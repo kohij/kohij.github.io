@@ -671,6 +671,12 @@ export const releaseItems: ReleaseItem[] = [
     status: "라이브 검증 중",
   },
   {
+    name: "파티클 치장",
+    version: "PlayerParticles 8.12",
+    scope: "한국어 253키 · 2틱 · 32블록 · 4개 프리셋",
+    status: "라이브 검증 중",
+  },
+  {
     name: "보스·레이드",
     version: "MythicMobs 검증본 선정 예정",
     scope: "보스 3종 · 자연 스폰 없음 · 파티 주간 제한",
