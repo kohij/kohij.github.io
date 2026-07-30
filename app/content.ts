@@ -660,21 +660,21 @@ export const releaseItems: ReleaseItem[] = [
   },
   {
     name: "경제 연결",
-    version: "TaekbyeongEconomy 1.2.0",
-    scope: "촉매 교환 · 수수료 · 원장 · 퀘스트 신호",
+    version: "TaekbyeongEconomy 1.3.0",
+    scope: "촉매 · 원장 · 퀘스트 · 파티클 영구 해금과 실패 환불",
     status: "카나리 통과",
   },
   {
     name: "펫",
     version: "MyPet 3.14.2",
-    scope: "라이브 활성 · 재시작·저장 반복 시험 후 상점 공개",
+    scope: "실제 로그인 회귀 실패로 JAR 격리 · 상점 결제 차단",
     status: "라이브 검증 중",
   },
   {
     name: "파티클 치장",
     version: "PlayerParticles 8.12",
-    scope: "한국어 253키 · 2틱 · 32블록 · 4개 프리셋",
-    status: "라이브 검증 중",
+    scope: "한국어 253키 · 2틱 · 32블록 · 영구 해금 4종",
+    status: "카나리 통과",
   },
   {
     name: "보스·레이드",
