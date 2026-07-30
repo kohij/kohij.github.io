@@ -32,6 +32,21 @@ export type QuestChain = {
   reward: string;
 };
 
+export type Pet = {
+  name: string;
+  model: string;
+  role: string;
+  unlock: string;
+  limit: string;
+};
+
+export type ReleaseItem = {
+  name: string;
+  version: string;
+  scope: string;
+  status: "카나리 통과" | "라이브 검증 중" | "설계 완료";
+};
+
 const habitats = {
   common: ["강", "평원 연못", "바다", "늪", "비 오는 해안"],
   uncommon: ["깊은 바다", "설원 강", "정글 강", "동굴 수맥", "밤바다"],
@@ -619,8 +634,133 @@ export const currentSystems = [
   },
   {
     title: "펫·레이드·생활 길드",
-    eyebrow: "업데이트 예정",
-    body: "펫 12종, 보스 3종, 양조 40종, 밈 어종 72종, 196개 규모의 퀘스트 풀을 단계적으로 개방합니다.",
+    eyebrow: "단계적 업데이트",
+    body: "양조 40종·밈 어종 72종·입문 퀘스트 4개부터 열고, 펫 12종·보스 3종·196개 퀘스트 풀은 검증 순서대로 개방합니다.",
   },
 ];
 
+export const releaseItems: ReleaseItem[] = [
+  {
+    name: "산업 양조",
+    version: "BreweryX 3.4.4",
+    scope: "레시피 40종 · 모드 촉매 28종 · 한국어 UI",
+    status: "카나리 통과",
+  },
+  {
+    name: "밈 낚시",
+    version: "EvenMoreFish Legacy 1.7.4",
+    scope: "어종 72종 · 미끼 5종 · 주말 대회 2종",
+    status: "카나리 통과",
+  },
+  {
+    name: "퀘스트 기반",
+    version: "BetonQuest 2.2.1",
+    scope: "입문 4개 실제 구현 · 196개 확장 설계",
+    status: "카나리 통과",
+  },
+  {
+    name: "경제 연결",
+    version: "TaekbyeongEconomy 1.2.0",
+    scope: "촉매 교환 · 수수료 · 원장 · 퀘스트 신호",
+    status: "카나리 통과",
+  },
+  {
+    name: "펫",
+    version: "MyPet 3.14.2",
+    scope: "라이브 활성 · 재시작·저장 반복 시험 후 상점 공개",
+    status: "라이브 검증 중",
+  },
+  {
+    name: "보스·레이드",
+    version: "MythicMobs 검증본 선정 예정",
+    scope: "보스 3종 · 자연 스폰 없음 · 파티 주간 제한",
+    status: "설계 완료",
+  },
+];
+
+export const pets: Pet[] = [
+  {
+    name: "황동 톱니 요정",
+    model: "Allay",
+    role: "Create 재료 탐지 연출",
+    unlock: "Create 평판 2",
+    limit: "자동 회수 없음",
+  },
+  {
+    name: "오스뮴 경비견",
+    model: "Wolf",
+    role: "짧은 방어 도발",
+    unlock: "Mekanism 평판 2",
+    limit: "PvP 작동 안 함",
+  },
+  {
+    name: "공허추적자",
+    model: "Black Cat",
+    role: "레이드 위험 경고",
+    unlock: "공허 레이드",
+    limit: "전투 피해 없음",
+  },
+  {
+    name: "광산 구조 드론",
+    model: "Allay",
+    role: "귀환 지점 안내",
+    unlock: "광산 발견 8개",
+    limit: "아이템 운반 없음",
+  },
+  {
+    name: "플루익스 정령",
+    model: "Allay",
+    role: "AE2 제작 완료 연출",
+    unlock: "AE2 체인",
+    limit: "저장망 검색 없음",
+  },
+  {
+    name: "해적 앵무",
+    model: "Parrot",
+    role: "스폰·퀘스트 알림",
+    unlock: "해적 체인",
+    limit: "알림 반복 제한",
+  },
+  {
+    name: "404 복어",
+    model: "Pufferfish",
+    role: "낚시 명예 치장",
+    unlock: "신화 어종 1종",
+    limit: "공격·독 없음",
+  },
+  {
+    name: "용궁 아홀로틀",
+    model: "Axolotl",
+    role: "수중 탐험 치장",
+    unlock: "어종 36종",
+    limit: "전투 버프 없음",
+  },
+  {
+    name: "벌꿀 슬라임",
+    model: "Small Slime",
+    role: "농업·양조 치장",
+    unlock: "벌꿀 미드 납품",
+    limit: "분열 없음",
+  },
+  {
+    name: "원자로 반딧불",
+    model: "Allay",
+    role: "방사선 경고 연출",
+    unlock: "원자로 결말",
+    limit: "청크 스캔 없음",
+  },
+  {
+    name: "설원 여우",
+    model: "Snow Fox",
+    role: "탐험 흔적 표시",
+    unlock: "설원 발견 체인",
+    limit: "아이템 줍기 없음",
+  },
+  {
+    name: "특이점 감시자",
+    model: "Endermite",
+    role: "시즌 명예 펫",
+    unlock: "시즌 최종",
+    limit: "순간이동·공격 없음",
+  },
+];

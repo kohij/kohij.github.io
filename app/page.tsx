@@ -5,7 +5,9 @@ import {
   brews,
   currentSystems,
   fish,
+  pets,
   questChains,
+  releaseItems,
   type BrewTier,
   type Rarity,
 } from "./content";
@@ -109,11 +111,12 @@ export default function Home() {
         </a>
         <nav aria-label="주요 메뉴">
           <a href="#start">시작</a>
+          <a href="#update">업데이트</a>
           <a href="#systems">시스템</a>
           <a href="#quests">퀘스트</a>
           <a href="#brewery">양조</a>
           <a href="#fishing">낚시</a>
-          <a href="#reference">설계 기준</a>
+          <a href="#pets">펫</a>
         </nav>
         <button className="nav-connect" onClick={copyAddress}>
           {copied ? "복사 완료" : "주소 복사"}
@@ -212,9 +215,58 @@ export default function Home() {
         </aside>
       </section>
 
+      <section className="section update-section" id="update">
+        <SectionTitle
+          kicker="02 · RELEASE BOARD"
+          title="무엇이 실제로 들어오고 있는지"
+          body="계획, 카나리 통과, 라이브 적용을 섞어 쓰지 않습니다. 아래 4개 시스템은 실제 Forge 모드와 ShopGUIPlus까지 넣은 Arclight 카나리를 통과했고 다음 오전 6시 정상 재시작에 반영됩니다."
+        />
+        <div className="release-metrics">
+          <article>
+            <strong>20.0</strong>
+            <span>안정 상태 TPS</span>
+          </article>
+          <article>
+            <strong>8.8ms</strong>
+            <span>10초 p95 MSPT</span>
+          </article>
+          <article>
+            <strong>0</strong>
+            <span>가격 런타임 불일치</span>
+          </article>
+          <article>
+            <strong>1%</strong>
+            <span>카나리 서버 CPU</span>
+          </article>
+        </div>
+        <div className="release-grid">
+          {releaseItems.map((item) => (
+            <article key={item.name}>
+              <div>
+                <span className={`status status-${item.status.replaceAll(" ", "-")}`}>
+                  {item.status}
+                </span>
+                <small>{item.version}</small>
+              </div>
+              <h3>{item.name}</h3>
+              <p>{item.scope}</p>
+            </article>
+          ))}
+        </div>
+        <aside className="release-note">
+          <b>이번 공개 범위</b>
+          <p>
+            양조 40종, 물고기 72종, 산업 촉매 28종, 입문 퀘스트 4개입니다.
+            196개 퀘스트와 펫·보스는 이미 설계돼 있지만 검증 없이 한꺼번에
+            켜지 않습니다. MyPet은 라이브에서 동작 중이어도 콜드 스타트 실패
+            이력이 있어 펫 상점을 아직 열지 않습니다.
+          </p>
+        </aside>
+      </section>
+
       <section className="section dark-section" id="systems">
         <SectionTitle
-          kicker="02 · THE WORLD"
+          kicker="03 · THE WORLD"
           title="서버의 핵심 시스템"
           body="각 시스템은 따로 놀지 않습니다. 산업 생산물이 계약·양조·상점으로 흐르고, 지출은 유물·치장·레이드로 돌아갑니다."
         />
@@ -259,7 +311,7 @@ export default function Home() {
 
       <section className="section economy-section" id="economy">
         <SectionTitle
-          kicker="03 · ECONOMY"
+          kicker="04 · ECONOMY"
           title="가격은 살아 움직입니다"
           body="판매가 몰린 품목은 내려가고, 거래가 없으면 24시간을 기준으로 원래 가격에 가까워집니다. 무한 자동화가 경제를 독점하지 못하게 하는 장치입니다."
         />
@@ -323,10 +375,15 @@ export default function Home() {
 
       <section className="section quest-section" id="quests">
         <SectionTitle
-          kicker="04 · CONTENT ARCHIVE"
-          title="196개의 이유를 만들겠습니다"
-          body="메인 체인 112장, 발견 퀘스트 24개, 일일 계약 36개, 주간 현상금 12개, 시즌 퀘스트 12개로 구성합니다. 현금보다 지역·상점·레시피·치장을 해금합니다."
+          kicker="05 · CONTENT ARCHIVE"
+          title="4개로 시작해 196개까지"
+          body="현재 실제 구현은 개척자·낚시·산업·양조 입문 4개입니다. 안정화 뒤 메인 체인 112장, 발견 24개, 일일 36개, 주간 12개, 시즌 12개를 주차별로 엽니다."
         />
+        <div className="implemented-banner">
+          <span>NOW PLAYABLE</span>
+          <b>통나무 16개 → 낚시 8회 → 피스톤 8개 → 실제 모드 촉매 교환</b>
+          <p>각 단계는 선행 조건과 완료 태그가 있어 건너뛰기와 중복 현금 보상을 막습니다.</p>
+        </div>
         <div className="quest-summary">
           {[
             ["112", "스토리 장"],
@@ -391,7 +448,7 @@ export default function Home() {
 
       <section className="section brewery-section" id="brewery">
         <SectionTitle
-          kicker="05 · BREWERS' GUILD"
+          kicker="06 · BREWERS' GUILD"
           title="술은 마시는 버프가 아니라 산업의 끝입니다"
           body="40종의 술을 계약, 유물 정제, 보스 제물, 박물관, 시즌 의식에 사용합니다. 서버가 되사주지 않으며 플레이어 양조장과 길드 주문이 가치를 만듭니다."
         />
@@ -464,7 +521,7 @@ export default function Home() {
 
       <section className="section fishing-section" id="fishing">
         <SectionTitle
-          kicker="06 · FISHDEX"
+          kicker="07 · FISHDEX"
           title="72종. 진지함은 낚싯대와 함께 놓고 오세요"
           body="한국 인터넷 밈을 서버 세계관에 맞게 비튼 어종 도감입니다. 구입·거래한 물고기는 최초 발견으로 인정하지 않아 도감 완성을 돈으로 살 수 없습니다."
         />
@@ -522,9 +579,65 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="section pet-section" id="pets">
+        <SectionTitle
+          kicker="08 · COMPANIONS"
+          title="강함보다 정체성이 분명한 12종"
+          body="별도 클라이언트 모드나 ModelEngine 없이 바닐라 모델을 사용합니다. 펫은 자동 농장이나 현금 복사 도구가 아니라 진로 진행도와 수집을 보여주는 동료입니다."
+        />
+        <div className="pet-rules">
+          <article>
+            <strong>1마리</strong>
+            <span>동시 소환 상한</span>
+          </article>
+          <article>
+            <strong>50,000원</strong>
+            <span>기본 조련 면허</span>
+          </article>
+          <article>
+            <strong>최대 25,000원</strong>
+            <span>부활 비용</span>
+          </article>
+          <article>
+            <strong>32블록</strong>
+            <span>초과 시 자동 회수</span>
+          </article>
+        </div>
+        <div className="pet-grid">
+          {pets.map((pet, index) => (
+            <article key={pet.name}>
+              <div>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <small>{pet.model}</small>
+              </div>
+              <h3>{pet.name}</h3>
+              <p>{pet.role}</p>
+              <dl>
+                <div>
+                  <dt>해금</dt>
+                  <dd>{pet.unlock}</dd>
+                </div>
+                <div>
+                  <dt>제한</dt>
+                  <dd>{pet.limit}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+        <aside className="notice pet-warning">
+          <b>아직 판매하지 않습니다</b>
+          <p>
+            MyPet 3.14.2는 현재 라이브에서 활성화됐지만 빈 Arclight 카나리의
+            콜드 스타트에서 레지스트리 동결이 한 번 발생했습니다. 정상 재시작
+            3회와 소환·보관·부활·월드 이동 저장 시험을 통과한 뒤 상점을 엽니다.
+          </p>
+        </aside>
+      </section>
+
       <section className="section reference-section" id="reference">
         <SectionTitle
-          kicker="07 · DESIGN REFERENCES"
+          kicker="09 · DESIGN REFERENCES"
           title="유명 서버의 장점만 가져왔습니다"
           body="콘텐츠를 그대로 복제하지 않고, 오래 운영된 서버가 복잡한 시스템을 플레이어에게 설명하고 순환시키는 방식을 참고했습니다."
         />
