@@ -116,7 +116,7 @@ export default function Home() {
           <a href="#quests">퀘스트</a>
           <a href="#brewery">양조</a>
           <a href="#fishing">낚시</a>
-          <a href="#pets">펫</a>
+          <a href="#pets">동료</a>
         </nav>
         <button className="nav-connect" onClick={copyAddress}>
           {copied ? "복사 완료" : "주소 복사"}
@@ -195,7 +195,7 @@ export default function Home() {
             ["03", "야생으로 이동", "첫 2회 쿠폰 이후 현재 잔액의 5%, 최대 3,000원이 듭니다."],
             ["04", "첫 자금 만들기", "채집물을 통합 상점에 판매합니다. 시작금은 10,000원입니다."],
             ["05", "진로 고르기", "Create·Mekanism·탐험·생활 길드 중 하나의 입문 퀘스트를 시작합니다."],
-            ["06", "스폰으로 복귀", "첫 산업 의뢰를 납품하고 펫·낚시·양조·주식 콘텐츠를 해금합니다."],
+            ["06", "스폰으로 복귀", "첫 산업 의뢰를 납품하고 동료·낚시·양조·주식 콘텐츠를 해금합니다."],
           ].map(([step, title, body]) => (
             <article key={step}>
               <span>{step}</span>
@@ -219,7 +219,7 @@ export default function Home() {
         <SectionTitle
           kicker="02 · RELEASE BOARD"
           title="무엇이 실제로 들어오고 있는지"
-          body="계획, 카나리 통과, 라이브 적용을 섞어 쓰지 않습니다. 아래 4개 시스템은 실제 Forge 모드와 ShopGUIPlus까지 넣은 Arclight 카나리를 통과했고 다음 오전 6시 정상 재시작에 반영됩니다."
+          body="Forge 모드와 실제 플러그인 조합으로 카나리 검증한 뒤 라이브에 반영합니다. 현재 공개된 시스템과 버전을 그대로 표시합니다."
         />
         <div className="release-metrics">
           <article>
@@ -256,11 +256,9 @@ export default function Home() {
         <aside className="release-note">
           <b>이번 공개 범위</b>
           <p>
-            양조 40종, 물고기 72종, 산업 촉매 28종, 입문 퀘스트 4개입니다.
-            파티클 영구 해금 4종도 경제 원장과 연결했습니다. 196개 퀘스트와
-            펫·보스는 이미 설계돼 있지만 검증 없이 한꺼번에 켜지 않습니다.
-            MyPet은 실제 로그인 회귀 실패를 확인해 JAR을 격리했고 펫 상점도
-            결제 불가능한 점검 상태로 유지합니다.
+            양조 40종, 물고기 72종, 산업 촉매 28종, 퀘스트 196개,
+            바닐라 동료 12종, 레이드 3종, 역할 유물 5종을 공개합니다.
+            현금 유입·지출·거래 출처는 경제 원장에 기록됩니다.
           </p>
         </aside>
       </section>
@@ -377,13 +375,13 @@ export default function Home() {
       <section className="section quest-section" id="quests">
         <SectionTitle
           kicker="05 · CONTENT ARCHIVE"
-          title="4개로 시작해 196개까지"
-          body="현재 실제 구현은 개척자·낚시·산업·양조 입문 4개입니다. 안정화 뒤 메인 체인 112장, 발견 24개, 일일 36개, 주간 12개, 시즌 12개를 주차별로 엽니다."
+          title="196개 통합 퀘스트"
+          body="스토리 112장, 발견 24개, 일일 36개, 주간 12개, 시즌 12개가 실제 행동과 거래를 추적합니다."
         />
         <div className="implemented-banner">
           <span>NOW PLAYABLE</span>
-          <b>통나무 16개 → 낚시 8회 → 피스톤 8개 → 실제 모드 촉매 교환</b>
-          <p>각 단계는 선행 조건과 완료 태그가 있어 건너뛰기와 중복 현금 보상을 막습니다.</p>
+          <b>채집 · 제작 · 낚시 · 토벌 · 바이옴 발견 · 주식 · 촉매 · 카지노</b>
+          <p>선행 조건, 회전 주기, 완료 상태를 저장해 건너뛰기와 중복 보상을 막습니다.</p>
         </div>
         <div className="quest-summary">
           {[
@@ -583,8 +581,8 @@ export default function Home() {
       <section className="section pet-section" id="pets">
         <SectionTitle
           kicker="08 · COMPANIONS"
-          title="강함보다 정체성이 분명한 12종"
-          body="별도 클라이언트 모드나 ModelEngine 없이 바닐라 모델을 사용합니다. 펫은 자동 농장이나 현금 복사 도구가 아니라 진로 진행도와 수집을 보여주는 동료입니다."
+          title="강함보다 정체성이 분명한 동료 12종"
+          body="별도 클라이언트 모드 없이 바닐라 엔티티를 사용합니다. 자동 농장이나 현금 복사 도구가 아닌 수집형 치장 동료입니다."
         />
         <div className="pet-rules">
           <article>
@@ -593,15 +591,15 @@ export default function Home() {
           </article>
           <article>
             <strong>50,000원</strong>
-            <span>기본 조련 면허</span>
+            <span>최저 영구 해금가</span>
           </article>
           <article>
-            <strong>최대 25,000원</strong>
-            <span>부활 비용</span>
+            <strong>0원</strong>
+            <span>귀환·재소환 비용</span>
           </article>
           <article>
-            <strong>32블록</strong>
-            <span>초과 시 자동 회수</span>
+            <strong>6블록</strong>
+            <span>초과 시 자동 추적</span>
           </article>
         </div>
         <div className="pet-grid">
@@ -627,11 +625,10 @@ export default function Home() {
           ))}
         </div>
         <aside className="notice pet-warning">
-          <b>아직 판매하지 않습니다</b>
+          <b>접속 안전 우선</b>
           <p>
-            MyPet 3.14.2 후보 기동 뒤 실제 로그인이 두 번 끊겨 현재 JAR을
-            라이브 폴더 밖에 격리했습니다. 원인 분리 카나리, 정상 재시작 3회와
-            소환·보관·부활·월드 이동 저장 시험을 모두 통과한 뒤 상점을 엽니다.
+            MyPet 의존성을 제거했습니다. 동료는 서버 자체 구현이며 동시 1마리,
+            무적, 비영구 엔티티로 월드 이동·종료 때 안전하게 정리됩니다.
           </p>
         </aside>
       </section>

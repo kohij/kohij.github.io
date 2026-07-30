@@ -12,6 +12,8 @@
   --gold: #e8bd63;
   --red: #ff736a;
   --green: #68d391;
+  --font-geist-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 * {
@@ -553,6 +555,11 @@ footer button {
 .status-카나리-통과 {
   background: rgba(104, 211, 145, 0.11);
   color: #a7ebc0;
+}
+
+.status-라이브-운영 {
+  background: rgba(69, 214, 208, 0.14);
+  color: var(--cyan-soft);
 }
 
 .status-라이브-검증-중 {

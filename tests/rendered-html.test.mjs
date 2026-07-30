@@ -34,11 +34,12 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /<html[^>]*lang="ko"/i);
   assert.match(html, /택병서버 플레이어 가이드/);
   assert.match(html, /taekbyeong-709371ef\.nip\.io/);
-  assert.match(html, /4개로 시작해 196개까지/);
+  assert.match(html, /196개 통합 퀘스트/);
   assert.match(html, /BreweryX 3\.4\.4/);
   assert.match(html, /황동 톱니 요정/);
   assert.match(html, /술은 마시는 버프가 아니라 산업의 끝입니다/);
   assert.match(html, /72종/);
+  assert.match(html, /바닐라 동료 12종/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
 });
 
