@@ -693,10 +693,10 @@ export default function Home() {
         />
         <div className="asset-grid">
           <article>
-            <span>FORGE 1.20.1 · 2.5KB</span>
-            <h3>택병서버 UI 정리팩</h3>
-            <p>TAB 사이드바의 빨간 점수 숫자만 숨깁니다. 블록·아이템·글꼴은 건드리지 않습니다.</p>
-            <a href="/downloads/taekbyeong-ui-1.20.1-v1.zip" download>ZIP 받기</a>
+            <span>FORGE 1.20.1 · REQUIRED</span>
+            <h3>택병서버 통합 리소스팩 v2</h3>
+            <p>커스텀 동료 4종과 TAB 사이드바 숫자 숨김을 한 팩으로 적용합니다. 접속 시 자동으로 받습니다.</p>
+            <a href="/downloads/taekbyeong-modelengine-ui-1.20.1-v2.zip" download>ZIP 받기</a>
           </article>
           <article>
             <span>MODELENGINE · 4 MODELS</span>
