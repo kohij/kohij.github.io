@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   brews,
   currentSystems,
@@ -65,6 +65,18 @@ export default function Home() {
     "전체",
   );
   const [questFilter, setQuestFilter] = useState("전체");
+  const [livePatchNotes, setLivePatchNotes] = useState(patchNotes);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/patch-notes", { cache: "no-store", signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : Promise.reject()))
+      .then((body: { notes?: typeof patchNotes }) => {
+        if (Array.isArray(body.notes) && body.notes.length > 0) setLivePatchNotes(body.notes);
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   const visibleFish = useMemo(
     () =>
@@ -272,7 +284,7 @@ export default function Home() {
           body="경제 밸런싱과 유지보수 결과를 날짜별로 공개합니다. 인게임 공지는 가장 최신 항목의 요약과 이 위치로 바로 오는 링크를 표시합니다."
         />
         <div className="patch-grid">
-          {patchNotes.map((note) => (
+          {livePatchNotes.map((note) => (
             <article key={`${note.date}-${note.type}-${note.title}`}>
               <div className="patch-meta">
                 <span>{note.type}</span>
