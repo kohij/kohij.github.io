@@ -40,6 +40,8 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /술은 마시는 버프가 아니라 산업의 끝입니다/);
   assert.match(html, /72종/);
   assert.match(html, /바닐라 동료 12종/);
+  assert.match(html, /오늘 무엇이 바뀌었는지/);
+  assert.match(html, /일일 경제 밸런싱 시작/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
 });
 

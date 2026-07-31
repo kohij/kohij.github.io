@@ -11,6 +11,7 @@ import {
   type BrewTier,
   type Rarity,
 } from "./content";
+import patchNotes from "./patch-notes.json";
 
 const address = "taekbyeong-709371ef.nip.io";
 const fishFilters: Array<"전체" | Rarity> = [
@@ -112,6 +113,7 @@ export default function Home() {
         <nav aria-label="주요 메뉴">
           <a href="#start">시작</a>
           <a href="#update">업데이트</a>
+          <a href="#patch-notes">패치노트</a>
           <a href="#systems">시스템</a>
           <a href="#quests">퀘스트</a>
           <a href="#brewery">양조</a>
@@ -261,6 +263,31 @@ export default function Home() {
             현금 유입·지출·거래 출처는 경제 원장에 기록됩니다.
           </p>
         </aside>
+      </section>
+
+      <section className="section patch-section" id="patch-notes">
+        <SectionTitle
+          kicker="LIVE · PATCH NOTES"
+          title="오늘 무엇이 바뀌었는지"
+          body="경제 밸런싱과 유지보수 결과를 날짜별로 공개합니다. 인게임 공지는 가장 최신 항목의 요약과 이 위치로 바로 오는 링크를 표시합니다."
+        />
+        <div className="patch-grid">
+          {patchNotes.map((note) => (
+            <article key={`${note.date}-${note.type}-${note.title}`}>
+              <div className="patch-meta">
+                <span>{note.type}</span>
+                <time dateTime={note.date}>{note.date}</time>
+              </div>
+              <h3>{note.title}</h3>
+              <p>{note.summary}</p>
+              <ul>
+                {note.changes.map((change) => (
+                  <li key={change}>{change}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="section dark-section" id="systems">
