@@ -131,6 +131,7 @@ export default function Home() {
           <a href="#brewery">양조</a>
           <a href="#fishing">낚시</a>
           <a href="#pets">동료</a>
+          <a href="#assets">에셋</a>
         </nav>
         <button className="nav-connect" onClick={copyAddress}>
           {copied ? "복사 완료" : "주소 복사"}
@@ -621,8 +622,19 @@ export default function Home() {
         <SectionTitle
           kicker="08 · COMPANIONS"
           title="강함보다 정체성이 분명한 동료 12종"
-          body="별도 클라이언트 모드 없이 바닐라 엔티티를 사용합니다. 자동 농장이나 현금 복사 도구가 아닌 수집형 치장 동료입니다."
+          body="12종 전용 외형 기준표를 만들고 ModelEngine 연동층을 준비했습니다. 대응 모델이 없거나 로드에 실패하면 바닐라 엔티티로 안전하게 폴백합니다."
         />
+        <figure className="pet-concept">
+          <img
+            src="/assets/taekbyeong-pet-concepts-v1.png"
+            alt="택병서버 동료 12종 커스텀 voxel 콘셉트 시트"
+          />
+          <figcaption>
+            <span>MODEL ATLAS · V1</span>
+            <b>12종 외형 기준 확정</b>
+            <p>황동 요정부터 특이점 감시자까지 같은 조명·비율·색상 규칙으로 통일했습니다.</p>
+          </figcaption>
+        </figure>
         <div className="pet-rules">
           <article>
             <strong>1마리</strong>
@@ -667,14 +679,57 @@ export default function Home() {
           <b>접속 안전 우선</b>
           <p>
             MyPet 의존성을 제거했습니다. 동료는 서버 자체 구현이며 동시 1마리,
-            무적, 비영구 엔티티로 월드 이동·종료 때 안전하게 정리됩니다.
+            무적, 비영구 엔티티입니다. 무료 MIT 기반 모델 4종부터 적용하고 나머지는
+            대응 에셋 완성 전까지 바닐라 외형을 유지합니다.
           </p>
+        </aside>
+      </section>
+
+      <section className="section asset-section" id="assets">
+        <SectionTitle
+          kicker="09 · DIRECT ASSET HOST"
+          title="필요 파일은 공식 가이드에서 바로"
+          body="외부 단축 주소와 임시 업로더를 제거했습니다. 자체 제작물과 재배포 허용 에셋만 이 사이트에서 직접 제공합니다."
+        />
+        <div className="asset-grid">
+          <article>
+            <span>FORGE 1.20.1 · 2.5KB</span>
+            <h3>택병서버 UI 정리팩</h3>
+            <p>TAB 사이드바의 빨간 점수 숫자만 숨깁니다. 블록·아이템·글꼴은 건드리지 않습니다.</p>
+            <a href="/downloads/taekbyeong-ui-1.20.1-v1.zip" download>ZIP 받기</a>
+          </article>
+          <article>
+            <span>MODELENGINE · 4 MODELS</span>
+            <h3>무료 펫 블루프린트 v1</h3>
+            <p>오스뮴 경비견·공허추적자·플루익스 정령·설원 여우. Microsoft MIT 샘플 기반 색상 변형입니다.</p>
+            <a href="/downloads/taekbyeong-modelengine-free-pets-v1.zip" download>ZIP 받기</a>
+          </article>
+          <article>
+            <span>1536 × 1024 · PNG</span>
+            <h3>동료 12종 모델 아틀라스</h3>
+            <p>추가 Blockbench 모델링과 홈페이지 카드에 공통으로 쓰는 공식 외형 기준표입니다.</p>
+            <a href="/assets/taekbyeong-pet-concepts-v1.png" download>PNG 받기</a>
+          </article>
+          <article>
+            <span>VERIFY · JSON + SHA256</span>
+            <h3>클라이언트 매니페스트</h3>
+            <p>서버 버전·주소·리소스팩 해시와 공개 파일 무결성 값을 기계 판독 형식으로 제공합니다.</p>
+            <div className="asset-links">
+              <a href="/downloads/client-manifest.json">JSON</a>
+              <a href="/downloads/SHA256SUMS.txt">SHA256</a>
+            </div>
+          </article>
+        </div>
+        <aside className="asset-policy">
+          <b>공개 제외</b>
+          <p>월드·DB·플레이어 데이터·백업·유료 플러그인·서드파티 모드 JAR. 서버 보안과 각 라이선스를 지킵니다.</p>
+          <a href="/assets/CREDITS.md">출처·라이선스</a>
         </aside>
       </section>
 
       <section className="section reference-section" id="reference">
         <SectionTitle
-          kicker="09 · DESIGN REFERENCES"
+          kicker="10 · DESIGN REFERENCES"
           title="유명 서버의 장점만 가져왔습니다"
           body="콘텐츠를 그대로 복제하지 않고, 오래 운영된 서버가 복잡한 시스템을 플레이어에게 설명하고 순환시키는 방식을 참고했습니다."
         />

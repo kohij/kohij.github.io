@@ -694,14 +694,14 @@ export const pets: Pet[] = [
   },
   {
     name: "오스뮴 경비견",
-    model: "Wolf",
+    model: "ModelEngine / Wolf 폴백",
     role: "Mekanism 기술자 치장",
     unlock: "75,000원",
     limit: "전투 참여 없음",
   },
   {
     name: "공허추적자",
-    model: "Black Cat",
+    model: "ModelEngine / Cat 폴백",
     role: "공허 탐험가 치장",
     unlock: "100,000원",
     limit: "전투 피해 없음",
@@ -715,7 +715,7 @@ export const pets: Pet[] = [
   },
   {
     name: "플루익스 정령",
-    model: "Allay",
+    model: "ModelEngine / Allay 폴백",
     role: "AE2 기술자 치장",
     unlock: "120,000원",
     limit: "저장망 검색 없음",
@@ -757,7 +757,7 @@ export const pets: Pet[] = [
   },
   {
     name: "설원 여우",
-    model: "Snow Fox",
+    model: "ModelEngine / Snow Fox 폴백",
     role: "설원 탐험가 치장",
     unlock: "110,000원",
     limit: "아이템 줍기 없음",
