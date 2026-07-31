@@ -3,7 +3,7 @@ import { copyFile, writeFile } from "node:fs/promises";
 const workerUrl = new URL(`../dist/server/index.js?export=${Date.now()}`, import.meta.url);
 const { default: worker } = await import(workerUrl.href);
 const response = await worker.fetch(
-  new Request("https://kohij.github.io/", {
+  new Request("https://taekbyeong-guide.fasho-7.chatgpt.site/", {
     headers: { accept: "text/html" },
   }),
   {

@@ -6,7 +6,7 @@ const description =
   "Forge 1.20.1 택병서버의 시작 동선, 경제, 산업, 퀘스트, 양조, 낚시를 한곳에 정리한 공식 플레이어 가이드입니다.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://kohij.github.io/"),
+  metadataBase: new URL("https://taekbyeong-guide.fasho-7.chatgpt.site/"),
   title,
   description,
   icons: {
