@@ -44,6 +44,11 @@ function clientIp(request: Request): string {
   return request.headers.get("cf-connecting-ip") ?? "";
 }
 
+function sameOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  return origin !== null && origin === new URL(request.url).origin;
+}
+
 async function verifySignature(message: string, signature: string): Promise<boolean> {
   try {
     const key = await crypto.subtle.importKey(
@@ -117,6 +122,7 @@ async function patchNotesApi(request: Request, env: Env): Promise<Response> {
 }
 
 async function marketLogin(request: Request, env: Env): Promise<Response> {
+  if (!sameOrigin(request)) return json({ error: "invalid_origin" }, 403);
   if (request.method === "DELETE") {
     const id = cookieValue(request, SESSION_COOKIE);
     if (id) await env.DB.prepare("DELETE FROM market_sessions WHERE id = ?").bind(id).run();
@@ -149,6 +155,10 @@ async function marketLogin(request: Request, env: Env): Promise<Response> {
   }
   const sessionId = `${crypto.randomUUID()}-${crypto.randomUUID()}`;
   const expiresAt = now + 1800;
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM market_sessions WHERE expires_at <= ?").bind(now),
+    env.DB.prepare("DELETE FROM market_login_nonces WHERE expires_at <= ?").bind(now),
+  ]);
   await env.DB.prepare(
     `INSERT INTO market_sessions (id, player_uuid, player_name, ip, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
   ).bind(sessionId, payload.sub, payload.name, payload.ip, expiresAt, now).run();
@@ -204,7 +214,7 @@ function acceptSocket(request: Request, onMessage: (data: unknown, socket: WebSo
   server.addEventListener("message", (event) => {
     let data: unknown;
     try { data = JSON.parse(String(event.data)); } catch { return; }
-    void onMessage(data, server);
+    void onMessage(data, server).catch(() => server.close(1011, "message processing failed"));
   });
   return new Response(null, { status: 101, webSocket: client });
 }
@@ -220,39 +230,53 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
       const statements: D1PreparedStatement[] = [];
       for (const rawItem of instruments) {
         const item = rawItem as Record<string, unknown>;
-        if (!/^[A-Z0-9.^=-]{1,32}$/.test(String(item.symbol ?? ""))) continue;
+        const price = Number(item.priceWon ?? 0);
+        const change = Number(item.changePercent ?? 0);
+        const market = String(item.market ?? "");
+        const currency = String(item.currency ?? "");
+        const type = String(item.type ?? "");
+        const unit = String(item.unit ?? "");
+        if (!/^[A-Z0-9.^=-]{1,32}$/.test(String(item.symbol ?? "")) || !Number.isFinite(price) || price < 0 ||
+            !Number.isFinite(change) || Math.abs(change) > 10000 || !/^[A-Z]{2,8}$/.test(market) ||
+            !/^[A-Z]{3}$/.test(currency) || !/^[A-Z_]{3,32}$/.test(type) || unit.length < 1 || unit.length > 12) continue;
         statements.push(env.DB.prepare(
           `INSERT INTO market_instruments (symbol, name, market, currency, type, unit, price_won, change_percent, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(symbol) DO UPDATE SET name=excluded.name, market=excluded.market, currency=excluded.currency,
              type=excluded.type, unit=excluded.unit, price_won=excluded.price_won,
              change_percent=excluded.change_percent, updated_at=excluded.updated_at`,
-        ).bind(item.symbol, String(item.name ?? "").slice(0, 160), item.market, item.currency, item.type, item.unit,
-          Number(item.priceWon ?? 0), Number(item.changePercent ?? 0), now));
+        ).bind(item.symbol, String(item.name ?? "").slice(0, 160), market, currency, type, unit, price, change, now));
       }
       for (const rawPlayer of players) {
         const player = rawPlayer as Record<string, unknown>;
         if (!/^[0-9a-f-]{36}$/.test(String(player.uuid ?? ""))) continue;
+        const cash = Number(player.cashWon ?? 0);
+        const positions = Array.isArray(player.positions) ? player.positions.slice(0, 500) : [];
+        const accounts = Array.isArray(player.accounts) ? player.accounts.slice(0, 100) : [];
+        if (!Number.isFinite(cash) || cash < 0) continue;
         statements.push(env.DB.prepare(
           `INSERT INTO market_players (player_uuid, player_name, cash_won, online, positions, accounts, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(player_uuid) DO UPDATE SET player_name=excluded.player_name, cash_won=excluded.cash_won,
              online=excluded.online, positions=excluded.positions, accounts=excluded.accounts, updated_at=excluded.updated_at`,
-        ).bind(player.uuid, String(player.name ?? "").slice(0, 16), Number(player.cashWon ?? 0), player.online ? 1 : 0,
-          JSON.stringify(player.positions ?? []), JSON.stringify(player.accounts ?? []), now));
+        ).bind(player.uuid, String(player.name ?? "").slice(0, 16), cash, player.online ? 1 : 0,
+          JSON.stringify(positions), JSON.stringify(accounts), now));
       }
       await batch(env, statements);
       socket.send(JSON.stringify({ type: "sync-ok", updatedAt: now }));
     } else if (message.type === "poll") {
+      const retryBefore = Date.now() - 10_000;
       const pending = await env.DB.prepare(
         `SELECT id, player_uuid AS playerUuid, action, symbol, quantity FROM market_commands
-          WHERE status = 'pending' ORDER BY created_at ASC LIMIT 25`,
-      ).all<{ id: string; playerUuid: string; action: string; symbol: string; quantity: string }>();
+          WHERE status = 'pending' OR (status = 'dispatched' AND updated_at <= ?)
+          ORDER BY created_at ASC LIMIT 25`,
+      ).bind(retryBefore).all<{ id: string; playerUuid: string; action: string; symbol: string; quantity: string }>();
       if (pending.results.length) {
         const now = Date.now();
         await batch(env, pending.results.map((command) => env.DB.prepare(
-          `UPDATE market_commands SET status = 'dispatched', updated_at = ? WHERE id = ? AND status = 'pending'`,
-        ).bind(now, command.id)));
+          `UPDATE market_commands SET status = 'dispatched', updated_at = ?
+            WHERE id = ? AND (status = 'pending' OR (status = 'dispatched' AND updated_at <= ?))`,
+        ).bind(now, command.id, retryBefore)));
       }
       socket.send(JSON.stringify({ type: "commands", items: pending.results }));
     } else if (message.type === "result") {
@@ -268,6 +292,7 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
 }
 
 async function browserSocket(request: Request, env: Env): Promise<Response> {
+  if (!sameOrigin(request)) return json({ error: "invalid_origin" }, 403);
   const session = await authenticatedSession(request, env);
   if (!session) return json({ error: "unauthorized" }, 401);
   return acceptSocket(request, async (raw, socket) => {
@@ -285,6 +310,16 @@ async function browserSocket(request: Request, env: Env): Promise<Response> {
         (action !== "search" && action !== "option" && !/^(?:all|[0-9]+(?:\.[0-9]{1,4})?)$/.test(quantity)) ||
         (action === "option" && !/^\d{4}-\d{2}-\d{2}\|[0-9]+(?:\.[0-9]{1,3})?\|(call|put)$/.test(quantity))) {
       socket.send(JSON.stringify({ type: "trade-error", message: "주문 형식을 확인하세요." }));
+      return;
+    }
+    const rate = await env.DB.prepare(
+      `SELECT
+         SUM(CASE WHEN status IN ('pending', 'dispatched') THEN 1 ELSE 0 END) AS active,
+         SUM(CASE WHEN created_at > ? THEN 1 ELSE 0 END) AS recent
+       FROM market_commands WHERE session_id = ?`,
+    ).bind(Date.now() - 10_000, session.id).first<{ active: number | null; recent: number | null }>();
+    if ((rate?.active ?? 0) >= 5 || (rate?.recent ?? 0) >= 12) {
+      socket.send(JSON.stringify({ type: "trade-error", message: "주문 처리 중입니다. 잠시 후 다시 시도하세요." }));
       return;
     }
     const id = crypto.randomUUID();
