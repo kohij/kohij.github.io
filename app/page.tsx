@@ -71,7 +71,8 @@ export default function Home() {
     const controller = new AbortController();
     fetch("/api/patch-notes", { cache: "no-store", signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then((body: { notes?: typeof patchNotes }) => {
+      .then((raw) => {
+        const body = raw as { notes?: typeof patchNotes };
         if (Array.isArray(body.notes) && body.notes.length > 0) setLivePatchNotes(body.notes);
       })
       .catch(() => undefined);
@@ -127,6 +128,7 @@ export default function Home() {
           <a href="#update">업데이트</a>
           <a href="#patch-notes">패치노트</a>
           <a href="#systems">시스템</a>
+          <a href="/market">증권·은행</a>
           <a href="#quests">퀘스트</a>
           <a href="#brewery">양조</a>
           <a href="#fishing">낚시</a>
@@ -371,8 +373,8 @@ export default function Home() {
               <span>통합 상점 상품</span>
             </article>
             <article>
-              <strong>201</strong>
-              <span>한국·미국 종목</span>
+              <strong>301+</strong>
+              <span>주식·ETF 기본 종목</span>
             </article>
             <article>
               <strong>0.30%</strong>
@@ -395,11 +397,12 @@ export default function Home() {
           </article>
           <article>
             <Tag>주식</Tag>
-            <h3>실제 장 운영시간을 따릅니다</h3>
+            <h3>웹 전용 증권으로 거래합니다</h3>
             <p>
-              휴장·조기 종료·3분 이상 지연 시 체결이 중지됩니다. 현금화할 수
-              없는 게임 내부 모의투자입니다.
+              실제 장 운영시간·시세를 따르며, 인게임 <b>/주식</b>으로 IP 결속
+              보안 로그인을 발급합니다. ETF·레버리지·옵션·보유 자산을 한 화면에서 확인합니다.
             </p>
+            <a className="economy-market-link" href="/market">웹 증권 열기</a>
           </article>
           <article>
             <Tag>자동화</Tag>
@@ -694,9 +697,9 @@ export default function Home() {
         <div className="asset-grid">
           <article>
             <span>FORGE 1.20.1 · REQUIRED</span>
-            <h3>택병서버 통합 리소스팩 v2</h3>
-            <p>커스텀 동료 4종과 TAB 사이드바 숫자 숨김을 한 팩으로 적용합니다. 접속 시 자동으로 받습니다.</p>
-            <a href="/downloads/taekbyeong-modelengine-ui-1.20.1-v2.zip" download>ZIP 받기</a>
+            <h3>택병서버 통합 리소스팩 v3</h3>
+            <p>커스텀 동료 4종, TAB 사이드바 숫자 숨김, 공지 배경 카드를 한 팩으로 적용합니다. 접속 시 자동으로 받습니다.</p>
+            <a href="/downloads/taekbyeong-modelengine-ui-1.20.1-v3.zip" download>ZIP 받기</a>
           </article>
           <article>
             <span>MODELENGINE · 4 MODELS</span>

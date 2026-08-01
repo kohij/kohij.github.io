@@ -1,7 +1,11 @@
 택병서버 공개 다운로드
 
+- taekbyeong-modelengine-ui-1.20.1-v3.zip
+  Forge 1.20.1 필수 통합 리소스팩. ModelEngine 동료 4종, TAB 사이드바 숫자 숨김,
+  채팅과 공지를 구분하는 청록·적색 배경 패널을 포함합니다.
+
 - taekbyeong-modelengine-ui-1.20.1-v2.zip
-  Forge 1.20.1 필수 통합 리소스팩. ModelEngine 동료 4종과 TAB 사이드바 숫자 숨김을 포함합니다.
+  이전 통합 리소스팩. 신규 접속용으로는 v3를 사용합니다.
 
 - taekbyeong-ui-1.20.1-v1.zip
   이전 UI 전용 리소스팩. 서버 접속용으로는 통합 v2를 사용합니다.

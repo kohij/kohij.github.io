@@ -5,10 +5,10 @@
   "address": "taekbyeong-709371ef.nip.io",
   "port": 25565,
   "resourcePack": {
-    "file": "taekbyeong-modelengine-ui-1.20.1-v2.zip",
+    "file": "taekbyeong-modelengine-ui-1.20.1-v3.zip",
     "required": true,
-    "sha1": "3ac30ef68c934d93b05606e0018c1f26634d3831",
-    "sha256": "fe9612be70c95adb548f9802ee3fb9c2937a6f2b2f854daf75c33367033dfa7f"
+    "sha1": "cd43fdbee02fb4cae78797330ccf65b77c5ac222",
+    "sha256": "9eb3fcb1a9bce6de42f1c75e64309f6eb396b1653228fb81e63701c69ea1d7e1"
   },
   "modelEngineFreePack": {
     "file": "taekbyeong-modelengine-free-pets-v1.zip",
