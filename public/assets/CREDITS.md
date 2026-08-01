@@ -8,7 +8,7 @@
 
 ## 택병서버 UI 정리팩
 
-- 파일: `../downloads/taekbyeong-modelengine-ui-1.20.1-v3.zip` (통합), `../downloads/taekbyeong-modelengine-ui-1.20.1-v2.zip` (이전 통합)
+- 파일: `../downloads/taekbyeong-modelengine-ui-1.20.1-v2.zip` (현재 통합), `../downloads/taekbyeong-modelengine-ui-1.20.1-v3.zip` (폰트 호환성으로 사용 중지)
 - 기반: McTsts/mc-core-shaders `hide sidebar numbers`
 - 고정 커밋: `628674d87277616d91e420ca0cb38884ecd22a2f`
 - 라이선스: Unlicense / Public Domain

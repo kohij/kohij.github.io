@@ -697,9 +697,9 @@ export default function Home() {
         <div className="asset-grid">
           <article>
             <span>FORGE 1.20.1 · REQUIRED</span>
-            <h3>택병서버 통합 리소스팩 v3</h3>
+            <h3>택병서버 통합 리소스팩 v2</h3>
             <p>커스텀 동료 4종, TAB 사이드바 숫자 숨김, 공지 배경 카드를 한 팩으로 적용합니다. 접속 시 자동으로 받습니다.</p>
-            <a href="/downloads/taekbyeong-modelengine-ui-1.20.1-v3.zip" download>ZIP 받기</a>
+            <a href="/downloads/taekbyeong-modelengine-ui-1.20.1-v2.zip" download>ZIP 받기</a>
           </article>
           <article>
             <span>MODELENGINE · 4 MODELS</span>
