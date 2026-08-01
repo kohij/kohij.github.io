@@ -5,12 +5,12 @@
   "address": "taekbyeong-709371ef.nip.io",
   "port": 25565,
   "resourcePack": {
-    "file": "taekbyeong-native-companions-ui-1.20.1-v7.zip",
+    "file": "taekbyeong-native-companions-ui-1.20.1-v8.zip",
     "required": true,
     "models": 12,
     "engine": "Minecraft ItemDisplay (외부 엔진 없음)",
-    "sha1": "35ddb55d398aec87f3a90038c3027bf2b2e9c817",
-    "sha256": "1937d9bf691c86a51b22dc05b1dbbe9741aee9ad862b0127116100397799d4df"
+    "sha1": "ac52d956b85a280a5c10ffc3e7a1b5afde42a5d4",
+    "sha256": "a7bcbdc8ee0120ae78f435973f88881a60bd3ee858c5593b1bede8bf555ca7dd"
   },
   "noticePack": {
     "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",

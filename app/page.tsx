@@ -535,8 +535,8 @@ export default function Home() {
           />
           <figcaption>
               <span>동료 12종</span>
-              <b>원하는 동료와 함께 다니세요.</b>
-              <p>황동 요정부터 특이점 감시자까지 각자 다른 모습을 가집니다.</p>
+              <b>등급별 동료 계약으로 수집하세요.</b>
+              <p>일반 52% · 희귀 32% · 영웅 13.5% · 전설 2.5%, 희귀 10회·전설 50회 천장입니다.</p>
           </figcaption>
         </figure>
         <div className="pet-rules">
@@ -545,8 +545,8 @@ export default function Home() {
             <span>동시 소환 상한</span>
           </article>
           <article>
-            <strong>600,000원</strong>
-            <span>최저 영구 해금가</span>
+            <strong>200,000원</strong>
+            <span>동료 계약 1회</span>
           </article>
           <article>
             <strong>12,000원</strong>
@@ -567,7 +567,7 @@ export default function Home() {
               <p>{pet.role}</p>
               <dl>
                 <div>
-                  <dt>해금</dt>
+                  <dt>계약 확률</dt>
                   <dd>{pet.unlock}</dd>
                 </div>
                 <div>

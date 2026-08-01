@@ -37,7 +37,8 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /196개 통합 퀘스트/);
   assert.match(html, /황동 톱니 요정/);
   assert.match(html, /5분마다 6종 버프 무작위 교대/);
-  assert.match(html, /5,000,000원/);
+  assert.match(html, /전설 · 2.5%/);
+  assert.match(html, /200,000원/);
   assert.match(html, /술은 마시는 버프가 아니라 산업의 끝입니다/);
   assert.match(html, /72종/);
   assert.match(html, /한국·미국 증권/);
