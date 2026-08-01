@@ -66,12 +66,17 @@ export default function MarketPage() {
       const code = new URLSearchParams(window.location.search).get("code");
       if (code) {
         history.replaceState(null, "", "/market");
-        const response = await fetch("/api/market/login", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ code }),
-        });
-        if (!response.ok) {
+        let loggedIn = false;
+        for (let attempt = 0; attempt < 6 && !loggedIn; attempt += 1) {
+          const response = await fetch("/api/market/login", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ code }),
+          });
+          loggedIn = response.ok;
+          if (!loggedIn && attempt < 5) await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+        if (!loggedIn) {
           setLoginCode(formatDeviceCode(code));
           setNotice("코드가 만료됐거나 이미 사용됐습니다. 게임에서 /주식을 다시 입력해 주세요.");
         }
