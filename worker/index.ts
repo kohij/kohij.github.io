@@ -271,7 +271,7 @@ async function marketOptions(request: Request, env: Env): Promise<Response> {
     return json({ error: "unsupported_underlying" }, 404);
   }
   const upstream = await fetch(
-    `https://api.nasdaq.com/api/quote/${encodeURIComponent(symbol)}/option-chain?assetclass=stocks&limit=120`,
+    `https://api.nasdaq.com/api/quote/${encodeURIComponent(symbol)}/option-chain?assetclass=${instrument.type === "EQUITY" ? "stocks" : "etf"}&limit=120`,
     { headers: { "user-agent": "Mozilla/5.0", accept: "application/json, text/plain, */*" } },
   );
   if (!upstream.ok) return json({ error: "option_chain_unavailable" }, 502);
@@ -546,7 +546,10 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
 function validOrder(action: string, symbol: string, quantity: string): boolean {
   if (!["buy", "sell", "search", "option", "bank_savings", "bank_deposit", "bank_cancel"].includes(action) ||
       !/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) return false;
-  if (action === "buy" || action === "sell") return /^(?:all|[0-9]+(?:\.[0-9]{1,4})?)$/.test(quantity);
+  if (action === "buy" || action === "sell") {
+    if (quantity === "all") return action === "sell";
+    return /^[0-9]+(?:\.[0-9]{1,4})?$/.test(quantity) && Number(quantity) > 0;
+  }
   if (action === "search") return quantity === "";
   if (action === "option") return /^\d{4}-\d{2}-\d{2}\|[0-9]+(?:\.[0-9]{1,3})?\|(call|put)$/.test(quantity);
   if (action === "bank_savings") return /^(?:7d|30d)$/.test(symbol.toLowerCase()) && /^[0-9]{4,8}$/.test(quantity);
