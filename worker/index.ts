@@ -169,9 +169,10 @@ async function marketSnapshot(request: Request, env: Env): Promise<Response> {
     player_name: string; cash_won: number; online: number; positions: string; accounts: string; updated_at: number;
   }>();
   const instruments = await env.DB.prepare(
-    `SELECT symbol, name, market, currency, type, unit, price_won, change_percent, updated_at
+    `SELECT symbol, name, market, currency, type, unit, price_won, change_percent, candles, updated_at
        FROM market_instruments ORDER BY type, symbol LIMIT 500`,
-  ).all();
+  ).all<{ symbol: string; name: string; market: string; currency: string; type: string; unit: string;
+    price_won: number; change_percent: number; candles: string; updated_at: number }>();
   const commands = await env.DB.prepare(
     `SELECT id, action, symbol, quantity, status, message, created_at
        FROM market_commands WHERE player_uuid = ? ORDER BY created_at DESC LIMIT 12`,
@@ -180,7 +181,10 @@ async function marketSnapshot(request: Request, env: Env): Promise<Response> {
     authenticated: true,
     player: player ? { ...player, online: Boolean(player.online), positions: JSON.parse(player.positions), accounts: JSON.parse(player.accounts) }
       : { player_name: session.player_name, cash_won: 0, online: false, positions: [], accounts: [], updated_at: 0 },
-    instruments: instruments.results,
+    instruments: instruments.results.map((instrument) => ({
+      ...instrument,
+      candles: JSON.parse(instrument.candles),
+    })),
     commands: commands.results,
   });
 }
@@ -228,16 +232,34 @@ async function handleBridgeMessage(raw: unknown, env: Env): Promise<Record<strin
         const currency = String(item.currency ?? "");
         const type = String(item.type ?? "");
         const unit = String(item.unit ?? "");
+        const sourceUpdatedAt = Number(item.updatedAt ?? now);
+        const rawCandles = Array.isArray(item.candles) ? item.candles.slice(-240) : [];
+        const candles = rawCandles.flatMap((rawCandle) => {
+          const candle = rawCandle as Record<string, unknown>;
+          const time = Number(candle.time ?? 0);
+          const open = Number(candle.open ?? 0);
+          const high = Number(candle.high ?? 0);
+          const low = Number(candle.low ?? 0);
+          const close = Number(candle.close ?? 0);
+          const volume = Number(candle.volume ?? 0);
+          if (!Number.isInteger(time) || time < 946684800 || time > Math.floor(Date.now() / 1000) + 86_400 ||
+              ![open, high, low, close, volume].every(Number.isFinite) ||
+              open <= 0 || high <= 0 || low <= 0 || close <= 0 || volume < 0 ||
+              low > Math.min(open, close) || high < Math.max(open, close)) return [];
+          return [{ time, open, high, low, close, volume }];
+        });
         if (!/^[A-Z0-9.^=-]{1,32}$/.test(String(item.symbol ?? "")) || !Number.isFinite(price) || price < 0 ||
             !Number.isFinite(change) || Math.abs(change) > 10000 || !/^[A-Z]{2,8}$/.test(market) ||
-            !/^[A-Z]{3}$/.test(currency) || !/^[A-Z_]{3,32}$/.test(type) || unit.length < 1 || unit.length > 12) continue;
+            !/^[A-Z]{3}$/.test(currency) || !/^[A-Z_]{3,32}$/.test(type) || unit.length < 1 || unit.length > 12 ||
+            !Number.isFinite(sourceUpdatedAt) || sourceUpdatedAt < 0) continue;
         statements.push(env.DB.prepare(
-          `INSERT INTO market_instruments (symbol, name, market, currency, type, unit, price_won, change_percent, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `INSERT INTO market_instruments (symbol, name, market, currency, type, unit, price_won, change_percent, candles, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(symbol) DO UPDATE SET name=excluded.name, market=excluded.market, currency=excluded.currency,
              type=excluded.type, unit=excluded.unit, price_won=excluded.price_won,
-             change_percent=excluded.change_percent, updated_at=excluded.updated_at`,
-        ).bind(item.symbol, String(item.name ?? "").slice(0, 160), market, currency, type, unit, price, change, now));
+             change_percent=excluded.change_percent, candles=excluded.candles, updated_at=excluded.updated_at`,
+        ).bind(item.symbol, String(item.name ?? "").slice(0, 160), market, currency, type, unit, price, change,
+          JSON.stringify(candles), Math.trunc(sourceUpdatedAt)));
       }
       for (const rawPlayer of players) {
         const player = rawPlayer as Record<string, unknown>;

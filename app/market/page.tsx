@@ -2,10 +2,11 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import StockChart, { type ChartCandle } from "./StockChart";
 
 type Instrument = {
   symbol: string; name: string; market: string; currency: string; type: string; unit: string;
-  price_won: number; change_percent: number; updated_at: number;
+  price_won: number; change_percent: number; updated_at: number; candles: ChartCandle[];
 };
 type Position = { symbol: string; name: string; type: string; unit: string; quantity: string; valueWon: number; profitWon: number };
 type Account = { id: string; name: string; type: string; principalWon: number; maturityAt: number };
@@ -53,37 +54,6 @@ function commandLabel(action: string) {
 
 function statusLabel(status: string) {
   return ({ pending: "전달 대기", dispatched: "처리 중", accepted: "완료", rejected: "거절", offline: "접속 필요" } as Record<string, string>)[status] ?? status;
-}
-
-function StockChart({ item }: { item: Instrument }) {
-  const rising = item.change_percent >= 0;
-  const points = useMemo(() => {
-    const drift = Math.max(-22, Math.min(22, item.change_percent));
-    return Array.from({ length: 42 }, (_, index) => {
-      const progress = index / 41;
-      const wave = Math.sin(index * 0.82) * 3.8 + Math.sin(index * 0.31 + 1.3) * 2.4;
-      return 54 - drift * progress - wave;
-    });
-  }, [item.change_percent]);
-  const line = points.map((value, index) => `${(index / 41) * 100},${Math.max(12, Math.min(88, value))}`).join(" ");
-  const area = `0,100 ${line} 100,100`;
-  const previousClose = item.price_won / (1 + item.change_percent / 100 || 1);
-
-  return (
-    <div className="price-chart" data-trend={rising ? "rise" : "fall"}>
-      <div className="chart-toolbar">
-        <div className="chart-periods" aria-label="차트 기간"><button className="active">1일</button><button>1주</button><button>1달</button><button>1년</button></div>
-        <span>현재가 기준 흐름</span>
-      </div>
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${item.name} 가격 흐름`}>
-        <defs><linearGradient id="chart-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopOpacity="0.28" /><stop offset="1" stopOpacity="0" /></linearGradient></defs>
-        <g className="chart-grid"><path d="M0 20H100M0 40H100M0 60H100M0 80H100" /><path d="M20 0V100M40 0V100M60 0V100M80 0V100" /></g>
-        <polygon points={area} className="chart-area" />
-        <polyline points={line} className="chart-line" />
-      </svg>
-      <div className="chart-axis"><span>전일 종가 {won.format(previousClose)}</span><span>현재 {won.format(item.price_won)}</span></div>
-    </div>
-  );
 }
 
 export default function MarketPage() {

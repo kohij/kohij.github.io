@@ -48,6 +48,7 @@ export const marketInstruments = sqliteTable("market_instruments", {
   unit: text("unit").notNull(),
   priceWon: real("price_won").notNull(),
   changePercent: real("change_percent").notNull(),
+  candles: text("candles").notNull().default("[]"),
   updatedAt: integer("updated_at").notNull(),
 }, (table) => [
   index("market_instruments_name_idx").on(table.name),
