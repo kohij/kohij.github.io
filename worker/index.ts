@@ -245,6 +245,153 @@ async function marketCandles(request: Request, env: Env): Promise<Response> {
   return json({ symbol, candles });
 }
 
+type NasdaqOptionRow = {
+  expirygroup?: string | null; strike?: string | null;
+  c_Last?: string | null; c_Bid?: string | null; c_Ask?: string | null;
+  c_Volume?: string | null; c_Openinterest?: string | null;
+  p_Last?: string | null; p_Bid?: string | null; p_Ask?: string | null;
+  p_Volume?: string | null; p_Openinterest?: string | null;
+};
+
+function optionNumber(value: string | null | undefined): number | null {
+  if (!value || value === "--") return null;
+  const parsed = Number(value.replace(/[$,]/g, ""));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+async function marketOptions(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
+  if (!(await authenticatedSession(request, env))) return json({ authenticated: false }, 401);
+  const symbol = new URL(request.url).searchParams.get("symbol")?.toUpperCase() ?? "";
+  if (!/^[A-Z]{1,6}(?:-[A-Z])?$/.test(symbol)) return json({ error: "invalid_symbol" }, 400);
+  const instrument = await env.DB.prepare(
+    "SELECT name, market, type FROM market_instruments WHERE symbol = ?",
+  ).bind(symbol).first<{ name: string; market: string; type: string }>();
+  if (!instrument || instrument.market !== "US" || !["EQUITY", "ETF", "LEVERAGED_ETF"].includes(instrument.type)) {
+    return json({ error: "unsupported_underlying" }, 404);
+  }
+  const upstream = await fetch(
+    `https://api.nasdaq.com/api/quote/${encodeURIComponent(symbol)}/option-chain?assetclass=stocks&limit=120`,
+    { headers: { "user-agent": "Mozilla/5.0", accept: "application/json, text/plain, */*" } },
+  );
+  if (!upstream.ok) return json({ error: "option_chain_unavailable" }, 502);
+  let data: { table?: { rows?: NasdaqOptionRow[] }; lastTrade?: string } | undefined;
+  try {
+    const payload = await upstream.json() as { data?: typeof data };
+    data = payload.data;
+  } catch {
+    return json({ error: "option_chain_unavailable" }, 502);
+  }
+  let expiry = "";
+  const contracts = [];
+  for (const row of data?.table?.rows ?? []) {
+    if (row.expirygroup) {
+      const parsed = new Date(`${row.expirygroup} 12:00:00 UTC`);
+      expiry = Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString().slice(0, 10);
+      continue;
+    }
+    const strike = optionNumber(row.strike);
+    if (!expiry || strike === null || strike <= 0) continue;
+    contracts.push({
+      expiry, strike,
+      call: { last: optionNumber(row.c_Last), bid: optionNumber(row.c_Bid), ask: optionNumber(row.c_Ask),
+        volume: optionNumber(row.c_Volume), openInterest: optionNumber(row.c_Openinterest) },
+      put: { last: optionNumber(row.p_Last), bid: optionNumber(row.p_Bid), ask: optionNumber(row.p_Ask),
+        volume: optionNumber(row.p_Volume), openInterest: optionNumber(row.p_Openinterest) },
+    });
+  }
+  return json({ symbol, name: instrument.name, lastTrade: data?.lastTrade ?? "", contracts });
+}
+
+async function marketCommunity(request: Request, env: Env): Promise<Response> {
+  const session = await authenticatedSession(request, env);
+  if (!session) return json({ error: "unauthorized" }, 401);
+  const url = new URL(request.url);
+  if (request.method === "GET") {
+    const symbol = (url.searchParams.get("symbol") ?? "").toUpperCase();
+    if (!/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) return json({ error: "invalid_symbol" }, 400);
+    const posts = await env.DB.prepare(
+      `SELECT p.id, p.player_name AS playerName, p.symbol, p.body, p.stance,
+        p.holder_verified AS holderVerified, p.created_at AS createdAt,
+        COUNT(r.player_uuid) AS reactionCount,
+        MAX(CASE WHEN r.player_uuid = ? THEN 1 ELSE 0 END) AS reacted,
+        CASE WHEN p.player_uuid = ? THEN 1 ELSE 0 END AS mine
+       FROM market_community_posts p
+       LEFT JOIN market_community_reactions r ON r.post_id = p.id
+       WHERE p.symbol = ?
+       GROUP BY p.id ORDER BY p.created_at DESC LIMIT 60`,
+    ).bind(session.player_uuid, session.player_uuid, symbol).all<Record<string, unknown>>();
+    return json({ symbol, posts: posts.results });
+  }
+  if (!sameOrigin(request)) return json({ error: "invalid_origin" }, 403);
+  let body: Record<string, unknown>;
+  try { body = await request.json() as Record<string, unknown>; } catch { return json({ error: "invalid_json" }, 400); }
+  if (request.method === "POST") {
+    const symbol = String(body.symbol ?? "").toUpperCase().trim();
+    const content = String(body.body ?? "").replace(/\s+/g, " ").trim();
+    const stance = String(body.stance ?? "watching").toLowerCase();
+    if (!/^[A-Z0-9.^=-]{1,32}$/.test(symbol) || content.length < 2 || content.length > 280 ||
+        !["watching", "holding", "positive", "cautious"].includes(stance)) {
+      return json({ error: "invalid_post", message: "종목과 글 내용을 확인해 주세요." }, 400);
+    }
+    const instrument = await env.DB.prepare("SELECT symbol FROM market_instruments WHERE symbol = ?").bind(symbol).first();
+    if (!instrument) return json({ error: "unknown_symbol", message: "등록된 종목만 이야기할 수 있습니다." }, 404);
+    const recent = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM market_community_posts WHERE player_uuid = ? AND created_at > ?",
+    ).bind(session.player_uuid, Date.now() - 300_000).first<{ count: number }>();
+    if ((recent?.count ?? 0) >= 5) return json({ error: "rate_limited", message: "잠시 뒤 다시 작성해 주세요." }, 429);
+    const player = await env.DB.prepare(
+      "SELECT positions FROM market_players WHERE player_uuid = ?",
+    ).bind(session.player_uuid).first<{ positions: string }>();
+    let holderVerified = 0;
+    try {
+      const positions = JSON.parse(player?.positions ?? "[]") as Array<{ symbol?: unknown; quantity?: unknown }>;
+      holderVerified = positions.some((position) => String(position.symbol ?? "") === symbol && Number(position.quantity ?? 0) > 0) ? 1 : 0;
+    } catch { holderVerified = 0; }
+    const id = crypto.randomUUID();
+    const now = Date.now();
+    await env.DB.prepare(
+      `INSERT INTO market_community_posts (id, player_uuid, player_name, symbol, body, stance, holder_verified, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(id, session.player_uuid, session.player_name, symbol, content, stance, holderVerified, now).run();
+    return json({ ok: true, id, message: "의견을 올렸습니다." }, 201);
+  }
+  if (request.method === "DELETE") {
+    const id = String(body.id ?? "");
+    if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: "invalid_post" }, 400);
+    const deleted = await env.DB.prepare(
+      "DELETE FROM market_community_posts WHERE id = ? AND player_uuid = ?",
+    ).bind(id, session.player_uuid).run();
+    if ((deleted.meta.changes ?? 0) !== 1) return json({ error: "not_found" }, 404);
+    await env.DB.prepare("DELETE FROM market_community_reactions WHERE post_id = ?").bind(id).run();
+    return json({ ok: true });
+  }
+  return json({ error: "method_not_allowed" }, 405);
+}
+
+async function marketCommunityReact(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  if (!sameOrigin(request)) return json({ error: "invalid_origin" }, 403);
+  const session = await authenticatedSession(request, env);
+  if (!session) return json({ error: "unauthorized" }, 401);
+  let id = "";
+  try { id = String((await request.json() as { id?: unknown }).id ?? ""); } catch { return json({ error: "invalid_json" }, 400); }
+  if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: "invalid_post" }, 400);
+  const post = await env.DB.prepare("SELECT id FROM market_community_posts WHERE id = ?").bind(id).first();
+  if (!post) return json({ error: "not_found" }, 404);
+  const existing = await env.DB.prepare(
+    "SELECT post_id FROM market_community_reactions WHERE post_id = ? AND player_uuid = ?",
+  ).bind(id, session.player_uuid).first();
+  if (existing) {
+    await env.DB.prepare("DELETE FROM market_community_reactions WHERE post_id = ? AND player_uuid = ?").bind(id, session.player_uuid).run();
+    return json({ ok: true, reacted: false });
+  }
+  await env.DB.prepare(
+    "INSERT INTO market_community_reactions (post_id, player_uuid, created_at) VALUES (?, ?, ?)",
+  ).bind(id, session.player_uuid, Date.now()).run();
+  return json({ ok: true, reacted: true });
+}
+
 async function bridgeAuthorized(request: Request): Promise<boolean> {
   const timestamp = request.headers.get("x-tbe-timestamp") ?? "";
   const signature = request.headers.get("x-tbe-signature") ?? "";
@@ -396,6 +543,17 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
   });
 }
 
+function validOrder(action: string, symbol: string, quantity: string): boolean {
+  if (!["buy", "sell", "search", "option", "bank_savings", "bank_deposit", "bank_cancel"].includes(action) ||
+      !/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) return false;
+  if (action === "buy" || action === "sell") return /^(?:all|[0-9]+(?:\.[0-9]{1,4})?)$/.test(quantity);
+  if (action === "search") return quantity === "";
+  if (action === "option") return /^\d{4}-\d{2}-\d{2}\|[0-9]+(?:\.[0-9]{1,3})?\|(call|put)$/.test(quantity);
+  if (action === "bank_savings") return /^(?:7d|30d)$/.test(symbol.toLowerCase()) && /^[0-9]{4,8}$/.test(quantity);
+  if (action === "bank_deposit") return /^(?:30d|90d)$/.test(symbol.toLowerCase()) && /^[0-9]{4,8}$/.test(quantity);
+  return /^[a-f0-9]{8}$/i.test(symbol) && quantity === "";
+}
+
 async function marketOrder(request: Request, env: Env): Promise<Response> {
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   if (!sameOrigin(request)) return json({ error: "invalid_origin" }, 403);
@@ -406,9 +564,7 @@ async function marketOrder(request: Request, env: Env): Promise<Response> {
   const action = String(message.action ?? "").toLowerCase();
   const symbol = String(message.symbol ?? "").toUpperCase().trim();
   const quantity = String(message.quantity ?? "").toLowerCase().trim();
-  if (!["buy", "sell", "search", "option"].includes(action) || !/^[A-Z0-9.^=-]{1,32}$/.test(symbol) ||
-      (action !== "search" && action !== "option" && !/^(?:all|[0-9]+(?:\.[0-9]{1,4})?)$/.test(quantity)) ||
-      (action === "option" && !/^\d{4}-\d{2}-\d{2}\|[0-9]+(?:\.[0-9]{1,3})?\|(call|put)$/.test(quantity))) {
+  if (!validOrder(action, symbol, quantity)) {
     return json({ error: "invalid_order", message: "주문 형식을 확인하세요." }, 400);
   }
   const rate = await env.DB.prepare(
@@ -444,9 +600,7 @@ async function browserSocket(request: Request, env: Env): Promise<Response> {
     const action = String(message.action ?? "").toLowerCase();
     const symbol = String(message.symbol ?? "").toUpperCase().trim();
     const quantity = String(message.quantity ?? "").toLowerCase().trim();
-    if (!["buy", "sell", "search", "option"].includes(action) || !/^[A-Z0-9.^=-]{1,32}$/.test(symbol) ||
-        (action !== "search" && action !== "option" && !/^(?:all|[0-9]+(?:\.[0-9]{1,4})?)$/.test(quantity)) ||
-        (action === "option" && !/^\d{4}-\d{2}-\d{2}\|[0-9]+(?:\.[0-9]{1,3})?\|(call|put)$/.test(quantity))) {
+    if (!validOrder(action, symbol, quantity)) {
       socket.send(JSON.stringify({ type: "trade-error", message: "주문 형식을 확인하세요." }));
       return;
     }
@@ -477,6 +631,9 @@ const worker = {
     if (url.pathname === "/api/market/login") return marketLogin(request, env);
     if (url.pathname === "/api/market/snapshot") return marketSnapshot(request, env);
     if (url.pathname === "/api/market/candles") return marketCandles(request, env);
+    if (url.pathname === "/api/market/options") return marketOptions(request, env);
+    if (url.pathname === "/api/market/community") return marketCommunity(request, env);
+    if (url.pathname === "/api/market/community/react") return marketCommunityReact(request, env);
     if (url.pathname === "/api/market/order") return marketOrder(request, env);
     if (url.pathname === "/api/market/bridge") return bridgeSocket(request, env);
     if (url.pathname === "/api/market/ws") return browserSocket(request, env);

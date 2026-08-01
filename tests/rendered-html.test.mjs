@@ -69,18 +69,26 @@ test("ships required social and server assets", async () => {
 });
 
 test("renders the device-code securities login", async () => {
-  const [marketPage, stockChart, worker, schema, migration, packageJson] = await Promise.all([
+  const [marketPage, stockChart, worker, schema, migration, communityMigration, packageJson] = await Promise.all([
     readFile(new URL("app/market/page.tsx", root), "utf8"),
     readFile(new URL("app/market/StockChart.tsx", root), "utf8"),
     readFile(new URL("worker/index.ts", root), "utf8"),
     readFile(new URL("db/schema.ts", root), "utf8"),
     readFile(new URL("drizzle/0002_market_candles.sql", root), "utf8"),
+    readFile(new URL("drizzle/0003_market_community.sql", root), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
   ]);
   assert.match(marketPage, /택병증권/);
   assert.match(marketPage, /로그인 코드/);
   assert.match(marketPage, /ABCD-EFGH/);
   assert.match(marketPage, /URLSearchParams/);
+  assert.match(marketPage, /LEVERAGED_ETF/);
+  assert.match(marketPage, /옵션 체인/);
+  assert.match(marketPage, /bank_savings/);
+  assert.match(marketPage, /만기 이자/);
+  assert.match(marketPage, /중도해지/);
+  assert.match(marketPage, /종목.*커뮤니티|커뮤니티/);
+  assert.match(marketPage, /보유자 표시/);
   assert.doesNotMatch(marketPage, /게임머니 투자|SECURE GAME LINK|현재 IP/);
   assert.match(stockChart, /CandlestickSeries/);
   assert.match(stockChart, /HistogramSeries/);
@@ -89,7 +97,14 @@ test("renders the device-code securities login", async () => {
   assert.match(stockChart, /\/api\/market\/candles/);
   assert.match(worker, /v8\/finance\/chart/);
   assert.match(worker, /marketCandles/);
+  assert.match(worker, /\/api\/market\/options/);
+  assert.match(worker, /api\.nasdaq\.com/);
+  assert.match(worker, /bank_deposit/);
+  assert.match(worker, /\/api\/market\/community/);
+  assert.match(worker, /holder_verified/);
   assert.match(schema, /candles: text\("candles"\)/);
   assert.match(migration, /ALTER TABLE `market_instruments` ADD `candles`/);
+  assert.match(communityMigration, /CREATE TABLE `market_community_posts`/);
+  assert.match(communityMigration, /market_community_reactions/);
   assert.match(packageJson, /lightweight-charts/);
 });

@@ -1,4 +1,4 @@
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const patchNotes = sqliteTable("patch_notes", {
   id: text("id").primaryKey(),
@@ -68,4 +68,28 @@ export const marketCommands = sqliteTable("market_commands", {
 }, (table) => [
   index("market_commands_pending_idx").on(table.status, table.createdAt),
   index("market_commands_player_idx").on(table.playerUuid, table.createdAt),
+]);
+
+export const marketCommunityPosts = sqliteTable("market_community_posts", {
+  id: text("id").primaryKey(),
+  playerUuid: text("player_uuid").notNull(),
+  playerName: text("player_name").notNull(),
+  symbol: text("symbol").notNull(),
+  body: text("body").notNull(),
+  stance: text("stance").notNull(),
+  holderVerified: integer("holder_verified").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [
+  index("market_community_symbol_idx").on(table.symbol, table.createdAt),
+  index("market_community_player_idx").on(table.playerUuid, table.createdAt),
+]);
+
+export const marketCommunityReactions = sqliteTable("market_community_reactions", {
+  postId: text("post_id").notNull(),
+  playerUuid: text("player_uuid").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.postId, table.playerUuid] }),
+  index("market_community_reaction_post_idx").on(table.postId),
+  index("market_community_reaction_player_idx").on(table.playerUuid),
 ]);
