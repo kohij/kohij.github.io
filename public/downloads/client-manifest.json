@@ -11,7 +11,7 @@
     "sha256": "fe9612be70c95adb548f9802ee3fb9c2937a6f2b2f854daf75c33367033dfa7f"
   },
   "noticePack": {
-    "file": "taekbyeong-modelengine-ui-1.20.1-v4.zip",
+    "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",
     "optional": true,
     "fontNamespace": "taekbyeong:scroll",
     "sha1": "80ec9dcce9cbbfff96d5e53dc00da69c2901c477",
