@@ -40,13 +40,6 @@ export type Pet = {
   limit: string;
 };
 
-export type ReleaseItem = {
-  name: string;
-  version: string;
-  scope: string;
-  status: "라이브 운영" | "카나리 통과";
-};
-
 const habitats = {
   common: ["강", "평원 연못", "바다", "늪", "비 오는 해안"],
   uncommon: ["깊은 바다", "설원 강", "정글 강", "동굴 수맥", "밤바다"],
@@ -453,7 +446,7 @@ export const brews: Brew[] = [
     value: "500,000~800,000원",
   },
   {
-    name: "MSPT 2.8",
+    name: "정적 속의 파동",
     tier: "신화",
     catalyst: "최적화 훈장",
     purpose: "성능 도전 업적",
@@ -613,9 +606,9 @@ export const currentSystems = [
     body: "10개 카테고리 348개 상품. 많이 팔면 가격이 내려가고, 거래가 없으면 24시간 기준가로 회복합니다.",
   },
   {
-    title: "한국·미국 모의주식",
+    title: "한국·미국 증권",
     eyebrow: "현재 운영",
-    body: "한국 100종목, 미국 101종목. 정규장·휴장·지연 시세·서킷브레이커를 반영합니다.",
+    body: "한국·미국 주식과 ETF를 조회하고 거래합니다. 검색한 종목은 바로 추가됩니다.",
   },
   {
     title: "산업 자동화",
@@ -625,7 +618,7 @@ export const currentSystems = [
   {
     title: "mcMMO·커스텀 강화",
     eyebrow: "현재 운영",
-    body: "스킬 이정표 보상, AdvancedEnchantments, 강화 호퍼를 경제 원장과 함께 운용합니다.",
+    body: "스킬 성장과 장비 강화, 호퍼 업그레이드에 따라 보상과 새 목표가 열립니다.",
   },
   {
     title: "해적섬 스폰",
@@ -635,52 +628,7 @@ export const currentSystems = [
   {
     title: "동료·레이드·생활 길드",
     eyebrow: "현재 운영",
-    body: "양조 40종·밈 어종 72종·동료 12종·보스 3종·196개 퀘스트가 하나의 경제 원장과 연결됩니다.",
-  },
-];
-
-export const releaseItems: ReleaseItem[] = [
-  {
-    name: "산업 양조",
-    version: "BreweryX 3.4.4",
-    scope: "레시피 40종 · 모드 촉매 28종 · 한국어 UI",
-    status: "라이브 운영",
-  },
-  {
-    name: "밈 낚시",
-    version: "EvenMoreFish Legacy 1.7.4",
-    scope: "어종 72종 · 미끼 5종 · 주말 대회 2종",
-    status: "라이브 운영",
-  },
-  {
-    name: "통합 퀘스트",
-    version: "TaekbyeongEconomy 2.0.0",
-    scope: "스토리 112 · 발견 24 · 일일 36 · 주간 12 · 시즌 12",
-    status: "라이브 운영",
-  },
-  {
-    name: "경제 연결",
-    version: "TaekbyeongEconomy 2.0.0",
-    scope: "동적 상점 · 실제 시세 모의주식 · 원장 · 실패 환불",
-    status: "라이브 운영",
-  },
-  {
-    name: "바닐라 동료",
-    version: "TaekbyeongEconomy 2.0.0",
-    scope: "12종 · 동시 1마리 · 전투·생산 이득 없음 · 청크 강제 로드 없음",
-    status: "라이브 운영",
-  },
-  {
-    name: "파티클 치장",
-    version: "PlayerParticles 8.12",
-    scope: "한국어 253키 · 2틱 · 32블록 · 영구 해금 4종",
-    status: "라이브 운영",
-  },
-  {
-    name: "레이드·역할 유물",
-    version: "TaekbyeongEconomy 2.0.0",
-    scope: "인스턴스 보스 3종 · 유물 5종 · 24시간 보상 제한",
-    status: "라이브 운영",
+    body: "양조 40종·물고기 72종·동료 12종·보스 3종·퀘스트 196개가 서로 이어집니다.",
   },
 ];
 

@@ -77,7 +77,7 @@ async function authenticatedSession(request: Request, env: Env): Promise<MarketS
     `SELECT id, player_uuid, player_name, ip, expires_at FROM market_sessions WHERE id = ?`,
   ).bind(id).first<MarketSession>();
   const now = Math.floor(Date.now() / 1000);
-  if (!session || session.expires_at <= now || session.ip !== clientIp(request)) return null;
+  if (!session || session.expires_at <= now) return null;
   return session;
 }
 
@@ -129,41 +129,34 @@ async function marketLogin(request: Request, env: Env): Promise<Response> {
     return json({ ok: true }, 200, { "set-cookie": `${SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
   }
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-  let token = "";
-  try { token = String((await request.json() as { token?: unknown }).token ?? ""); }
+  let code = "";
+  try { code = String((await request.json() as { code?: unknown }).code ?? "").toUpperCase().replace(/[^A-Z0-9]/g, ""); }
   catch { return json({ error: "invalid_json" }, 400); }
-  const parts = token.split(".");
-  if (parts.length !== 2 || !(await verifySignature(parts[0], parts[1]))) {
-    return json({ error: "invalid_token" }, 401);
-  }
-  let payload: { aud?: string; sub?: string; name?: string; ip?: string; exp?: number; nonce?: string };
-  try { payload = JSON.parse(new TextDecoder().decode(base64Bytes(parts[0]))); }
-  catch { return json({ error: "invalid_token" }, 401); }
+  if (!/^[A-Z2-9]{8}$/.test(code)) return json({ error: "invalid_code" }, 401);
   const now = Math.floor(Date.now() / 1000);
-  if (payload.aud !== "taekbyeong-market" || !/^[0-9a-f-]{36}$/.test(payload.sub ?? "") ||
-      !/^[A-Za-z0-9_]{1,16}$/.test(payload.name ?? "") || !/^[0-9a-f-]{36}$/.test(payload.nonce ?? "") ||
-      typeof payload.exp !== "number" || payload.exp <= now || payload.exp > now + 600 ||
-      payload.ip !== clientIp(request)) {
-    return json({ error: payload.ip !== clientIp(request) ? "ip_mismatch" : "expired_or_invalid" }, 401);
-  }
-  try {
-    await env.DB.prepare(
-      `INSERT INTO market_login_nonces (nonce, player_uuid, expires_at, used_at) VALUES (?, ?, ?, ?)`,
-    ).bind(payload.nonce, payload.sub, payload.exp, now).run();
-  } catch {
-    return json({ error: "token_already_used" }, 401);
-  }
+  const pending = await env.DB.prepare(
+    `SELECT player_uuid FROM market_login_nonces WHERE nonce = ? AND used_at = 0 AND expires_at > ?`,
+  ).bind(code, now).first<{ player_uuid: string }>();
+  if (!pending || !/^[0-9a-f-]{36}$/.test(pending.player_uuid)) return json({ error: "expired_or_invalid" }, 401);
+  const claimed = await env.DB.prepare(
+    `UPDATE market_login_nonces SET used_at = ? WHERE nonce = ? AND used_at = 0 AND expires_at > ?`,
+  ).bind(now, code, now).run();
+  if ((claimed.meta.changes ?? 0) !== 1) return json({ error: "expired_or_invalid" }, 401);
+  const player = await env.DB.prepare(
+    `SELECT player_name FROM market_players WHERE player_uuid = ?`,
+  ).bind(pending.player_uuid).first<{ player_name: string }>();
+  if (!player || !/^[A-Za-z0-9_]{1,16}$/.test(player.player_name)) return json({ error: "player_not_ready" }, 409);
   const sessionId = `${crypto.randomUUID()}-${crypto.randomUUID()}`;
-  const expiresAt = now + 1800;
+  const expiresAt = now + 43_200;
   await env.DB.batch([
     env.DB.prepare("DELETE FROM market_sessions WHERE expires_at <= ?").bind(now),
     env.DB.prepare("DELETE FROM market_login_nonces WHERE expires_at <= ?").bind(now),
   ]);
   await env.DB.prepare(
     `INSERT INTO market_sessions (id, player_uuid, player_name, ip, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
-  ).bind(sessionId, payload.sub, payload.name, payload.ip, expiresAt, now).run();
-  return json({ ok: true, playerName: payload.name }, 200, {
-    "set-cookie": `${SESSION_COOKIE}=${encodeURIComponent(sessionId)}; Path=/; Max-Age=1800; HttpOnly; Secure; SameSite=Lax`,
+  ).bind(sessionId, pending.player_uuid, player.player_name, clientIp(request), expiresAt, now).run();
+  return json({ ok: true, playerName: player.player_name }, 200, {
+    "set-cookie": `${SESSION_COOKIE}=${encodeURIComponent(sessionId)}; Path=/; Max-Age=43200; HttpOnly; Secure; SameSite=Lax`,
   });
 }
 
@@ -279,6 +272,27 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
         ).bind(now, command.id, retryBefore)));
       }
       socket.send(JSON.stringify({ type: "commands", items: pending.results }));
+    } else if (message.type === "device-login") {
+      const code = String(message.code ?? "").toUpperCase();
+      const playerUuid = String(message.playerUuid ?? "");
+      const playerName = String(message.playerName ?? "");
+      const expiresAt = Number(message.expiresAt ?? 0);
+      const now = Math.floor(Date.now() / 1000);
+      if (!/^[A-Z2-9]{8}$/.test(code) || !/^[0-9a-f-]{36}$/.test(playerUuid) ||
+          !/^[A-Za-z0-9_]{1,16}$/.test(playerName) || !Number.isInteger(expiresAt) ||
+          expiresAt <= now || expiresAt > now + 600) return;
+      await env.DB.batch([
+        env.DB.prepare(
+          `INSERT INTO market_players (player_uuid, player_name, cash_won, online, positions, accounts, updated_at)
+           VALUES (?, ?, 0, 1, '[]', '[]', ?)
+           ON CONFLICT(player_uuid) DO UPDATE SET player_name=excluded.player_name, online=1`,
+        ).bind(playerUuid, playerName, Date.now()),
+        env.DB.prepare(
+          `INSERT INTO market_login_nonces (nonce, player_uuid, expires_at, used_at)
+           VALUES (?, ?, ?, 0) ON CONFLICT(nonce) DO NOTHING`,
+        ).bind(code, playerUuid, expiresAt),
+        env.DB.prepare("DELETE FROM market_login_nonces WHERE expires_at <= ?").bind(now),
+      ]);
     } else if (message.type === "result") {
       const id = String(message.id ?? "");
       const status = String(message.status ?? "rejected");

@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   brews,
   currentSystems,
   fish,
   pets,
   questChains,
-  releaseItems,
   type BrewTier,
   type Rarity,
 } from "./content";
-import patchNotes from "./patch-notes.json";
 
 const address = "taekbyeong-709371ef.nip.io";
 const fishFilters: Array<"전체" | Rarity> = [
@@ -65,20 +63,6 @@ export default function Home() {
     "전체",
   );
   const [questFilter, setQuestFilter] = useState("전체");
-  const [livePatchNotes, setLivePatchNotes] = useState(patchNotes);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/patch-notes", { cache: "no-store", signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then((raw) => {
-        const body = raw as { notes?: typeof patchNotes };
-        if (Array.isArray(body.notes) && body.notes.length > 0) setLivePatchNotes(body.notes);
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, []);
-
   const visibleFish = useMemo(
     () =>
       fish.filter(
@@ -125,15 +109,13 @@ export default function Home() {
         </a>
         <nav aria-label="주요 메뉴">
           <a href="#start">시작</a>
-          <a href="#update">업데이트</a>
-          <a href="#patch-notes">패치노트</a>
           <a href="#systems">시스템</a>
+          <a href="#economy">경제</a>
           <a href="/market">증권·은행</a>
           <a href="#quests">퀘스트</a>
           <a href="#brewery">양조</a>
           <a href="#fishing">낚시</a>
           <a href="#pets">동료</a>
-          <a href="#assets">에셋</a>
         </nav>
         <button className="nav-connect" onClick={copyAddress}>
           {copied ? "복사 완료" : "주소 복사"}
@@ -161,7 +143,7 @@ export default function Home() {
               <div>
                 <small>SERVER ADDRESS</small>
                 <strong>{address}</strong>
-                <span>기본 포트 25565 · 2026.08.29 20:57 KST까지</span>
+                <span>Minecraft 1.20.1 · Forge</span>
               </div>
               <button onClick={copyAddress}>
                 {copied ? "복사했습니다" : "접속 주소 복사"}
@@ -187,15 +169,13 @@ export default function Home() {
           </figure>
         </div>
         <div className="hero-stripe" aria-hidden="true">
-          <span>CREATE</span>
+          <span>산업</span>
           <i />
-          <span>MEKANISM</span>
+          <span>경제</span>
           <i />
-          <span>AE2</span>
+          <span>모험</span>
           <i />
-          <span>IC2</span>
-          <i />
-          <span>PLAYER ECONOMY</span>
+          <span>생활</span>
         </div>
       </section>
 
@@ -226,83 +206,9 @@ export default function Home() {
         <aside className="notice">
           <b>접속이 안 될 때</b>
           <p>
-            권한보다 모드 불일치부터 확인하세요. 특히 Create 6.0.8과 Mekanism
-            10.4.16.80이 서버와 같아야 데이터팩 레지스트리 오류가 나지 않습니다.
+            서버 안내에 있는 모드팩을 그대로 적용한 뒤 다시 접속하세요.
           </p>
         </aside>
-      </section>
-
-      <section className="section update-section" id="update">
-        <SectionTitle
-          kicker="02 · RELEASE BOARD"
-          title="무엇이 실제로 들어오고 있는지"
-          body="Forge 모드와 실제 플러그인 조합으로 카나리 검증한 뒤 라이브에 반영합니다. 현재 공개된 시스템과 버전을 그대로 표시합니다."
-        />
-        <div className="release-metrics">
-          <article>
-            <strong>20.0</strong>
-            <span>안정 상태 TPS</span>
-          </article>
-          <article>
-            <strong>8.8ms</strong>
-            <span>10초 p95 MSPT</span>
-          </article>
-          <article>
-            <strong>0</strong>
-            <span>가격 런타임 불일치</span>
-          </article>
-          <article>
-            <strong>1%</strong>
-            <span>카나리 서버 CPU</span>
-          </article>
-        </div>
-        <div className="release-grid">
-          {releaseItems.map((item) => (
-            <article key={item.name}>
-              <div>
-                <span className={`status status-${item.status.replaceAll(" ", "-")}`}>
-                  {item.status}
-                </span>
-                <small>{item.version}</small>
-              </div>
-              <h3>{item.name}</h3>
-              <p>{item.scope}</p>
-            </article>
-          ))}
-        </div>
-        <aside className="release-note">
-          <b>이번 공개 범위</b>
-          <p>
-            양조 40종, 물고기 72종, 산업 촉매 28종, 퀘스트 196개,
-            바닐라 동료 12종, 레이드 3종, 역할 유물 5종을 공개합니다.
-            현금 유입·지출·거래 출처는 경제 원장에 기록됩니다.
-          </p>
-        </aside>
-      </section>
-
-      <section className="section patch-section" id="patch-notes">
-        <SectionTitle
-          kicker="LIVE · PATCH NOTES"
-          title="오늘 무엇이 바뀌었는지"
-          body="경제 밸런싱과 유지보수 결과를 날짜별로 공개합니다. 인게임 공지는 가장 최신 항목의 요약과 이 위치로 바로 오는 링크를 표시합니다."
-        />
-        <div className="patch-grid">
-          {livePatchNotes.map((note) => (
-            <article key={`${note.date}-${note.type}-${note.title}`}>
-              <div className="patch-meta">
-                <span>{note.type}</span>
-                <time dateTime={note.date}>{note.date}</time>
-              </div>
-              <h3>{note.title}</h3>
-              <p>{note.summary}</p>
-              <ul>
-                {note.changes.map((change) => (
-                  <li key={change}>{change}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
       </section>
 
       <section className="section dark-section" id="systems">
@@ -358,13 +264,10 @@ export default function Home() {
         />
         <div className="economy-layout">
           <article className="formula-card">
-            <span>DYNAMIC PRICE MODEL</span>
-            <code>
-              price = clamp(e<sup>-0.20 × pressure</sup>, 0.55, 1.45)
-            </code>
+            <span>가격 변동</span>
+            <h3>많이 팔린 물건은 잠시 값이 내려갑니다.</h3>
             <p>
-              50스택 집중 판매 시 약 18% 하락. 구매는 반대로 가격을 회복시키며
-              통화정책은 하루 최대 ±2%만 움직입니다.
+              시간이 지나면 가격이 회복되므로 여러 품목을 나눠 파는 편이 유리합니다.
             </p>
           </article>
           <div className="economy-stats">
@@ -391,16 +294,14 @@ export default function Home() {
             <Tag>상점</Tag>
             <h3>싸게 사서 바로 되팔 수 없습니다</h3>
             <p>
-              구매·판매가, 수급 압력, 품목별 거래량이 함께 기록됩니다. 변형된
-              장비와 NBT 아이템은 판매가 거부됩니다.
+              판매가 몰리면 가격이 내려가며, 일부 특수 장비는 판매할 수 없습니다.
             </p>
           </article>
           <article>
             <Tag>주식</Tag>
             <h3>웹 전용 증권으로 거래합니다</h3>
             <p>
-              실제 장 운영시간·시세를 따르며, 인게임 <b>/주식</b>으로 IP 결속
-              보안 로그인을 발급합니다. ETF·레버리지·옵션·보유 자산을 한 화면에서 확인합니다.
+              게임에서 <b>/주식</b>을 입력하면 포트폴리오와 로그인 코드가 함께 표시됩니다. 주식·ETF·레버리지·옵션을 한 화면에서 확인합니다.
             </p>
             <a className="economy-market-link" href="/market">웹 증권 열기</a>
           </article>
@@ -424,7 +325,7 @@ export default function Home() {
         <div className="implemented-banner">
           <span>NOW PLAYABLE</span>
           <b>채집 · 제작 · 낚시 · 토벌 · 바이옴 발견 · 주식 · 촉매 · 카지노</b>
-          <p>선행 조건, 회전 주기, 완료 상태를 저장해 건너뛰기와 중복 보상을 막습니다.</p>
+          <p>조건을 달성하면 다음 퀘스트와 보상이 차례로 열립니다.</p>
         </div>
         <div className="quest-summary">
           {[
@@ -625,7 +526,7 @@ export default function Home() {
         <SectionTitle
           kicker="08 · COMPANIONS"
           title="강함보다 정체성이 분명한 동료 12종"
-          body="12종 전용 외형 기준표를 만들고 ModelEngine 연동층을 준비했습니다. 대응 모델이 없거나 로드에 실패하면 바닐라 엔티티로 안전하게 폴백합니다."
+          body="각자 다른 외형과 해금 조건을 가진 치장 동료입니다. 전투나 생산 이득 없이 함께 다닙니다."
         />
         <figure className="pet-concept">
           <img
@@ -633,9 +534,9 @@ export default function Home() {
             alt="택병서버 동료 12종 커스텀 voxel 콘셉트 시트"
           />
           <figcaption>
-            <span>MODEL ATLAS · V1</span>
-            <b>12종 외형 기준 확정</b>
-            <p>황동 요정부터 특이점 감시자까지 같은 조명·비율·색상 규칙으로 통일했습니다.</p>
+              <span>동료 12종</span>
+              <b>원하는 동료와 함께 다니세요.</b>
+              <p>황동 요정부터 특이점 감시자까지 각자 다른 모습을 가집니다.</p>
           </figcaption>
         </figure>
         <div className="pet-rules">
@@ -661,7 +562,6 @@ export default function Home() {
             <article key={pet.name}>
               <div>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <small>{pet.model}</small>
               </div>
               <h3>{pet.name}</h3>
               <p>{pet.role}</p>
@@ -678,120 +578,6 @@ export default function Home() {
             </article>
           ))}
         </div>
-        <aside className="notice pet-warning">
-          <b>접속 안전 우선</b>
-          <p>
-            MyPet 의존성을 제거했습니다. 동료는 서버 자체 구현이며 동시 1마리,
-            무적, 비영구 엔티티입니다. 무료 MIT 기반 모델 4종부터 적용하고 나머지는
-            대응 에셋 완성 전까지 바닐라 외형을 유지합니다.
-          </p>
-        </aside>
-      </section>
-
-      <section className="section asset-section" id="assets">
-        <SectionTitle
-          kicker="09 · DIRECT ASSET HOST"
-          title="필요 파일은 공식 가이드에서 바로"
-          body="외부 단축 주소와 임시 업로더를 제거했습니다. 자체 제작물과 재배포 허용 에셋만 이 사이트에서 직접 제공합니다."
-        />
-        <div className="asset-grid">
-          <article>
-            <span>FORGE 1.20.1 · REQUIRED</span>
-            <h3>택병서버 통합 리소스팩 v2</h3>
-            <p>커스텀 동료 4종, TAB 사이드바 숫자 숨김, 공지 배경 카드를 한 팩으로 적용합니다. 접속 시 자동으로 받습니다.</p>
-            <a href="/downloads/taekbyeong-modelengine-ui-1.20.1-v2.zip" download>ZIP 받기</a>
-          </article>
-          <article>
-            <span>MODELENGINE · 4 MODELS</span>
-            <h3>무료 펫 블루프린트 v1</h3>
-            <p>오스뮴 경비견·공허추적자·플루익스 정령·설원 여우. Microsoft MIT 샘플 기반 색상 변형입니다.</p>
-            <a href="/downloads/taekbyeong-modelengine-free-pets-v1.zip" download>ZIP 받기</a>
-          </article>
-          <article>
-            <span>1536 × 1024 · PNG</span>
-            <h3>동료 12종 모델 아틀라스</h3>
-            <p>추가 Blockbench 모델링과 홈페이지 카드에 공통으로 쓰는 공식 외형 기준표입니다.</p>
-            <a href="/assets/taekbyeong-pet-concepts-v1.png" download>PNG 받기</a>
-          </article>
-          <article>
-            <span>VERIFY · JSON + SHA256</span>
-            <h3>클라이언트 매니페스트</h3>
-            <p>서버 버전·주소·리소스팩 해시와 공개 파일 무결성 값을 기계 판독 형식으로 제공합니다.</p>
-            <div className="asset-links">
-              <a href="/downloads/client-manifest.json">JSON</a>
-              <a href="/downloads/SHA256SUMS.txt">SHA256</a>
-            </div>
-          </article>
-        </div>
-        <aside className="asset-policy">
-          <b>공개 제외</b>
-          <p>월드·DB·플레이어 데이터·백업·유료 플러그인·서드파티 모드 JAR. 서버 보안과 각 라이선스를 지킵니다.</p>
-          <a href="/assets/CREDITS.md">출처·라이선스</a>
-        </aside>
-      </section>
-
-      <section className="section reference-section" id="reference">
-        <SectionTitle
-          kicker="10 · DESIGN REFERENCES"
-          title="유명 서버의 장점만 가져왔습니다"
-          body="콘텐츠를 그대로 복제하지 않고, 오래 운영된 서버가 복잡한 시스템을 플레이어에게 설명하고 순환시키는 방식을 참고했습니다."
-        />
-        <div className="reference-grid">
-          <a href="https://wiki.hypixel.net/Collections" target="_blank" rel="noreferrer">
-            <span>HYPIXEL SKYBLOCK</span>
-            <h3>수집 진행도와 자연 획득 판정</h3>
-            <p>구매가 아닌 실제 플레이로 도감을 올리고 단계별 보상을 받는 구조.</p>
-          </a>
-          <a href="https://wynncraft.wiki.gg/wiki/Content_Book" target="_blank" rel="noreferrer">
-            <span>WYNNCRAFT</span>
-            <h3>모든 콘텐츠를 한 권에</h3>
-            <p>퀘스트·발견·동굴·레이드의 조건과 진행 상태를 한곳에서 확인하는 방식.</p>
-          </a>
-          <a href="https://monumenta.wiki.gg/wiki/Quests" target="_blank" rel="noreferrer">
-            <span>MONUMENTA</span>
-            <h3>장기 퀘스트와 목표 추적</h3>
-            <p>도시별 이야기와 나침반 추적을 결합해 다음 행동을 잃지 않게 하는 방식.</p>
-          </a>
-          <a href="https://www.stoneworks.gg/" target="_blank" rel="noreferrer">
-            <span>STONEWORKS</span>
-            <h3>플레이어가 만드는 직업 경제</h3>
-            <p>희귀 양조법과 길드·상점·역할극이 플레이어 사이에서 가치를 만드는 방식.</p>
-          </a>
-          <a href="https://www.ecocitycraft.com/" target="_blank" rel="noreferrer">
-            <span>ECOCITYCRAFT</span>
-            <h3>여러 진로가 공존하는 경제</h3>
-            <p>채집·상점·도시·거래 중 어느 길을 골라도 경제에 참여할 수 있는 구조.</p>
-          </a>
-        </div>
-      </section>
-
-      <section className="section operation-section">
-        <div>
-          <span>SERVER OPERATIONS</span>
-          <h2>오래 켜져 있어야 좋은 서버입니다.</h2>
-          <p>
-            4시간 간격 최대 10개 백업, 크래시 자동 복구, 매일 오전 6시 재시작,
-            AntiXray, CoreProtect, 화이트리스트를 기본으로 운영합니다.
-          </p>
-        </div>
-        <dl>
-          <div>
-            <dt>RAM</dt>
-            <dd>2GB → 6GB G1GC</dd>
-          </div>
-          <div>
-            <dt>거리</dt>
-            <dd>시야 10 · 시뮬레이션 6</dd>
-          </div>
-          <div>
-            <dt>성능</dt>
-            <dd>TPS 19.97 · p95 4.6ms</dd>
-          </div>
-          <div>
-            <dt>외부 포트</dt>
-            <dd>TCP 25565만 허용</dd>
-          </div>
-        </dl>
       </section>
 
       <footer>
@@ -799,12 +585,11 @@ export default function Home() {
           <img src="/server-icon.png" alt="" />
           <span>
             <b>택병서버</b>
-            <small>FORGE 1.20.1</small>
+            <small>PLAYER GUIDE</small>
           </span>
         </div>
         <p>
-          이 페이지는 현재 운영 상태와 개발 예정 콘텐츠를 구분해 표시합니다.
-          실제 업데이트 시 변경 내역을 함께 갱신합니다.
+          플레이에 필요한 정보만 정리했습니다.
         </p>
         <button onClick={copyAddress}>{copied ? "복사 완료" : address}</button>
       </footer>

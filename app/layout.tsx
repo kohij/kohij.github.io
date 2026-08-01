@@ -3,7 +3,7 @@ import "./globals.css";
 
 const title = "택병서버 플레이어 가이드";
 const description =
-  "Forge 1.20.1 택병서버의 시작 동선, 경제, 산업, 퀘스트, 양조, 낚시를 한곳에 정리한 공식 플레이어 가이드입니다.";
+  "택병서버의 시작 방법, 경제, 퀘스트, 양조, 낚시, 동료를 정리한 플레이어 가이드입니다.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://taekbyeong-guide.fasho-7.chatgpt.site/"),
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
         url: "/og.png",
         width: 1536,
         height: 1024,
-        alt: "택병서버 Forge 1.20.1 플레이어 가이드",
+        alt: "택병서버 플레이어 가이드",
       },
     ],
   },

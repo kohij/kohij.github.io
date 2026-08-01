@@ -4,13 +4,13 @@ import test from "node:test";
 
 const root = new URL("../", import.meta.url);
 
-async function render() {
+async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
+    new Request(`http://localhost${path}`, {
       headers: { accept: "text/html" },
     }),
     {
@@ -35,13 +35,12 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /택병서버 플레이어 가이드/);
   assert.match(html, /taekbyeong-709371ef\.nip\.io/);
   assert.match(html, /196개 통합 퀘스트/);
-  assert.match(html, /BreweryX 3\.4\.4/);
   assert.match(html, /황동 톱니 요정/);
   assert.match(html, /술은 마시는 버프가 아니라 산업의 끝입니다/);
   assert.match(html, /72종/);
-  assert.match(html, /바닐라 동료 12종/);
-  assert.match(html, /오늘 무엇이 바뀌었는지/);
-  assert.match(html, /일일 경제 밸런싱 시작/);
+  assert.match(html, /한국·미국 증권/);
+  assert.match(html, /웹 증권 열기/);
+  assert.doesNotMatch(html, /카나리|MSPT|SERVER OPERATIONS|DESIGN REFERENCES|게임머니 투자/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
 });
 
@@ -59,11 +58,19 @@ test("ships required social and server assets", async () => {
     readFile(new URL("package.json", root), "utf8"),
   ]);
 
-  assert.match(page, /HYPIXEL SKYBLOCK/);
-  assert.match(page, /STONEWORKS/);
+  assert.doesNotMatch(page, /HYPIXEL SKYBLOCK|STONEWORKS|SHA256|SERVER OPERATIONS/);
   assert.match(content, /404 피시 낫 파운드/);
   assert.match(content, /정밀기계식 브랜디/);
   assert.match(layout, /lang="ko"/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   await assert.rejects(access(new URL("app/_sites-preview/SkeletonPreview.tsx", root)));
+});
+
+test("renders the device-code securities login", async () => {
+  const marketPage = await readFile(new URL("app/market/page.tsx", root), "utf8");
+  assert.match(marketPage, /택병증권/);
+  assert.match(marketPage, /로그인 코드/);
+  assert.match(marketPage, /ABCD-EFGH/);
+  assert.match(marketPage, /URLSearchParams/);
+  assert.doesNotMatch(marketPage, /게임머니 투자|SECURE GAME LINK|현재 IP/);
 });
