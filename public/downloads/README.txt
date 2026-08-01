@@ -1,7 +1,10 @@
 택병서버 공개 다운로드
 
+- taekbyeong-fmm-companions-ui-1.20.1-v10.zip
+  현재 Forge 1.20.1 필수 통합 리소스팩. FMM 동료 12종·ItemDisplay 대체, 가변 제목/본문 두루마리 모듈, 밀랍 인장 행동, TAB 사이드바 UI를 포함합니다.
+
 - taekbyeong-fmm-companions-ui-1.20.1-v9.zip
-  현재 Forge 1.20.1 필수 통합 리소스팩. CC0 고품질 원본을 변환한 FMM 동료 12종, 엔진 장애 시 ItemDisplay 대체, 9px 행 높이 두루마리 UI, TAB 사이드바 UI를 포함합니다.
+  모듈형 두루마리 전환 전 FMM 이전 팩입니다.
 
 - taekbyeong-native-companions-ui-1.20.1-v8.zip
   FMM 전환 전 ItemDisplay 이전 팩입니다.
@@ -22,7 +25,7 @@
   고대 두루마리 공지 시험팩입니다. `taekbyeong:scroll` 독립 폰트만 추가하며 기본 폰트를 덮어쓰지 않습니다. 모든 비트맵 글리프는 1.20.1 폰트 아틀라스 크기 이하(240x14px)입니다.
 
 - taekbyeong-ui-1.20.1-v1.zip
-  이전 UI 전용 리소스팩. 서버 접속용으로는 통합 v9를 사용합니다.
+  이전 UI 전용 리소스팩. 서버 접속용으로는 통합 v10을 사용합니다.
 
 - taekbyeong-modelengine-free-pets-v1.zip
   사용 중지한 이전 ModelEngine blueprints 4종입니다.
