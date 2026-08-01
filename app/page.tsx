@@ -531,7 +531,7 @@ export default function Home() {
         <figure className="pet-concept">
           <img
             src="/assets/taekbyeong-pet-concepts-v1.png"
-            alt="택병서버 동료 12종 커스텀 voxel 콘셉트 시트"
+            alt="Kenney Cube Pets CC0 원본으로 제작한 택병서버 동료 12종"
           />
           <figcaption>
               <span>동료 12종</span>

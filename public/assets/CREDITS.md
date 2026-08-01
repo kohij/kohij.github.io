@@ -1,10 +1,12 @@
 # 공개 에셋 출처
 
-## 택병서버 펫 콘셉트 시트
+## 택병서버 동료 원본 시트
 
 - 파일: `taekbyeong-pet-concepts-v1.png`
-- 제작: 택병서버용 자체 생성 에셋
-- 용도: 공식 가이드, 펫 모델링 기준표
+- 원본: Kenney Cube Pets 2.0 미리보기 12종
+- 편집: 택병서버 이름·등급·패시브 카드 구성
+- 라이선스: CC0 1.0 Universal
+- 용도: 공식 가이드, 실제 FMM 변환 원본 안내
 
 ## 택병서버 UI·FMM 동료 통합팩
 
@@ -18,5 +20,6 @@
 
 - 파일: `../downloads/taekbyeong-fmm-companions-ui-1.20.1-v9.zip`
 - 렌더러: FreeMinecraftModels 1.1.4, 장애 시 Minecraft 1.20.1 기본 `ItemDisplay`
-- 원본: Quaternius Cute Animated Monsters·Ultimate Monsters·Ultimate Animated Animal Pack, Kenney Cube Pets
+- FMM 원본: Kenney Cube Pets 2.0
+- 기본 ItemDisplay 대체 원본: Quaternius CC0·Kenney CC0
 - 라이선스: CC0 1.0 Universal; 변환·재채색 모델과 출처 문서를 팩에 포함합니다.
