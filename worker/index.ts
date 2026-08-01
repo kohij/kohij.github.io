@@ -25,6 +25,14 @@ interface ExecutionContext {
 
 type PatchNote = { date: string; type: string; title: string; summary: string; changes: string[] };
 type MarketSession = { id: string; player_uuid: string; player_name: string; ip: string; expires_at: number };
+type YahooChartResult = {
+  meta?: { regularMarketPrice?: number };
+  timestamp?: Array<number | null>;
+  indicators?: { quote?: Array<{
+    open?: Array<number | null>; high?: Array<number | null>; low?: Array<number | null>;
+    close?: Array<number | null>; volume?: Array<number | null>;
+  }> };
+};
 
 function json(data: unknown, status = 200, headers: HeadersInit = {}) {
   return Response.json(data, { status, headers: { "cache-control": "no-store", ...headers } });
@@ -187,6 +195,54 @@ async function marketSnapshot(request: Request, env: Env): Promise<Response> {
     })),
     commands: commands.results,
   });
+}
+
+async function marketCandles(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
+  if (!(await authenticatedSession(request, env))) return json({ authenticated: false }, 401);
+  const symbol = new URL(request.url).searchParams.get("symbol")?.toUpperCase() ?? "";
+  if (!/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) return json({ error: "invalid_symbol" }, 400);
+  const instrument = await env.DB.prepare(
+    "SELECT price_won FROM market_instruments WHERE symbol = ?",
+  ).bind(symbol).first<{ price_won: number }>();
+  if (!instrument) return json({ error: "not_found" }, 404);
+
+  const upstream = await fetch(
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1m`,
+    { headers: { "user-agent": "Mozilla/5.0 TaekbyeongSecurities/1.0" } },
+  );
+  if (!upstream.ok) return json({ error: "quote_unavailable" }, 502);
+  let result: YahooChartResult | undefined;
+  try {
+    const payload = await upstream.json() as { chart?: { result?: YahooChartResult[] | null } };
+    result = payload.chart?.result?.[0];
+  } catch {
+    return json({ error: "quote_unavailable" }, 502);
+  }
+  const timestamps = result?.timestamp ?? [];
+  const quote = result?.indicators?.quote?.[0];
+  const opens = quote?.open ?? [];
+  const highs = quote?.high ?? [];
+  const lows = quote?.low ?? [];
+  const closes = quote?.close ?? [];
+  const volumes = quote?.volume ?? [];
+  const size = Math.min(timestamps.length, opens.length, highs.length, lows.length, closes.length);
+  const latestRaw = Number(result?.meta?.regularMarketPrice) || [...closes].reverse().find((value) => Number(value) > 0) || 0;
+  const scale = latestRaw > 0 && instrument.price_won > 0 ? instrument.price_won / latestRaw : 1;
+  const candles = [];
+  for (let index = Math.max(0, size - 240); index < size; index += 1) {
+    const time = Number(timestamps[index]);
+    const open = Number(opens[index]);
+    const high = Number(highs[index]);
+    const low = Number(lows[index]);
+    const close = Number(closes[index]);
+    const volume = Math.max(0, Number(volumes[index]) || 0);
+    if (!Number.isInteger(time) || ![open, high, low, close].every(Number.isFinite) ||
+        open <= 0 || high <= 0 || low <= 0 || close <= 0 ||
+        low > Math.min(open, close) || high < Math.max(open, close)) continue;
+    candles.push({ time, open: open * scale, high: high * scale, low: low * scale, close: close * scale, volume });
+  }
+  return json({ symbol, candles });
 }
 
 async function bridgeAuthorized(request: Request): Promise<boolean> {
@@ -420,6 +476,7 @@ const worker = {
     if (url.pathname === "/api/patch-notes") return patchNotesApi(request, env);
     if (url.pathname === "/api/market/login") return marketLogin(request, env);
     if (url.pathname === "/api/market/snapshot") return marketSnapshot(request, env);
+    if (url.pathname === "/api/market/candles") return marketCandles(request, env);
     if (url.pathname === "/api/market/order") return marketOrder(request, env);
     if (url.pathname === "/api/market/bridge") return bridgeSocket(request, env);
     if (url.pathname === "/api/market/ws") return browserSocket(request, env);

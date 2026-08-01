@@ -47,15 +47,35 @@ function periodLimit(period: Period) {
 
 export default function StockChart({ item }: { item: ChartInstrument }) {
   const [period, setPeriod] = useState<Period>("1D");
+  const [remote, setRemote] = useState<{ symbol: string; candles: ChartCandle[] } | null>(null);
   const mountRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick", UTCTimestamp> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram", UTCTimestamp> | null>(null);
 
-  const visibleCandles = useMemo(() => item.candles.slice(-periodLimit(period)), [item.candles, period]);
+  const candles = remote?.symbol === item.symbol && remote.candles.length ? remote.candles : item.candles;
+  const loading = remote?.symbol !== item.symbol;
+  const visibleCandles = useMemo(() => candles.slice(-periodLimit(period)), [candles, period]);
   const latest = visibleCandles.at(-1);
   const hasData = visibleCandles.length > 0;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch(`/api/market/candles?symbol=${encodeURIComponent(item.symbol)}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    }).then(async (response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json() as { candles?: ChartCandle[] };
+      if (!controller.signal.aborted) {
+        setRemote({ symbol: item.symbol, candles: Array.isArray(payload.candles) ? payload.candles : [] });
+      }
+    }).catch(() => {
+      if (!controller.signal.aborted) setRemote({ symbol: item.symbol, candles: [] });
+    });
+    return () => controller.abort();
+  }, [item.symbol]);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -199,7 +219,7 @@ export default function StockChart({ item }: { item: ChartInstrument }) {
           <div className="chart-tooltip" ref={tooltipRef} hidden />
         </div>
         <a className="chart-attribution" href="https://www.tradingview.com/" target="_blank" rel="noreferrer">Charts by TradingView</a>
-      </> : <div className="chart-empty"><strong>차트 데이터 수집 중</strong><span>다음 시세 갱신 후 1분봉이 표시됩니다.</span></div>}
+      </> : <div className="chart-empty"><strong>{loading ? "1분봉 불러오는 중" : "차트 데이터 없음"}</strong><span>{loading ? "실제 시세를 확인하고 있습니다." : "잠시 후 다시 확인해 주세요."}</span></div>}
     </div>
   );
 }

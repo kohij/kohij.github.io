@@ -69,9 +69,10 @@ test("ships required social and server assets", async () => {
 });
 
 test("renders the device-code securities login", async () => {
-  const [marketPage, stockChart, schema, migration, packageJson] = await Promise.all([
+  const [marketPage, stockChart, worker, schema, migration, packageJson] = await Promise.all([
     readFile(new URL("app/market/page.tsx", root), "utf8"),
     readFile(new URL("app/market/StockChart.tsx", root), "utf8"),
+    readFile(new URL("worker/index.ts", root), "utf8"),
     readFile(new URL("db/schema.ts", root), "utf8"),
     readFile(new URL("drizzle/0002_market_candles.sql", root), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
@@ -85,6 +86,9 @@ test("renders the device-code securities login", async () => {
   assert.match(stockChart, /HistogramSeries/);
   assert.match(stockChart, /1분봉 · 거래량/);
   assert.match(stockChart, /Charts by TradingView/);
+  assert.match(stockChart, /\/api\/market\/candles/);
+  assert.match(worker, /v8\/finance\/chart/);
+  assert.match(worker, /marketCandles/);
   assert.match(schema, /candles: text\("candles"\)/);
   assert.match(migration, /ALTER TABLE `market_instruments` ADD `candles`/);
   assert.match(packageJson, /lightweight-charts/);
