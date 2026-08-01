@@ -92,7 +92,7 @@ a {
 .market-status { justify-self: end; display: flex; align-items: center; gap: 7px; color: var(--market-muted); font-size: 11px; }
 .market-status i { width: 7px; height: 7px; border-radius: 50%; background: #5b5b64; }
 .market-status i.live { background: #32c983; box-shadow: 0 0 0 4px rgba(50, 201, 131, 0.1); }
-.icon-button { display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 9px; background: transparent; color: var(--market-muted); }
+.icon-button { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--market-muted); }
 .icon-button:hover, .icon-button:focus-visible { background: var(--market-panel-2); color: #fff; }
 
 .ticker-strip { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)) auto; gap: 1px; border-bottom: 1px solid var(--market-line); background: var(--market-line); }
@@ -352,6 +352,7 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
 .market-shell .input-with-unit span,
 .market-shell .community-compose-actions > span,
 .market-shell .banking-workspace .bank-products em,
+.market-shell .banking-workspace .bank-calculator > div:first-child span,
 .market-shell .banking-workspace .bank-calculator dd,
 .market-shell .banking-workspace .account-list h3,
 .market-shell .empty-state { font-size: 12px !important; line-height: 1.5; }
