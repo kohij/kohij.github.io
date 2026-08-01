@@ -6,6 +6,9 @@
 - taekbyeong-modelengine-ui-1.20.1-v3.zip
   기본 폰트 호환성 문제로 사용 중지된 시험판입니다.
 
+- taekbyeong-modelengine-ui-1.20.1-v4.zip
+  고대 두루마리 공지 시험팩입니다. `taekbyeong:scroll` 독립 폰트만 추가하며 기본 폰트를 덮어쓰지 않습니다.
+
 - taekbyeong-ui-1.20.1-v1.zip
   이전 UI 전용 리소스팩. 서버 접속용으로는 통합 v2를 사용합니다.
 
