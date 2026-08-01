@@ -335,7 +335,26 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
 /* Typography audit: no market body or data label is rendered below 12px. */
 .market-shell { font-size: 14px; line-height: 1.5; }
 .market-shell button, .market-shell input, .market-shell select, .market-shell textarea, .market-shell .table-row { font-size: 14px !important; }
-.market-shell small, .market-shell dt, .market-shell label, .market-shell .terminal-panel-head > span, .market-shell .ticker-strip span, .market-shell .market-status, .market-shell .risk-badge, .market-shell .stance, .market-shell .holder-badge, .market-shell .chart-attribution { font-size: 12px !important; line-height: 1.5; }
+.market-shell small,
+.market-shell dt,
+.market-shell label,
+.market-shell .terminal-panel-head > span,
+.market-shell .ticker-strip span,
+.market-shell .market-status,
+.market-shell .risk-badge,
+.market-shell .stance,
+.market-shell .holder-badge,
+.market-shell .chart-attribution,
+.market-shell .chart-toolbar > span,
+.market-shell .chart-ohlc dd,
+.market-shell .quote-name > i,
+.market-shell .product-note b,
+.market-shell .input-with-unit span,
+.market-shell .community-compose-actions > span,
+.market-shell .banking-workspace .bank-products em,
+.market-shell .banking-workspace .bank-calculator dd,
+.market-shell .banking-workspace .account-list h3,
+.market-shell .empty-state { font-size: 12px !important; line-height: 1.5; }
 .market-shell p, .market-shell .order-helper, .market-shell .product-note, .market-shell .leverage-banner span { font-size: 13px !important; line-height: 1.6; }
 .market-shell .terminal-panel-head h2 { font-size: 15px; }
 .market-shell .quote-list b, .market-shell .bank-products b, .market-shell .account-list b, .market-shell .account-list strong { font-size: 14px; }
