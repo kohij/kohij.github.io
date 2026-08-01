@@ -5,10 +5,12 @@
   "address": "taekbyeong-709371ef.nip.io",
   "port": 25565,
   "resourcePack": {
-    "file": "taekbyeong-modelengine-ui-1.20.1-v2.zip",
+    "file": "taekbyeong-bettermodel-ui-1.20.1-v6.zip",
     "required": true,
-    "sha1": "3ac30ef68c934d93b05606e0018c1f26634d3831",
-    "sha256": "fe9612be70c95adb548f9802ee3fb9c2937a6f2b2f854daf75c33367033dfa7f"
+    "models": 12,
+    "engine": "BetterModel 1.4.2-arclight.1",
+    "sha1": "086b2061f4684effff6bb6f8426384c12a5035b1",
+    "sha256": "0ee558690c76cbe46c3b1405aa73e6db932b8f8b9794b5fe066c5044dbb37f7d"
   },
   "noticePack": {
     "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",
@@ -17,9 +19,10 @@
     "sha1": "80ec9dcce9cbbfff96d5e53dc00da69c2901c477",
     "sha256": "4a3ec09b841afb40eb71ab1ca4b9897ccd7ce38eeef48789d0af395b6a8d5151"
   },
-  "modelEngineFreePack": {
+  "legacyModelEnginePack": {
     "file": "taekbyeong-modelengine-free-pets-v1.zip",
     "models": 4,
+    "deprecated": true,
     "license": "MIT",
     "sha256": "f2c7b6030afd5bc5ab7799a684e3867cca4e9662f75a079e14f69e1c3b85aa15"
   }

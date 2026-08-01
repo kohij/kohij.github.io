@@ -525,8 +525,8 @@ export default function Home() {
       <section className="section pet-section" id="pets">
         <SectionTitle
           kicker="08 · COMPANIONS"
-          title="강함보다 정체성이 분명한 동료 12종"
-          body="각자 다른 외형과 해금 조건을 가진 치장 동료입니다. 전투나 생산 이득 없이 함께 다닙니다."
+          title="먹이로 교감하고 성장하는 역할형 동료 12종"
+          body="소환 중에만 배고픔과 경험치가 쌓이며, Lv.30까지 성장하면 고유 패시브와 먹이 효율이 강화됩니다."
         />
         <figure className="pet-concept">
           <img
@@ -545,16 +545,16 @@ export default function Home() {
             <span>동시 소환 상한</span>
           </article>
           <article>
-            <strong>50,000원</strong>
+            <strong>600,000원</strong>
             <span>최저 영구 해금가</span>
           </article>
           <article>
-            <strong>0원</strong>
-            <span>귀환·재소환 비용</span>
+            <strong>12,000원</strong>
+            <span>먹이 1개 · 포만도 25</span>
           </article>
           <article>
-            <strong>6블록</strong>
-            <span>초과 시 자동 추적</span>
+            <strong>Lv.30</strong>
+            <span>최대 성장·먹이 효율 +30%</span>
           </article>
         </div>
         <div className="pet-grid">
@@ -571,7 +571,7 @@ export default function Home() {
                   <dd>{pet.unlock}</dd>
                 </div>
                 <div>
-                  <dt>제한</dt>
+                  <dt>능력</dt>
                   <dd>{pet.limit}</dd>
                 </div>
               </dl>
