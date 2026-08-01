@@ -14,8 +14,8 @@
     "file": "taekbyeong-modelengine-ui-1.20.1-v4.zip",
     "optional": true,
     "fontNamespace": "taekbyeong:scroll",
-    "sha1": "9a98b82c0c91b6cb8f9594a3588117a996b04dcd",
-    "sha256": "0c7450c819be373bd427ae2f80b585b4f90885277f17584f3653320513218c84"
+    "sha1": "80ec9dcce9cbbfff96d5e53dc00da69c2901c477",
+    "sha256": "4a3ec09b841afb40eb71ab1ca4b9897ccd7ce38eeef48789d0af395b6a8d5151"
   },
   "modelEngineFreePack": {
     "file": "taekbyeong-modelengine-free-pets-v1.zip",
