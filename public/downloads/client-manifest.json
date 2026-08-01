@@ -10,8 +10,8 @@
     "models": 12,
     "engine": "FreeMinecraftModels 1.1.4 + Minecraft ItemDisplay 대체",
     "license": "CC0 모델 자산",
-    "sha1": "f734b00cb7c2baba84d18ba5cb5a39222a2e9f33",
-    "sha256": "c2cbc6092c8e513df01e91383e77ee1ad8a7c7615ceef3059ed22db9e8887c44"
+    "sha1": "81a9f14f294a4cc3818a082633814a4b58270bab",
+    "sha256": "c5b4149c4f175d81e9540a9c3585a99fca6a5220b20dc319a153d9fa88c9d0c6"
   },
   "noticePack": {
     "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",
