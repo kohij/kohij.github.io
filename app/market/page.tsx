@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 type Instrument = {
@@ -53,15 +53,13 @@ export default function MarketPage() {
   const [submittingLogin, setSubmittingLogin] = useState(false);
   const [connection, setConnection] = useState<"연결 중" | "연결됨" | "다시 연결 중">("연결 중");
   const [option, setOption] = useState({ underlying: "AAPL", expiry: "", strike: "", side: "call" });
-  const socketRef = useRef<WebSocket | null>(null);
-
   const loadSnapshot = useCallback(async () => {
     const response = await fetch("/api/market/snapshot", { cache: "no-store" });
     if (!response.ok) { setSnapshot({ authenticated: false }); return; }
     const next = await response.json() as Snapshot;
     setSnapshot(next);
-    if (!selected && next.instruments?.length) setSelected(next.instruments[0]);
-  }, [selected]);
+    setSelected((current) => current ?? next.instruments?.[0] ?? null);
+  }, []);
 
   useEffect(() => {
     const login = async () => {
@@ -87,25 +85,23 @@ export default function MarketPage() {
   useEffect(() => {
     if (!snapshot.authenticated) return;
     let stopped = false;
-    let timer: ReturnType<typeof setTimeout>;
-    const connect = () => {
-      const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-      const socket = new WebSocket(`${protocol}//${location.host}/api/market/ws`);
-      socketRef.current = socket;
-      socket.onopen = () => { setConnection("연결됨"); socket.send(JSON.stringify({ type: "poll" })); };
-      socket.onmessage = (event) => {
-        const message = JSON.parse(String(event.data)) as Snapshot & { type?: string; message?: string };
-        if (message.type === "snapshot") setSnapshot(message);
-        if (message.message) setNotice(message.message);
-      };
-      socket.onclose = () => {
-        if (!stopped) { setConnection("다시 연결 중"); timer = setTimeout(connect, 2500); }
-      };
+    const poll = async () => {
+      try {
+        const response = await fetch("/api/market/snapshot", { cache: "no-store" });
+        if (!response.ok) throw new Error("snapshot unavailable");
+        const next = await response.json() as Snapshot;
+        if (!stopped) {
+          setSnapshot(next);
+          setSelected((current) => current ?? next.instruments?.[0] ?? null);
+          setConnection("연결됨");
+        }
+      } catch {
+        if (!stopped) setConnection("다시 연결 중");
+      }
     };
-    connect();
-    const poll = setInterval(() => socketRef.current?.readyState === WebSocket.OPEN &&
-      socketRef.current.send(JSON.stringify({ type: "poll" })), 2500);
-    return () => { stopped = true; clearInterval(poll); clearTimeout(timer); socketRef.current?.close(); };
+    void poll();
+    const timer = setInterval(() => void poll(), 2500);
+    return () => { stopped = true; clearInterval(timer); };
   }, [snapshot.authenticated]);
 
   const instruments = useMemo(() => snapshot.instruments ?? [], [snapshot.instruments]);
@@ -116,27 +112,32 @@ export default function MarketPage() {
   const positions = snapshot.player?.positions ?? [];
   const portfolioWon = positions.reduce((sum, item) => sum + Number(item.valueWon || 0), 0);
 
-  const sendTrade = (payload: Record<string, string>) => {
-    const socket = socketRef.current;
-    if (!socket || socket.readyState !== WebSocket.OPEN) { setNotice("연결된 뒤 다시 시도해 주세요."); return; }
-    socket.send(JSON.stringify({ type: "trade", ...payload }));
+  const sendTrade = async (payload: Record<string, string>) => {
+    if (connection !== "연결됨") { setNotice("연결된 뒤 다시 시도해 주세요."); return; }
+    const response = await fetch("/api/market/order", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json() as { message?: string };
+    setNotice(result.message ?? (response.ok ? "주문을 전달했습니다." : "주문을 처리하지 못했습니다."));
   };
 
   const submitOrder = (event: FormEvent) => {
     event.preventDefault();
     if (!selected) return;
-    sendTrade({ action: side, symbol: selected.symbol, quantity });
+    void sendTrade({ action: side, symbol: selected.symbol, quantity });
   };
 
   const registerSearch = () => {
     const symbol = query.trim().toUpperCase();
-    if (/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) sendTrade({ action: "search", symbol, quantity: "" });
+    if (/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) void sendTrade({ action: "search", symbol, quantity: "" });
     else setNotice("정확한 종목 심볼을 입력하세요.");
   };
 
   const submitOption = (event: FormEvent) => {
     event.preventDefault();
-    sendTrade({ action: "option", symbol: option.underlying.toUpperCase(), quantity: `${option.expiry}|${option.strike}|${option.side}` });
+    void sendTrade({ action: "option", symbol: option.underlying.toUpperCase(), quantity: `${option.expiry}|${option.strike}|${option.side}` });
   };
 
   const logout = async () => { await fetch("/api/market/login", { method: "DELETE" }); location.reload(); };

@@ -189,7 +189,8 @@ async function bridgeAuthorized(request: Request): Promise<boolean> {
   const timestamp = request.headers.get("x-tbe-timestamp") ?? "";
   const signature = request.headers.get("x-tbe-signature") ?? "";
   if (!/^\d{10}$/.test(timestamp) || Math.abs(Number(timestamp) - Math.floor(Date.now() / 1000)) > 45) return false;
-  return verifySignature(`${timestamp}\nbridge`, signature);
+  const payload = request.method === "POST" ? await request.clone().text() : "bridge";
+  return verifySignature(`${timestamp}\n${payload}`, signature);
 }
 
 async function batch(env: Env, statements: D1PreparedStatement[]) {
@@ -212,10 +213,8 @@ function acceptSocket(request: Request, onMessage: (data: unknown, socket: WebSo
   return new Response(null, { status: 101, webSocket: client });
 }
 
-async function bridgeSocket(request: Request, env: Env): Promise<Response> {
-  if (!(await bridgeAuthorized(request))) return json({ error: "unauthorized" }, 401);
-  return acceptSocket(request, async (raw, socket) => {
-    const message = raw as Record<string, unknown>;
+async function handleBridgeMessage(raw: unknown, env: Env): Promise<Record<string, unknown>> {
+  const message = raw as Record<string, unknown>;
     if (message.type === "sync") {
       const now = Date.now();
       const instruments = Array.isArray(message.instruments) ? message.instruments.slice(0, 1000) : [];
@@ -256,7 +255,7 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
           JSON.stringify(positions), JSON.stringify(accounts), now));
       }
       await batch(env, statements);
-      socket.send(JSON.stringify({ type: "sync-ok", updatedAt: now }));
+      return { type: "sync-ok", updatedAt: now };
     } else if (message.type === "poll") {
       const retryBefore = Date.now() - 10_000;
       const pending = await env.DB.prepare(
@@ -271,7 +270,7 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
             WHERE id = ? AND (status = 'pending' OR (status = 'dispatched' AND updated_at <= ?))`,
         ).bind(now, command.id, retryBefore)));
       }
-      socket.send(JSON.stringify({ type: "commands", items: pending.results }));
+      return { type: "commands", items: pending.results };
     } else if (message.type === "device-login") {
       const code = String(message.code ?? "").toUpperCase();
       const playerUuid = String(message.playerUuid ?? "");
@@ -280,7 +279,7 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
       const now = Math.floor(Date.now() / 1000);
       if (!/^[A-Z2-9]{8}$/.test(code) || !/^[0-9a-f-]{36}$/.test(playerUuid) ||
           !/^[A-Za-z0-9_]{1,16}$/.test(playerName) || !Number.isInteger(expiresAt) ||
-          expiresAt <= now || expiresAt > now + 600) return;
+          expiresAt <= now || expiresAt > now + 600) return { type: "ignored" };
       await env.DB.batch([
         env.DB.prepare(
           `INSERT INTO market_players (player_uuid, player_name, cash_won, online, positions, accounts, updated_at)
@@ -293,6 +292,7 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
         ).bind(code, playerUuid, expiresAt),
         env.DB.prepare("DELETE FROM market_login_nonces WHERE expires_at <= ?").bind(now),
       ]);
+      return { type: "device-login-ok", code };
     } else if (message.type === "result") {
       const id = String(message.id ?? "");
       const status = String(message.status ?? "rejected");
@@ -301,8 +301,54 @@ async function bridgeSocket(request: Request, env: Env): Promise<Response> {
           `UPDATE market_commands SET status = ?, message = ?, updated_at = ? WHERE id = ?`,
         ).bind(status, String(message.message ?? "").slice(0, 300), Date.now(), id).run();
       }
+      return { type: "result-ok" };
     }
+  return { type: "ignored" };
+}
+
+async function bridgeSocket(request: Request, env: Env): Promise<Response> {
+  if (!(await bridgeAuthorized(request))) return json({ error: "unauthorized" }, 401);
+  if (request.method === "POST") {
+    let message: unknown;
+    try { message = await request.json(); } catch { return json({ error: "invalid_json" }, 400); }
+    return json(await handleBridgeMessage(message, env));
+  }
+  return acceptSocket(request, async (raw, socket) => {
+    socket.send(JSON.stringify(await handleBridgeMessage(raw, env)));
   });
+}
+
+async function marketOrder(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  if (!sameOrigin(request)) return json({ error: "invalid_origin" }, 403);
+  const session = await authenticatedSession(request, env);
+  if (!session) return json({ error: "unauthorized" }, 401);
+  let message: Record<string, unknown>;
+  try { message = await request.json() as Record<string, unknown>; } catch { return json({ error: "invalid_json" }, 400); }
+  const action = String(message.action ?? "").toLowerCase();
+  const symbol = String(message.symbol ?? "").toUpperCase().trim();
+  const quantity = String(message.quantity ?? "").toLowerCase().trim();
+  if (!["buy", "sell", "search", "option"].includes(action) || !/^[A-Z0-9.^=-]{1,32}$/.test(symbol) ||
+      (action !== "search" && action !== "option" && !/^(?:all|[0-9]+(?:\.[0-9]{1,4})?)$/.test(quantity)) ||
+      (action === "option" && !/^\d{4}-\d{2}-\d{2}\|[0-9]+(?:\.[0-9]{1,3})?\|(call|put)$/.test(quantity))) {
+    return json({ error: "invalid_order", message: "주문 형식을 확인하세요." }, 400);
+  }
+  const rate = await env.DB.prepare(
+    `SELECT
+       SUM(CASE WHEN status IN ('pending', 'dispatched') THEN 1 ELSE 0 END) AS active,
+       SUM(CASE WHEN created_at > ? THEN 1 ELSE 0 END) AS recent
+     FROM market_commands WHERE session_id = ?`,
+  ).bind(Date.now() - 10_000, session.id).first<{ active: number | null; recent: number | null }>();
+  if ((rate?.active ?? 0) >= 5 || (rate?.recent ?? 0) >= 12) {
+    return json({ error: "rate_limited", message: "주문 처리 중입니다. 잠시 후 다시 시도하세요." }, 429);
+  }
+  const id = crypto.randomUUID();
+  const now = Date.now();
+  await env.DB.prepare(
+    `INSERT INTO market_commands (id, session_id, player_uuid, action, symbol, quantity, status, message, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'pending', '게임 서버 전달 대기', ?, ?)`,
+  ).bind(id, session.id, session.player_uuid, action, symbol, quantity, now, now).run();
+  return json({ type: "trade-queued", id, message: "주문을 게임 서버에 전달했습니다." }, 202);
 }
 
 async function browserSocket(request: Request, env: Env): Promise<Response> {
@@ -352,6 +398,7 @@ const worker = {
     if (url.pathname === "/api/patch-notes") return patchNotesApi(request, env);
     if (url.pathname === "/api/market/login") return marketLogin(request, env);
     if (url.pathname === "/api/market/snapshot") return marketSnapshot(request, env);
+    if (url.pathname === "/api/market/order") return marketOrder(request, env);
     if (url.pathname === "/api/market/bridge") return bridgeSocket(request, env);
     if (url.pathname === "/api/market/ws") return browserSocket(request, env);
     if (url.pathname === "/_vinext/image") {
