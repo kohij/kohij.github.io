@@ -34,6 +34,33 @@ type YahooChartResult = {
   }> };
 };
 
+type MarketPlayerRow = {
+  player_name: string;
+  cash_won: number;
+  online: number;
+  positions: string;
+  accounts: string;
+  updated_at: number;
+};
+
+type PublicPosition = {
+  symbol: string;
+  name: string;
+  type: string;
+  unit: string;
+  quantity: string;
+  valueWon: number;
+  profitWon: number;
+};
+
+type PublicAccount = {
+  name: string;
+  type: string;
+  principalWon: number;
+  rate: number;
+  maturityAt: number;
+};
+
 function json(data: unknown, status = 200, headers: HeadersInit = {}) {
   return Response.json(data, { status, headers: { "cache-control": "no-store", ...headers } });
 }
@@ -194,6 +221,109 @@ async function marketSnapshot(request: Request, env: Env): Promise<Response> {
       candles: JSON.parse(instrument.candles),
     })),
     commands: commands.results,
+  });
+}
+
+function jsonArray(value: string): Array<Record<string, unknown>> {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object") : [];
+  } catch {
+    return [];
+  }
+}
+
+function publicPosition(item: Record<string, unknown>): PublicPosition | null {
+  const symbol = String(item.symbol ?? "").toUpperCase();
+  const quantity = String(item.quantity ?? "0");
+  const valueWon = Number(item.valueWon ?? 0);
+  const profitWon = Number(item.profitWon ?? 0);
+  if (!/^[A-Z0-9.^=-]{1,32}$/.test(symbol) || !/^[0-9]+(?:\.[0-9]{1,4})?$/.test(quantity) ||
+      !Number.isFinite(valueWon) || valueWon < 0 || !Number.isFinite(profitWon)) return null;
+  return {
+    symbol,
+    name: String(item.name ?? symbol).slice(0, 160),
+    type: String(item.type ?? "EQUITY").slice(0, 32),
+    unit: String(item.unit ?? "").slice(0, 12),
+    quantity,
+    valueWon,
+    profitWon,
+  };
+}
+
+function publicAccount(item: Record<string, unknown>): PublicAccount | null {
+  const principalWon = Number(item.principalWon ?? 0);
+  const rate = Number(item.rate ?? 0);
+  const maturityAt = Number(item.maturityAt ?? 0);
+  if (!Number.isFinite(principalWon) || principalWon < 0 || !Number.isFinite(rate) || rate < 0 ||
+      !Number.isFinite(maturityAt) || maturityAt < 0) return null;
+  return {
+    name: String(item.name ?? "예금 · 적금").slice(0, 60),
+    type: String(item.type ?? "DEPOSIT").slice(0, 16),
+    principalWon,
+    rate,
+    maturityAt,
+  };
+}
+
+function publicProfile(row: MarketPlayerRow, viewerName: string) {
+  const positions = jsonArray(row.positions).map(publicPosition).filter((item): item is PublicPosition => item !== null);
+  const accounts = jsonArray(row.accounts).map(publicAccount).filter((item): item is PublicAccount => item !== null);
+  const portfolioWon = positions.reduce((sum, item) => sum + item.valueWon, 0);
+  const profitWon = positions.reduce((sum, item) => sum + item.profitWon, 0);
+  const bankWon = accounts.reduce((sum, item) => sum + item.principalWon, 0);
+  return {
+    playerName: row.player_name,
+    online: Boolean(row.online),
+    mine: row.player_name === viewerName,
+    totalAssetWon: Math.max(0, Number(row.cash_won) || 0) + portfolioWon + bankWon,
+    cashWon: Math.max(0, Number(row.cash_won) || 0),
+    portfolioWon,
+    bankWon,
+    profitWon,
+    positionCount: positions.length,
+    accountCount: accounts.length,
+    updatedAt: row.updated_at,
+    positions,
+    accounts,
+  };
+}
+
+async function marketRankings(request: Request, env: Env): Promise<Response> {
+  if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
+  const session = await authenticatedSession(request, env);
+  if (!session) return json({ error: "unauthorized" }, 401);
+  const players = await env.DB.prepare(
+    `SELECT player_name, cash_won, online, positions, accounts, updated_at
+       FROM market_players ORDER BY updated_at DESC LIMIT 500`,
+  ).all<MarketPlayerRow>();
+  const profiles = players.results
+    .filter((row) => /^[A-Za-z0-9_]{1,16}$/.test(row.player_name))
+    .map((row) => publicProfile(row, session.player_name))
+    .sort((left, right) => right.totalAssetWon - left.totalAssetWon || left.playerName.localeCompare(right.playerName, "en"))
+    .map((profile, index) => ({ ...profile, rank: index + 1 }));
+  const requested = new URL(request.url).searchParams.get("player");
+  if (requested !== null) {
+    if (!/^[A-Za-z0-9_]{1,16}$/.test(requested)) return json({ error: "invalid_player" }, 400);
+    const profile = profiles.find((item) => item.playerName.toLowerCase() === requested.toLowerCase());
+    return profile ? json({ profile }) : json({ error: "not_found" }, 404);
+  }
+  return json({
+    rankings: profiles.map((profile) => ({
+      rank: profile.rank,
+      playerName: profile.playerName,
+      online: profile.online,
+      mine: profile.mine,
+      totalAssetWon: profile.totalAssetWon,
+      cashWon: profile.cashWon,
+      portfolioWon: profile.portfolioWon,
+      bankWon: profile.bankWon,
+      profitWon: profile.profitWon,
+      positionCount: profile.positionCount,
+      accountCount: profile.accountCount,
+      updatedAt: profile.updatedAt,
+    })),
+    updatedAt: profiles.reduce((latest, item) => Math.max(latest, item.updatedAt), 0),
   });
 }
 
@@ -633,6 +763,7 @@ const worker = {
     if (url.pathname === "/api/patch-notes") return patchNotesApi(request, env);
     if (url.pathname === "/api/market/login") return marketLogin(request, env);
     if (url.pathname === "/api/market/snapshot") return marketSnapshot(request, env);
+    if (url.pathname === "/api/market/rankings") return marketRankings(request, env);
     if (url.pathname === "/api/market/candles") return marketCandles(request, env);
     if (url.pathname === "/api/market/options") return marketOptions(request, env);
     if (url.pathname === "/api/market/community") return marketCommunity(request, env);
