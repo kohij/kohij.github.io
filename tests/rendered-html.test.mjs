@@ -91,6 +91,8 @@ test("renders the device-code securities login", async () => {
   assert.match(marketPage, /종목.*커뮤니티|커뮤니티/);
   assert.match(marketPage, /자산 랭킹/);
   assert.match(marketPage, /포트폴리오/);
+  assert.match(marketPage, /InstrumentIcon/);
+  assert.match(marketPage, /instrument-product-badge/);
   assert.match(marketPage, /보유자 표시/);
   assert.doesNotMatch(marketPage, /게임머니 투자|SECURE GAME LINK|현재 IP/);
   assert.match(stockChart, /CandlestickSeries/);
@@ -105,6 +107,8 @@ test("renders the device-code securities login", async () => {
   assert.match(worker, /bank_deposit/);
   assert.match(worker, /\/api\/market\/community/);
   assert.match(worker, /\/api\/market\/rankings/);
+  assert.match(worker, /\/api\/market\/logo/);
+  assert.match(worker, /assets\.parqet\.com\/logos\/symbol/);
   assert.match(worker, /publicProfile/);
   assert.match(worker, /holder_verified/);
   assert.match(schema, /candles: text\("candles"\)/);

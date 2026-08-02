@@ -59,6 +59,41 @@ const leverageProducts: Record<string, { benchmark: string; multiple: string }> 
   LABU: { benchmark: "미국 바이오", multiple: "+3배" }, LABD: { benchmark: "미국 바이오", multiple: "-3배" },
 };
 
+function instrumentMarket(symbol: string) {
+  return /\.(?:KS|KQ)$/i.test(symbol) ? "KR" : "US";
+}
+
+function instrumentBadge(symbol: string, type: string) {
+  const leverage = leverageProducts[symbol]?.multiple;
+  if (leverage) return leverage.replace("+", "").replace("배", "x");
+  if (type === "LEVERAGED_ETF") return "LEV";
+  if (type === "ETF") return "ETF";
+  if (type === "OPTION_CALL") return "CALL";
+  if (type === "OPTION_PUT") return "PUT";
+  return "";
+}
+
+function InstrumentIcon({ symbol, name, type, market, size = "medium", eager = false }: {
+  symbol: string; name: string; type: string; market?: string; size?: "small" | "medium" | "large"; eager?: boolean;
+}) {
+  const [failed, setFailed] = useState(false);
+  const normalizedSymbol = symbol.toUpperCase();
+  const usesLogo = !type.startsWith("OPTION_");
+  const badge = instrumentBadge(normalizedSymbol, type);
+  const region = market ?? instrumentMarket(normalizedSymbol);
+  const fallback = type.startsWith("OPTION_") ? (type === "OPTION_CALL" ? "C" : "P") : normalizedSymbol.replace(/\..*$/, "").slice(0, 2);
+
+  useEffect(() => setFailed(false), [normalizedSymbol]);
+
+  return <span className={`instrument-logo instrument-logo-${size} ${type.toLowerCase().replaceAll("_", "-")}`} aria-hidden="true">
+    {usesLogo && !failed
+      ? <img src={`/api/market/logo?symbol=${encodeURIComponent(normalizedSymbol)}`} alt="" width={size === "large" ? 50 : size === "small" ? 36 : 42} height={size === "large" ? 50 : size === "small" ? 36 : 42} loading={eager ? "eager" : "lazy"} decoding="async" onError={() => setFailed(true)} />
+      : <span className="instrument-logo-fallback">{fallback}</span>}
+    {badge && <span className="instrument-product-badge">{badge}</span>}
+    {region === "US" && !badge && <span className="instrument-market-badge">US</span>}
+  </span>;
+}
+
 type IconName = "search" | "chart" | "wallet" | "clock" | "logout" | "close" | "bank" | "shield" | "users" | "chevron";
 
 function Icon({ name }: { name: IconName }) {
@@ -418,7 +453,7 @@ export default function MarketPage() {
       {notice && <div className="market-alert terminal-alert" role="status" aria-live="polite">{notice}<button onClick={() => setNotice("")} aria-label="알림 닫기"><Icon name="close" /></button></div>}
 
       {selected && <section className="stock-overview" aria-labelledby="selected-stock-title">
-        <div className="stock-identity"><span className="stock-avatar">{selected.name.slice(0, 1)}</span><div><h1 id="selected-stock-title">{selected.name}</h1><p>{selected.symbol} · {selected.market === "KR" ? "국내" : "해외"} · {instrumentType(selected.type)} <span className={`risk-badge ${highRisk ? "high" : ""}`}>{selectedRisk.level}</span></p></div></div>
+        <div className="stock-identity"><InstrumentIcon symbol={selected.symbol} name={selected.name} type={selected.type} market={selected.market} size="large" eager /><div><h1 id="selected-stock-title">{selected.name}</h1><p>{selected.symbol} · {selected.market === "KR" ? "국내" : "해외"} · {instrumentType(selected.type)} <span className={`risk-badge ${highRisk ? "high" : ""}`}>{selectedRisk.level}</span></p></div></div>
         <div className="stock-price"><strong>{won.format(selected.price_won)}</strong><span className={selected.change_percent >= 0 ? "rise" : "fall"}>{changeAmount >= 0 ? "+" : ""}{won.format(changeAmount)} ({percent.format(selected.change_percent)}%)</span></div>
         <dl><div><dt>보유 수량</dt><dd>{selectedPosition ? `${selectedPosition.quantity}${selectedPosition.unit}` : "-"}</dd></div><div><dt>평가 금액</dt><dd>{selectedPosition ? won.format(selectedPosition.valueWon) : "-"}</dd></div><div><dt>평가 손익</dt><dd className={(selectedPosition?.profitWon ?? 0) >= 0 ? "rise" : "fall"}>{selectedPosition ? `${selectedPosition.profitWon >= 0 ? "+" : ""}${won.format(selectedPosition.profitWon)}` : "-"}</dd></div></dl>
       </section>}
@@ -439,7 +474,7 @@ export default function MarketPage() {
           <div className="asset-filter" role="group" aria-label="상품 유형">{(["ALL", "EQUITY", "ETF", "LEVERAGED_ETF", "OPTION"] as AssetFilter[]).map((value) => <button key={value} className={assetFilter === value ? "active" : ""} onClick={() => setAssetFilter(value)}>{value === "ALL" ? "모든 상품" : value === "OPTION" ? "옵션" : instrumentType(value)}</button>)}</div>
           <div className="quote-list" role="list">
             {filtered.map((item) => <button key={item.symbol} role="listitem" className={selected?.symbol === item.symbol ? "selected" : ""} onClick={() => chooseInstrument(item)}>
-              <span className="quote-name"><i>{item.name.slice(0, 1)}</i><span><b>{item.name}</b><small>{item.symbol} · {instrumentType(item.type)}</small></span></span><span className="price"><b>{won.format(item.price_won)}</b><small className={item.change_percent >= 0 ? "rise" : "fall"}>{percent.format(item.change_percent)}%</small></span>
+              <span className="quote-name"><InstrumentIcon symbol={item.symbol} name={item.name} type={item.type} market={item.market} size="small" /><span><b>{item.name}</b><small>{item.symbol} · {instrumentType(item.type)}</small></span></span><span className="price"><b>{won.format(item.price_won)}</b><small className={item.change_percent >= 0 ? "rise" : "fall"}>{percent.format(item.change_percent)}%</small></span>
             </button>)}
             {!filtered.length && <div className="empty-state"><p>검색 결과가 없습니다.</p><button onClick={registerSearch}>“{query}” 서버 조회</button></div>}
           </div>
@@ -494,7 +529,7 @@ export default function MarketPage() {
       <section className="terminal-panel portfolio-panel" id="portfolio" aria-labelledby="portfolio-title">
         <div className="terminal-panel-head"><div><Icon name="wallet" /><h2 id="portfolio-title">보유 종목</h2></div><span>{positions.length}개</span></div>
         <div className="data-table portfolio-table" role="table"><div className="table-row table-head" role="row"><span>종목</span><span>수량</span><span>평가 금액</span><span>평가 손익</span></div>
-          {positions.length ? positions.map((item) => <button className="table-row" role="row" key={item.symbol} onClick={() => chooseInstrument(instruments.find((stock) => stock.symbol === item.symbol) ?? null)}><span><b>{item.name}</b><small>{item.symbol} · {instrumentType(item.type)}</small></span><span>{item.quantity}{item.unit}</span><span>{won.format(item.valueWon)}</span><span className={item.profitWon >= 0 ? "rise" : "fall"}>{item.profitWon >= 0 ? "+" : ""}{won.format(item.profitWon)}</span></button>) : <div className="empty-state">아직 보유 종목이 없습니다.</div>}
+          {positions.length ? positions.map((item) => <button className="table-row" role="row" key={item.symbol} onClick={() => chooseInstrument(instruments.find((stock) => stock.symbol === item.symbol) ?? null)}><span className="portfolio-instrument"><InstrumentIcon symbol={item.symbol} name={item.name} type={item.type} size="small" /><span><b>{item.name}</b><small>{item.symbol} · {instrumentType(item.type)}</small></span></span><span>{item.quantity}{item.unit}</span><span>{won.format(item.valueWon)}</span><span className={item.profitWon >= 0 ? "rise" : "fall"}>{item.profitWon >= 0 ? "+" : ""}{won.format(item.profitWon)}</span></button>) : <div className="empty-state">아직 보유 종목이 없습니다.</div>}
         </div>
       </section>
 
@@ -546,7 +581,7 @@ export default function MarketPage() {
             <div className="profile-total"><span>총자산</span><strong>{won.format(publicProfile.totalAssetWon)}</strong><small className={publicProfile.profitWon >= 0 ? "rise" : "fall"}>투자 손익 {publicProfile.profitWon >= 0 ? "+" : ""}{won.format(publicProfile.profitWon)}</small></div>
             <div className="allocation-bar" aria-label="자산 구성"><i className="cash" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.cashWon / publicProfile.totalAssetWon * 100 : 0}%` }} /><i className="stocks" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.portfolioWon / publicProfile.totalAssetWon * 100 : 0}%` }} /><i className="bank" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.bankWon / publicProfile.totalAssetWon * 100 : 0}%` }} /></div>
             <dl className="profile-allocation"><div><dt><i className="cash" />현금</dt><dd>{won.format(publicProfile.cashWon)}</dd></div><div><dt><i className="stocks" />투자</dt><dd>{won.format(publicProfile.portfolioWon)}</dd></div><div><dt><i className="bank" />예금 · 적금</dt><dd>{won.format(publicProfile.bankWon)}</dd></div></dl>
-            <div className="profile-section"><h3>포트폴리오 <span>{publicProfile.positions.length}종목</span></h3><div className="profile-holdings">{publicProfile.positions.length ? publicProfile.positions.map((position) => <div key={position.symbol}><span className="holding-avatar">{position.name.slice(0, 1)}</span><span><b>{position.name}</b><small>{position.symbol} · {position.quantity}{position.unit}</small></span><span><b>{won.format(position.valueWon)}</b><small className={position.profitWon >= 0 ? "rise" : "fall"}>{position.profitWon >= 0 ? "+" : ""}{won.format(position.profitWon)}</small></span></div>) : <div className="profile-empty">보유 종목이 없습니다.</div>}</div></div>
+            <div className="profile-section"><h3>포트폴리오 <span>{publicProfile.positions.length}종목</span></h3><div className="profile-holdings">{publicProfile.positions.length ? publicProfile.positions.map((position) => <div key={position.symbol}><InstrumentIcon symbol={position.symbol} name={position.name} type={position.type} size="medium" /><span className="profile-instrument-copy"><b>{position.name}</b><small>{position.symbol} · {position.quantity}{position.unit}</small></span><span className="profile-position-value"><b>{won.format(position.valueWon)}</b><small className={position.profitWon >= 0 ? "rise" : "fall"}>{position.profitWon >= 0 ? "+" : ""}{won.format(position.profitWon)}</small></span></div>) : <div className="profile-empty">보유 종목이 없습니다.</div>}</div></div>
             <div className="profile-section"><h3>예금 · 적금 <span>{publicProfile.accounts.length}개</span></h3><div className="profile-accounts">{publicProfile.accounts.length ? publicProfile.accounts.map((account, index) => <div key={`${account.name}-${account.maturityAt}-${index}`}><span><b>{account.name}</b><small>{dateLabel(account.maturityAt)} 만기 · 이자율 {Math.round(account.rate * 100)}%</small></span><strong>{won.format(account.principalWon)}</strong></div>) : <div className="profile-empty">가입한 상품이 없습니다.</div>}</div></div>
           </>}
         </section>

@@ -65,6 +65,30 @@ function json(data: unknown, status = 200, headers: HeadersInit = {}) {
   return Response.json(data, { status, headers: { "cache-control": "no-store", ...headers } });
 }
 
+async function marketLogo(request: Request): Promise<Response> {
+  if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, { allow: "GET" });
+  const symbol = new URL(request.url).searchParams.get("symbol")?.trim().toUpperCase() ?? "";
+  if (!/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) return json({ error: "invalid_symbol" }, 400);
+
+  try {
+    const upstream = await fetch(`https://assets.parqet.com/logos/symbol/${encodeURIComponent(symbol)}?format=png`, {
+      headers: { accept: "image/png,image/*;q=0.8" }, redirect: "follow",
+    });
+    const contentType = upstream.headers.get("content-type") ?? "";
+    if (!upstream.ok || !contentType.startsWith("image/")) return json({ error: "logo_not_found" }, 404);
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        "cache-control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000",
+        "content-type": contentType,
+        "x-content-type-options": "nosniff",
+      },
+    });
+  } catch {
+    return json({ error: "logo_unavailable" }, 502);
+  }
+}
+
 function base64Bytes(value: string): Uint8Array {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
@@ -761,6 +785,7 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/api/patch-notes") return patchNotesApi(request, env);
+    if (url.pathname === "/api/market/logo") return marketLogo(request);
     if (url.pathname === "/api/market/login") return marketLogin(request, env);
     if (url.pathname === "/api/market/snapshot") return marketSnapshot(request, env);
     if (url.pathname === "/api/market/rankings") return marketRankings(request, env);
