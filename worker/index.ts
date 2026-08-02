@@ -715,8 +715,8 @@ function validOrder(action: string, symbol: string, quantity: string): boolean {
   }
   if (action === "search") return quantity === "";
   if (action === "option") return /^\d{4}-\d{2}-\d{2}\|[0-9]+(?:\.[0-9]{1,3})?\|(call|put)$/.test(quantity);
-  if (action === "bank_savings") return /^(?:7d|30d)$/.test(symbol.toLowerCase()) && /^[0-9]{4,8}$/.test(quantity);
-  if (action === "bank_deposit") return /^(?:30d|90d)$/.test(symbol.toLowerCase()) && /^[0-9]{4,8}$/.test(quantity);
+  if (action === "bank_savings") return /^(?:15m|1h)$/.test(symbol.toLowerCase()) && /^[0-9]{4,8}$/.test(quantity);
+  if (action === "bank_deposit") return /^(?:15m|1h)$/.test(symbol.toLowerCase()) && /^[0-9]{4,8}$/.test(quantity);
   return /^[a-f0-9]{8}$/i.test(symbol) && quantity === "";
 }
 

@@ -23,7 +23,7 @@ type Snapshot = {
 type AssetFilter = "ALL" | "EQUITY" | "ETF" | "LEVERAGED_ETF" | "OPTION";
 type BankProduct = {
   id: string; action: "bank_savings" | "bank_deposit"; term: string; name: string; kind: string;
-  days: number; rate: number; payments: number; description: string;
+  durationMinutes: number; rate: number; payments: number; intervalMinutes: number; description: string;
 };
 type OptionLeg = { last: number | null; bid: number | null; ask: number | null; volume: number | null; openInterest: number | null };
 type OptionContract = { expiry: string; strike: number; call: OptionLeg; put: OptionLeg };
@@ -44,10 +44,10 @@ const integer = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 });
 const percent = new Intl.NumberFormat("ko-KR", { signDisplay: "always", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const optionPrice = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const bankProducts: BankProduct[] = [
-  { id: "savings-7", action: "bank_savings", term: "7D", name: "7일 적금", kind: "매일 납입", days: 7, rate: 0.02, payments: 7, description: "같은 금액을 매일 7회 납입" },
-  { id: "savings-30", action: "bank_savings", term: "30D", name: "30일 적금", kind: "매일 납입", days: 30, rate: 0.10, payments: 30, description: "같은 금액을 매일 30회 납입" },
-  { id: "deposit-30", action: "bank_deposit", term: "30D", name: "30일 예금", kind: "한 번에 예치", days: 30, rate: 0.06, payments: 1, description: "가입할 때 전액 예치" },
-  { id: "deposit-90", action: "bank_deposit", term: "90D", name: "90일 예금", kind: "한 번에 예치", days: 90, rate: 0.20, payments: 1, description: "가입할 때 전액 예치" },
+  { id: "savings-15m", action: "bank_savings", term: "15M", name: "15분 적금", kind: "5분마다 납입", durationMinutes: 15, rate: 0.05, payments: 3, intervalMinutes: 5, description: "5분 간격으로 총 3회" },
+  { id: "savings-1h", action: "bank_savings", term: "1H", name: "1시간 적금", kind: "10분마다 납입", durationMinutes: 60, rate: 0.15, payments: 6, intervalMinutes: 10, description: "10분 간격으로 총 6회" },
+  { id: "deposit-15m", action: "bank_deposit", term: "15M", name: "15분 예금", kind: "한 번에 예치", durationMinutes: 15, rate: 0.03, payments: 1, intervalMinutes: 0, description: "15분 후 원금과 함께 지급" },
+  { id: "deposit-1h", action: "bank_deposit", term: "1H", name: "1시간 예금", kind: "한 번에 예치", durationMinutes: 60, rate: 0.12, payments: 1, intervalMinutes: 0, description: "1시간 후 원금과 함께 지급" },
 ];
 const leverageProducts: Record<string, { benchmark: string; multiple: string }> = {
   TQQQ: { benchmark: "나스닥100", multiple: "+3배" }, SQQQ: { benchmark: "나스닥100", multiple: "-3배" },
@@ -142,6 +142,17 @@ function stanceLabel(stance: string) {
 
 function dateLabel(timestamp: number) {
   return timestamp > 0 ? new Date(timestamp).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "-";
+}
+
+function bankTimeLabel(timestamp: number) {
+  if (timestamp <= 0) return "-";
+  const remaining = timestamp - Date.now();
+  if (remaining <= 0) return "처리 중";
+  const minutes = Math.max(1, Math.ceil(remaining / 60_000));
+  if (minutes < 60) return `${minutes}분 남음`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? `${hours}시간 ${rest}분 남음` : `${hours}시간 남음`;
 }
 
 function compactQuantity(value: number) {
@@ -588,19 +599,19 @@ export default function MarketPage() {
       <section className="terminal-panel banking-workspace" id="banking" aria-labelledby="bank-title">
         <div className="terminal-panel-head"><div><Icon name="bank" /><h2 id="bank-title">예금 · 적금</h2></div><span>가입 계좌 {accounts.length}개</span></div>
         <div className="banking-grid">
-          <div className="bank-products" role="radiogroup" aria-label="예금 적금 상품">{bankProducts.map((product) => <button key={product.id} type="button" role="radio" aria-checked={bankProductId === product.id} className={bankProductId === product.id ? "selected" : ""} onClick={() => setBankProductId(product.id)}><span><small>{product.kind}</small><b>{product.name}</b><em>{product.description}</em></span><strong>{Math.round(product.rate * 100)}<small>%</small><em>만기 이자율</em></strong></button>)}</div>
+          <div className="bank-products" role="radiogroup" aria-label="예금 적금 상품">{bankProducts.map((product) => <button key={product.id} type="button" role="radio" aria-checked={bankProductId === product.id} className={bankProductId === product.id ? "selected" : ""} onClick={() => setBankProductId(product.id)}><span><small>{product.kind}</small><b>{product.name}</b><em>{product.description}</em></span><strong>{Math.round(product.rate * 100)}<small>%</small><em>만기 수익률</em></strong></button>)}</div>
           <div className="bank-calculator">
             <div><span>선택 상품</span><strong>{selectedBank.name}</strong></div>
-            <label htmlFor="bank-amount">{selectedBank.action === "bank_savings" ? "매일 납입액" : "예치 금액"}<div className="input-with-unit"><input id="bank-amount" inputMode="numeric" value={bankAmount} onChange={(event) => setBankAmount(event.target.value.replace(/[^0-9]/g, "").slice(0, 8))} /><span>원</span></div></label>
+            <label htmlFor="bank-amount">{selectedBank.action === "bank_savings" ? "회차 납입액" : "예치 금액"}<div className="input-with-unit"><input id="bank-amount" inputMode="numeric" value={bankAmount} onChange={(event) => setBankAmount(event.target.value.replace(/[^0-9]/g, "").slice(0, 8))} /><span>원</span></div></label>
             {!bankAmountValid && <p className="field-error" role="alert">1,000원~10,000,000원을 입력하세요.</p>}
-            <dl><div><dt>예상 원금</dt><dd>{won.format(expectedPrincipal)}</dd></div><div><dt>예상 이자</dt><dd>+{won.format(expectedInterest)}</dd></div><div className="total"><dt>예상 만기금액</dt><dd>{won.format(expectedPrincipal + expectedInterest)}</dd></div><div><dt>가입 시 출금</dt><dd>{won.format(bankAmountNumber)}</dd></div></dl>
-            <p>{selectedBank.action === "bank_savings" ? `가입 시 1회차 출금 후 매일 자동 납입합니다. 총 ${selectedBank.payments}회.` : "가입 시 전액을 한 번에 예치합니다."} 중도해지 시 원금의 1%가 차감됩니다.</p>
+            <dl><div><dt>예상 원금</dt><dd>{won.format(expectedPrincipal)}</dd></div><div><dt>예상 수익</dt><dd>+{won.format(expectedInterest)}</dd></div><div className="total"><dt>예상 만기금액</dt><dd>{won.format(expectedPrincipal + expectedInterest)}</dd></div><div><dt>가입 시 출금</dt><dd>{won.format(bankAmountNumber)}</dd></div></dl>
+            <p>{selectedBank.action === "bank_savings" ? `가입 시 1회차를 내고 ${selectedBank.intervalMinutes}분마다 자동 납입합니다. 총 ${selectedBank.payments}회.` : `가입 시 전액을 한 번에 예치합니다. ${selectedBank.durationMinutes}분 후 만기입니다.`} 중도해지 시 원금의 1%가 차감됩니다.</p>
             <button className="secondary-button bank-subscribe" type="button" disabled={!bankAmountValid || ordering || !snapshot.player?.online || connection !== "연결됨"} onClick={() => void subscribeBank()}>{ordering ? "처리 중" : `${selectedBank.name} 가입`}</button>
           </div>
           <div className="account-list"><h3>내 계좌</h3>{accounts.length ? accounts.map((account) => {
             const interest = Math.floor(account.principalWon * account.rate);
             const progress = account.type === "SAVINGS" ? `${account.paidCount}/${account.totalPayments}회 납입` : "예치 완료";
-            return <article key={account.id}><div className="account-top"><span><small>{progress} · {account.id}</small><b>{account.name}</b></span><strong>{won.format(account.principalWon)}</strong></div><div className="account-progress"><i style={{ width: `${Math.min(100, account.paidCount / Math.max(1, account.totalPayments) * 100)}%` }} /></div><dl><div><dt>만기</dt><dd>{dateLabel(account.maturityAt)}</dd></div><div><dt>예상 만기금액</dt><dd>{won.format(account.principalWon + interest)}</dd></div>{account.type === "SAVINGS" && account.paidCount < account.totalPayments && <div><dt>다음 납입</dt><dd>{dateLabel(account.nextPaymentAt)} · {won.format(account.installmentWon)}</dd></div>}</dl><div className="account-actions">{cancelAccountId === account.id && <span role="alert">지금 해지하면 원금의 1%가 차감됩니다.</span>}<button type="button" className={cancelAccountId === account.id ? "confirm" : ""} onClick={() => void cancelBank(account)} disabled={ordering}>{cancelAccountId === account.id ? "해지 확정" : "중도해지"}</button>{cancelAccountId === account.id && <button type="button" onClick={() => setCancelAccountId("")}>취소</button>}</div></article>;
+            return <article key={account.id}><div className="account-top"><span><small>{progress} · {account.id}</small><b>{account.name}</b></span><strong>{won.format(account.principalWon)}</strong></div><div className="account-progress"><i style={{ width: `${Math.min(100, account.paidCount / Math.max(1, account.totalPayments) * 100)}%` }} /></div><dl><div><dt>만기</dt><dd>{bankTimeLabel(account.maturityAt)}</dd></div><div><dt>예상 만기금액</dt><dd>{won.format(account.principalWon + interest)}</dd></div>{account.type === "SAVINGS" && account.paidCount < account.totalPayments && <div><dt>다음 납입</dt><dd>{bankTimeLabel(account.nextPaymentAt)} · {won.format(account.installmentWon)}</dd></div>}</dl><div className="account-actions">{cancelAccountId === account.id && <span role="alert">지금 해지하면 원금의 1%가 차감됩니다.</span>}<button type="button" className={cancelAccountId === account.id ? "confirm" : ""} onClick={() => void cancelBank(account)} disabled={ordering}>{cancelAccountId === account.id ? "해지 확정" : "중도해지"}</button>{cancelAccountId === account.id && <button type="button" onClick={() => setCancelAccountId("")}>취소</button>}</div></article>;
           }) : <div className="empty-state">가입한 상품이 없습니다.</div>}</div>
         </div>
       </section>
@@ -614,7 +625,7 @@ export default function MarketPage() {
             <div className="allocation-bar" aria-label="자산 구성"><i className="cash" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.cashWon / publicProfile.totalAssetWon * 100 : 0}%` }} /><i className="stocks" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.portfolioWon / publicProfile.totalAssetWon * 100 : 0}%` }} /><i className="bank" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.bankWon / publicProfile.totalAssetWon * 100 : 0}%` }} /></div>
             <dl className="profile-allocation"><div><dt><i className="cash" />현금</dt><dd>{won.format(publicProfile.cashWon)}</dd></div><div><dt><i className="stocks" />투자</dt><dd>{won.format(publicProfile.portfolioWon)}</dd></div><div><dt><i className="bank" />예금 · 적금</dt><dd>{won.format(publicProfile.bankWon)}</dd></div></dl>
             <div className="profile-section"><h3>포트폴리오 <span>{publicProfile.positions.length}종목</span></h3><div className="profile-holdings">{publicProfile.positions.length ? publicProfile.positions.map((position) => <div key={position.symbol}><InstrumentIcon symbol={position.symbol} name={position.name} type={position.type} size="medium" /><span className="profile-instrument-copy"><b>{position.name}</b><small>{position.symbol} · {position.quantity}{position.unit}</small></span><span className="profile-position-value"><b>{won.format(position.valueWon)}</b><small className={position.profitWon >= 0 ? "rise" : "fall"}>{position.profitWon >= 0 ? "+" : ""}{won.format(position.profitWon)}</small></span></div>) : <div className="profile-empty">보유 종목이 없습니다.</div>}</div></div>
-            <div className="profile-section"><h3>예금 · 적금 <span>{publicProfile.accounts.length}개</span></h3><div className="profile-accounts">{publicProfile.accounts.length ? publicProfile.accounts.map((account, index) => <div key={`${account.name}-${account.maturityAt}-${index}`}><span><b>{account.name}</b><small>{dateLabel(account.maturityAt)} 만기 · 이자율 {Math.round(account.rate * 100)}%</small></span><strong>{won.format(account.principalWon)}</strong></div>) : <div className="profile-empty">가입한 상품이 없습니다.</div>}</div></div>
+            <div className="profile-section"><h3>예금 · 적금 <span>{publicProfile.accounts.length}개</span></h3><div className="profile-accounts">{publicProfile.accounts.length ? publicProfile.accounts.map((account, index) => <div key={`${account.name}-${account.maturityAt}-${index}`}><span><b>{account.name}</b><small>{bankTimeLabel(account.maturityAt)} · 수익률 {Math.round(account.rate * 100)}%</small></span><strong>{won.format(account.principalWon)}</strong></div>) : <div className="profile-empty">가입한 상품이 없습니다.</div>}</div></div>
           </>}
         </section>
       </div>}
