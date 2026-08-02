@@ -7,6 +7,8 @@ export const patchNotes = sqliteTable("patch_notes", {
   title: text("title").notNull(),
   summary: text("summary").notNull(),
   changes: text("changes").notNull(),
+  reason: text("reason").notNull().default(""),
+  evidence: text("evidence").notNull().default("[]"),
   position: integer("position").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

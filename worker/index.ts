@@ -23,7 +23,15 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
-type PatchNote = { date: string; type: string; title: string; summary: string; changes: string[] };
+type PatchNote = {
+  date: string;
+  type: string;
+  title: string;
+  summary: string;
+  changes: string[];
+  reason: string;
+  evidence: string[];
+};
 type MarketSession = { id: string; player_uuid: string; player_name: string; ip: string; expires_at: number };
 type YahooChartResult = {
   meta?: { regularMarketPrice?: number };
@@ -172,15 +180,22 @@ function validNote(value: unknown): value is PatchNote {
     typeof note.title === "string" && note.title.length >= 1 && note.title.length <= 100 &&
     typeof note.summary === "string" && note.summary.length >= 1 && note.summary.length <= 300 &&
     Array.isArray(note.changes) && note.changes.length <= 20 &&
-    note.changes.every((change) => typeof change === "string" && change.length >= 1 && change.length <= 240);
+    note.changes.every((change) => typeof change === "string" && change.length >= 1 && change.length <= 240) &&
+    typeof note.reason === "string" && note.reason.length >= 1 && note.reason.length <= 600 &&
+    Array.isArray(note.evidence) && note.evidence.length <= 12 &&
+    note.evidence.every((item) => typeof item === "string" && item.length >= 1 && item.length <= 360);
 }
 
 async function patchNotesApi(request: Request, env: Env): Promise<Response> {
   if (request.method === "GET") {
     const result = await env.DB.prepare(
-      `SELECT date, type, title, summary, changes FROM patch_notes ORDER BY position ASC LIMIT 120`,
-    ).all<{ date: string; type: string; title: string; summary: string; changes: string }>();
-    return json({ notes: result.results.map((row) => ({ ...row, changes: JSON.parse(row.changes) })) });
+      `SELECT date, type, title, summary, changes, reason, evidence FROM patch_notes ORDER BY position ASC LIMIT 120`,
+    ).all<{ date: string; type: string; title: string; summary: string; changes: string; reason: string; evidence: string }>();
+    return json({ notes: result.results.map((row) => ({
+      ...row,
+      changes: JSON.parse(row.changes),
+      evidence: JSON.parse(row.evidence),
+    })) });
   }
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   const supplied = request.headers.get("authorization");
@@ -196,10 +211,10 @@ async function patchNotesApi(request: Request, env: Env): Promise<Response> {
   const now = new Date().toISOString();
   const statements = [env.DB.prepare("DELETE FROM patch_notes")];
   notes.forEach((note: PatchNote, position) => statements.push(env.DB.prepare(
-    `INSERT INTO patch_notes (id, date, type, title, summary, changes, position, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO patch_notes (id, date, type, title, summary, changes, reason, evidence, position, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).bind(`${note.date}|${note.type}|${note.title}`, note.date, note.type, note.title,
-    note.summary, JSON.stringify(note.changes), position, now)));
+    note.summary, JSON.stringify(note.changes), note.reason, JSON.stringify(note.evidence), position, now)));
   await env.DB.batch(statements);
   return json({ ok: true, count: notes.length });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   brews,
   currentSystems,
@@ -11,6 +11,8 @@ import {
   type Rarity,
 } from "./content";
 import patchNotes from "./patch-notes.json";
+
+type PatchNote = (typeof patchNotes)[number];
 
 const address = "taekbyeong-709371ef.nip.io";
 const fishFilters: Array<"전체" | Rarity> = [
@@ -64,6 +66,18 @@ export default function Home() {
     "전체",
   );
   const [questFilter, setQuestFilter] = useState("전체");
+  const [livePatchNotes, setLivePatchNotes] = useState<PatchNote[]>(patchNotes);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/patch-notes", { cache: "no-store", signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("patch notes unavailable")))
+      .then((payload: { notes?: PatchNote[] }) => {
+        if (Array.isArray(payload.notes) && payload.notes.length > 0) setLivePatchNotes(payload.notes);
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
   const visibleFish = useMemo(
     () =>
       fish.filter(
@@ -595,7 +609,7 @@ export default function Home() {
           <a href="#top">맨 위로</a>
         </div>
         <div className="patch-toc" aria-label="패치노트 바로가기">
-          {patchNotes.map((note, index) => (
+          {livePatchNotes.map((note, index) => (
             <a key={note.title} href={`#patch-${index + 1}`}>
               <span>{String(index + 1).padStart(2, "0")}</span>
               {note.type}
@@ -603,7 +617,7 @@ export default function Home() {
           ))}
         </div>
         <div className="patch-list">
-          {patchNotes.map((note, index) => (
+          {livePatchNotes.map((note, index) => (
             <article key={note.title} id={`patch-${index + 1}`}>
               <header>
                 <div className="patch-number">{String(index + 1).padStart(2, "0")}</div>
