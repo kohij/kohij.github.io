@@ -69,6 +69,30 @@ test("ships required social and server assets", async () => {
   await assert.rejects(access(new URL("app/_sites-preview/SkeletonPreview.tsx", root)));
 });
 
+test("ships a dedicated Taekbyeong Securities brand and install metadata", async () => {
+  await Promise.all([
+    access(new URL("public/securities-favicon-32.png", root)),
+    access(new URL("public/securities-favicon-64.png", root)),
+    access(new URL("public/securities-apple-touch-icon.png", root)),
+    access(new URL("public/securities-icon-192.png", root)),
+    access(new URL("public/securities-icon.png", root)),
+    access(new URL("public/securities.webmanifest", root)),
+  ]);
+
+  const [marketLayout, marketPage, manifest] = await Promise.all([
+    readFile(new URL("app/market/layout.tsx", root), "utf8"),
+    readFile(new URL("app/market/page.tsx", root), "utf8"),
+    readFile(new URL("public/securities.webmanifest", root), "utf8"),
+  ]);
+
+  assert.match(marketLayout, /securities-favicon-32\.png/);
+  assert.match(marketLayout, /securities-apple-touch-icon\.png/);
+  assert.match(marketLayout, /securities\.webmanifest/);
+  assert.match(marketPage, /securities-favicon-64\.png/);
+  assert.match(marketPage, /securities-icon-192\.png/);
+  assert.equal(JSON.parse(manifest).start_url, "/market");
+});
+
 test("renders the device-code securities login", async () => {
   const [marketPage, stockChart, worker, schema, migration, communityMigration, packageJson] = await Promise.all([
     readFile(new URL("app/market/page.tsx", root), "utf8"),

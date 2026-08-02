@@ -419,9 +419,9 @@ export default function MarketPage() {
 
   if (!snapshot.authenticated) return (
     <main className="market-shell market-login">
-      <Link className="market-wordmark" href="/"><span className="brand-mark">T</span><b>택병증권</b></Link>
+      <Link className="market-wordmark" href="/"><span className="brand-mark"><img src="/securities-favicon-64.png" alt="" width="32" height="32" /></span><b>택병증권</b></Link>
       <section className="login-card">
-        <span className="login-symbol"><Icon name="chart" /></span><h1>택병증권 로그인</h1>
+        <span className="login-symbol"><img src="/securities-icon-192.png" alt="" width="52" height="52" /></span><h1>택병증권 로그인</h1>
         <p>게임에서 <code>/주식</code>을 입력한 뒤 표시된 코드를 입력하세요.</p>
         <form className="device-login-form" onSubmit={submitLogin}>
           <label htmlFor="login-code">로그인 코드</label>
@@ -437,7 +437,7 @@ export default function MarketPage() {
   return (
     <main className="market-shell terminal-shell">
       <header className="market-header">
-        <Link className="market-wordmark" href="/"><span className="brand-mark">T</span><b>택병증권</b></Link>
+        <Link className="market-wordmark" href="/"><span className="brand-mark"><img src="/securities-favicon-64.png" alt="" width="32" height="32" /></span><b>택병증권</b></Link>
         <nav aria-label="증권 메뉴"><a className="active" href="#quotes">종목</a><a href="#ranking">랭킹</a><a href="#portfolio">내 자산</a><a href="#banking">예금 · 적금</a></nav>
         <label className="top-search"><Icon name="search" /><span className="sr-only">종목 검색</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="종목명 또는 심볼 검색" /></label>
         <div className="market-status"><i className={connection === "연결됨" ? "live" : ""} />{connection}</div>

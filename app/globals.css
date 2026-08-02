@@ -83,7 +83,8 @@ a {
 }
 .market-wordmark { display: inline-flex; align-items: center; gap: 9px; width: max-content; }
 .market-wordmark b { font-size: 17px; letter-spacing: -0.045em; }
-.brand-mark { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 9px 9px 9px 3px; background: #fff; color: #121215; font-size: 13px; font-weight: 900; }
+.brand-mark { display: block; flex: none; width: 32px; height: 32px; overflow: hidden; border-radius: 9px; background: #0b1113; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.28); }
+.brand-mark img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .market-header nav { display: flex; align-items: stretch; height: 58px; }
 .market-header nav a, .market-header nav button { display: grid; place-items: center; min-width: 62px; padding: 0 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--market-muted); font-size: 13px; font-weight: 700; }
 .market-header nav .active, .market-header nav a:hover, .market-header nav a:focus-visible { border-bottom-color: #fff; color: #fff; }
@@ -481,8 +482,8 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
 .market-login { display: grid; align-content: start; gap: 72px; width: min(1180px, 100%); background: var(--market-bg); }
 .market-login > .market-wordmark { padding-top: 24px; }
 .login-card { justify-self: center; display: grid; justify-items: center; width: min(480px, 100%); padding: 44px 32px; border: 1px solid var(--market-line); border-radius: 18px; background: var(--market-panel); text-align: center; }
-.login-symbol { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 20px; border-radius: 15px; background: rgba(49, 130, 246, 0.15); color: var(--market-blue-soft); }
-.login-symbol svg { width: 25px; height: 25px; }
+.login-symbol { display: block; width: 52px; height: 52px; margin-bottom: 20px; overflow: hidden; border-radius: 15px; background: #0b1113; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 8px 24px rgba(0,0,0,0.3); }
+.login-symbol img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .login-card h1 { margin: 0; font-size: clamp(27px, 6vw, 36px); letter-spacing: -0.055em; }
 .login-card > p { max-width: 390px; margin: 13px 0 0; color: var(--market-muted); font-size: 13px; line-height: 1.7; }
 .login-card code { color: #fff; }
