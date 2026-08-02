@@ -1,7 +1,10 @@
 택병서버 공개 다운로드
 
+- taekbyeong-fmm-companions-ui-1.20.1-v15.zip
+  현재 Forge 1.20.1 필수 통합 리소스팩. Quaternius CC0 동료 12종과 DeluxeMenus 실물 아이콘을 포함합니다.
+
 - taekbyeong-fmm-companions-ui-1.20.1-v13.zip
-  현재 Forge 1.20.1 필수 통합 리소스팩. 소형 2행 표제판의 투명 여백 폭까지 고정해 글자를 정확히 가운데 정렬합니다.
+  이전 동료 모델을 포함한 구버전입니다.
 
 - taekbyeong-fmm-companions-ui-1.20.1-v12.zip
   표제 투명 여백 폭 고정 전 이전 팩입니다.
@@ -34,7 +37,7 @@
   고대 두루마리 공지 시험팩입니다. `taekbyeong:scroll` 독립 폰트만 추가하며 기본 폰트를 덮어쓰지 않습니다. 모든 비트맵 글리프는 1.20.1 폰트 아틀라스 크기 이하(240x14px)입니다.
 
 - taekbyeong-ui-1.20.1-v1.zip
-  이전 UI 전용 리소스팩. 서버 접속용으로는 통합 v13을 사용합니다.
+  이전 UI 전용 리소스팩. 서버 접속용으로는 통합 v15를 사용합니다.
 
 - taekbyeong-modelengine-free-pets-v1.zip
   사용 중지한 이전 ModelEngine blueprints 4종입니다.
