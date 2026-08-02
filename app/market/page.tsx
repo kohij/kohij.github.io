@@ -254,11 +254,10 @@ export default function MarketPage() {
     return () => { stopped = true; clearInterval(timer); };
   }, [snapshot.authenticated, applySnapshot]);
 
-  const loadCommunity = useCallback(async (symbol: string) => {
-    if (!symbol) return;
+  const loadCommunity = useCallback(async () => {
     setCommunityLoading(true);
     try {
-      const response = await fetch(`/api/market/community?symbol=${encodeURIComponent(symbol)}`, { cache: "no-store" });
+      const response = await fetch("/api/market/community", { cache: "no-store" });
       const result = await response.json() as { posts?: CommunityPost[] };
       setCommunityPosts(response.ok ? result.posts ?? [] : []);
     } catch { setCommunityPosts([]); }
@@ -266,10 +265,10 @@ export default function MarketPage() {
   }, []);
 
   useEffect(() => {
-    if (!snapshot.authenticated || !selected?.symbol) return;
-    const timer = window.setTimeout(() => void loadCommunity(selected.symbol), 0);
+    if (!snapshot.authenticated) return;
+    const timer = window.setTimeout(() => void loadCommunity(), 0);
     return () => window.clearTimeout(timer);
-  }, [snapshot.authenticated, selected?.symbol, loadCommunity]);
+  }, [snapshot.authenticated, loadCommunity]);
 
   const loadRankings = useCallback(async () => {
     setRankingsLoading(true);
@@ -418,19 +417,19 @@ export default function MarketPage() {
       const response = await fetch("/api/market/community", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ symbol: selected.symbol, body: communityBody, stance: communityStance }) });
       const result = await response.json() as { message?: string };
       setNotice(result.message ?? (response.ok ? "의견을 올렸습니다." : "의견을 올리지 못했습니다."));
-      if (response.ok) { setCommunityBody(""); await loadCommunity(selected.symbol); }
+      if (response.ok) { setCommunityBody(""); await loadCommunity(); }
     } catch { setNotice("커뮤니티 연결을 확인해 주세요."); }
     finally { setCommunityLoading(false); }
   };
 
   const reactCommunityPost = async (id: string) => {
     const response = await fetch("/api/market/community/react", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id }) });
-    if (response.ok && selected) await loadCommunity(selected.symbol);
+    if (response.ok) await loadCommunity();
   };
 
   const deleteCommunityPost = async (id: string) => {
     const response = await fetch("/api/market/community", { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ id }) });
-    if (response.ok && selected) { setNotice("글을 삭제했습니다."); await loadCommunity(selected.symbol); }
+    if (response.ok) { setNotice("글을 삭제했습니다."); await loadCommunity(); }
   };
 
   const logout = async () => { await fetch("/api/market/login", { method: "DELETE" }); location.reload(); };
@@ -525,7 +524,7 @@ export default function MarketPage() {
       </div>
 
       <section className="terminal-panel community-panel" id="community" aria-labelledby="community-title">
-        <div className="terminal-panel-head"><div><Icon name="wallet" /><h2 id="community-title">{selected?.name ?? "종목"} 커뮤니티</h2></div><span>{communityPosts.length}개 의견</span></div>
+        <div className="terminal-panel-head"><div><Icon name="wallet" /><h2 id="community-title">커뮤니티 새글</h2></div><span>전체 종목 · 최신순 {communityPosts.length}개</span></div>
         <div className="community-layout">
           <form className="community-compose" onSubmit={submitCommunityPost}>
             <label htmlFor="community-body">{selected?.symbol ?? "종목"}에 대한 생각</label>
@@ -537,7 +536,7 @@ export default function MarketPage() {
             {communityLoading && !communityPosts.length ? <div className="empty-state">의견을 불러오는 중입니다.</div> : communityPosts.length ? communityPosts.map((post) => <article key={post.id}>
               <header><button className="community-avatar" type="button" onClick={() => void openPublicProfile(post.playerName)} aria-label={`${post.playerName} 포트폴리오 보기`}>{post.playerName.slice(0, 1).toUpperCase()}</button><div><button className="community-profile-link" type="button" onClick={() => void openPublicProfile(post.playerName)}>{post.playerName}</button><small>{new Date(post.createdAt).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</small></div><span className={`stance ${post.stance}`}>{stanceLabel(post.stance)}</span>{Boolean(post.holderVerified) && <span className="holder-badge">보유자</span>}</header>
               <p>{post.body}</p>
-              <footer><button type="button" className={post.reacted ? "reacted" : ""} onClick={() => void reactCommunityPost(post.id)} aria-pressed={Boolean(post.reacted)}>공감 {post.reactionCount}</button>{Boolean(post.mine) && <button type="button" className="delete-post" onClick={() => void deleteCommunityPost(post.id)}>삭제</button>}</footer>
+              <footer><button type="button" className="community-symbol" onClick={() => setSelected(snapshot.instruments?.find((item) => item.symbol === post.symbol) ?? selected)} aria-label={`${post.symbol} 종목 선택`}>{post.symbol}</button><button type="button" className={post.reacted ? "reacted" : ""} onClick={() => void reactCommunityPost(post.id)} aria-pressed={Boolean(post.reacted)}>공감 {post.reactionCount}</button>{Boolean(post.mine) && <button type="button" className="delete-post" onClick={() => void deleteCommunityPost(post.id)}>삭제</button>}</footer>
             </article>) : <div className="empty-state">아직 의견이 없습니다. 첫 의견을 남겨보세요.</div>}
           </div>
         </div>

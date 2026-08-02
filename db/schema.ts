@@ -80,6 +80,7 @@ export const marketCommunityPosts = sqliteTable("market_community_posts", {
   holderVerified: integer("holder_verified").notNull(),
   createdAt: integer("created_at").notNull(),
 }, (table) => [
+  index("market_community_created_idx").on(table.createdAt),
   index("market_community_symbol_idx").on(table.symbol, table.createdAt),
   index("market_community_player_idx").on(table.playerUuid, table.createdAt),
 ]);

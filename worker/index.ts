@@ -472,8 +472,9 @@ async function marketCommunity(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   if (request.method === "GET") {
     const symbol = (url.searchParams.get("symbol") ?? "").toUpperCase();
-    if (!/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) return json({ error: "invalid_symbol" }, 400);
-    const posts = await env.DB.prepare(
+    if (symbol && !/^[A-Z0-9.^=-]{1,32}$/.test(symbol)) return json({ error: "invalid_symbol" }, 400);
+    const symbolFilter = symbol ? "WHERE p.symbol = ?" : "";
+    const statement = env.DB.prepare(
       `SELECT p.id, p.player_name AS playerName, p.symbol, p.body, p.stance,
         p.holder_verified AS holderVerified, p.created_at AS createdAt,
         COUNT(r.player_uuid) AS reactionCount,
@@ -481,10 +482,13 @@ async function marketCommunity(request: Request, env: Env): Promise<Response> {
         CASE WHEN p.player_uuid = ? THEN 1 ELSE 0 END AS mine
        FROM market_community_posts p
        LEFT JOIN market_community_reactions r ON r.post_id = p.id
-       WHERE p.symbol = ?
+       ${symbolFilter}
        GROUP BY p.id ORDER BY p.created_at DESC LIMIT 60`,
-    ).bind(session.player_uuid, session.player_uuid, symbol).all<Record<string, unknown>>();
-    return json({ symbol, posts: posts.results });
+    );
+    const posts = symbol
+      ? await statement.bind(session.player_uuid, session.player_uuid, symbol).all<Record<string, unknown>>()
+      : await statement.bind(session.player_uuid, session.player_uuid).all<Record<string, unknown>>();
+    return json({ symbol: symbol || null, posts: posts.results });
   }
   if (!sameOrigin(request)) return json({ error: "invalid_origin" }, 403);
   let body: Record<string, unknown>;

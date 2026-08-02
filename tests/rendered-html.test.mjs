@@ -94,13 +94,14 @@ test("ships a dedicated Taekbyeong Securities brand and install metadata", async
 });
 
 test("renders the device-code securities login", async () => {
-  const [marketPage, stockChart, worker, schema, migration, communityMigration, packageJson] = await Promise.all([
+  const [marketPage, stockChart, worker, schema, migration, communityMigration, communityGlobalMigration, packageJson] = await Promise.all([
     readFile(new URL("app/market/page.tsx", root), "utf8"),
     readFile(new URL("app/market/StockChart.tsx", root), "utf8"),
     readFile(new URL("worker/index.ts", root), "utf8"),
     readFile(new URL("db/schema.ts", root), "utf8"),
     readFile(new URL("drizzle/0002_market_candles.sql", root), "utf8"),
     readFile(new URL("drizzle/0003_market_community.sql", root), "utf8"),
+    readFile(new URL("drizzle/0004_market_community_global.sql", root), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
   ]);
   assert.match(marketPage, /택병증권/);
@@ -119,6 +120,9 @@ test("renders the device-code securities login", async () => {
   assert.match(marketPage, /bankTimeLabel/);
   assert.match(marketPage, /중도해지/);
   assert.match(marketPage, /종목.*커뮤니티|커뮤니티/);
+  assert.match(marketPage, /커뮤니티 새글/);
+  assert.match(marketPage, /전체 종목 · 최신순/);
+  assert.match(marketPage, /fetch\("\/api\/market\/community", \{ cache: "no-store" \}\)/);
   assert.match(marketPage, /자산 랭킹/);
   assert.match(marketPage, /포트폴리오/);
   assert.match(marketPage, /InstrumentIcon/);
@@ -140,6 +144,7 @@ test("renders the device-code securities login", async () => {
   assert.match(worker, /bank_deposit/);
   assert.match(worker, /15m\|1h/);
   assert.match(worker, /\/api\/market\/community/);
+  assert.match(worker, /symbol \? "WHERE p\.symbol = \?" : ""/);
   assert.match(worker, /\/api\/market\/rankings/);
   assert.match(worker, /\/api\/market\/logo/);
   assert.match(worker, /assets\.parqet\.com\/logos\/symbol/);
@@ -149,5 +154,6 @@ test("renders the device-code securities login", async () => {
   assert.match(migration, /ALTER TABLE `market_instruments` ADD `candles`/);
   assert.match(communityMigration, /CREATE TABLE `market_community_posts`/);
   assert.match(communityMigration, /market_community_reactions/);
+  assert.match(communityGlobalMigration, /market_community_created_idx/);
   assert.match(packageJson, /lightweight-charts/);
 });
