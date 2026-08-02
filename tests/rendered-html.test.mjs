@@ -147,6 +147,10 @@ test("renders the device-code securities login", async () => {
   assert.match(worker, /15m\|1h/);
   assert.match(worker, /\/api\/market\/community/);
   assert.match(worker, /symbol \? "WHERE p\.symbol = \?" : ""/);
+  assert.match(worker, /'community_notice'/);
+  assert.match(worker, /인게임 커뮤니티 알림 대기/);
+  assert.match(worker, /noticeCutoff/);
+  assert.match(worker, /action <> 'community_notice'/);
   assert.match(worker, /\/api\/market\/rankings/);
   assert.match(worker, /\/api\/market\/logo/);
   assert.match(worker, /assets\.parqet\.com\/logos\/symbol/);

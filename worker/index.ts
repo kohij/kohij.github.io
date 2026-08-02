@@ -258,7 +258,8 @@ async function marketSnapshot(request: Request, env: Env): Promise<Response> {
     price_won: number; change_percent: number; candles: string; updated_at: number }>();
   const commands = await env.DB.prepare(
     `SELECT id, action, symbol, quantity, status, message, created_at
-       FROM market_commands WHERE player_uuid = ? ORDER BY created_at DESC LIMIT 12`,
+       FROM market_commands WHERE player_uuid = ? AND action <> 'community_notice'
+       ORDER BY created_at DESC LIMIT 12`,
   ).bind(session.player_uuid).all();
   return json({
     authenticated: true,
@@ -541,10 +542,16 @@ async function marketCommunity(request: Request, env: Env): Promise<Response> {
     } catch { holderVerified = 0; }
     const id = crypto.randomUUID();
     const now = Date.now();
-    await env.DB.prepare(
-      `INSERT INTO market_community_posts (id, player_uuid, player_name, symbol, body, stance, holder_verified, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).bind(id, session.player_uuid, session.player_name, symbol, content, stance, holderVerified, now).run();
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO market_community_posts (id, player_uuid, player_name, symbol, body, stance, holder_verified, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).bind(id, session.player_uuid, session.player_name, symbol, content, stance, holderVerified, now),
+      env.DB.prepare(
+        `INSERT INTO market_commands (id, session_id, player_uuid, action, symbol, quantity, status, message, created_at, updated_at)
+         VALUES (?, ?, ?, 'community_notice', ?, ?, 'pending', '인게임 커뮤니티 알림 대기', ?, ?)`,
+      ).bind(id, session.id, session.player_uuid, symbol, content, now, now),
+    ]);
     return json({ ok: true, id, message: "의견을 올렸습니다." }, 201);
   }
   if (request.method === "DELETE") {
@@ -555,6 +562,9 @@ async function marketCommunity(request: Request, env: Env): Promise<Response> {
     ).bind(id, session.player_uuid).run();
     if ((deleted.meta.changes ?? 0) !== 1) return json({ error: "not_found" }, 404);
     await env.DB.prepare("DELETE FROM market_community_reactions WHERE post_id = ?").bind(id).run();
+    await env.DB.prepare(
+      "DELETE FROM market_commands WHERE id = ? AND action = 'community_notice' AND status IN ('pending', 'dispatched')",
+    ).bind(id).run();
     return json({ ok: true });
   }
   return json({ error: "method_not_allowed" }, 405);
@@ -674,11 +684,16 @@ async function handleBridgeMessage(raw: unknown, env: Env): Promise<Record<strin
       return { type: "sync-ok", updatedAt: now };
     } else if (message.type === "poll") {
       const retryBefore = Date.now() - 10_000;
+      const noticeCutoff = Date.now() - 600_000;
       const pending = await env.DB.prepare(
-        `SELECT id, player_uuid AS playerUuid, action, symbol, quantity FROM market_commands
-          WHERE status = 'pending' OR (status = 'dispatched' AND updated_at <= ?)
-          ORDER BY created_at ASC LIMIT 25`,
-      ).bind(retryBefore).all<{ id: string; playerUuid: string; action: string; symbol: string; quantity: string }>();
+        `SELECT c.id, c.player_uuid AS playerUuid, p.player_name AS playerName, c.action, c.symbol, c.quantity
+           FROM market_commands c LEFT JOIN market_players p ON p.player_uuid = c.player_uuid
+          WHERE (c.status = 'pending' OR (c.status = 'dispatched' AND c.updated_at <= ?))
+            AND (c.action <> 'community_notice' OR c.created_at >= ?)
+          ORDER BY c.created_at ASC LIMIT 25`,
+      ).bind(retryBefore, noticeCutoff).all<{
+        id: string; playerUuid: string; playerName: string | null; action: string; symbol: string; quantity: string;
+      }>();
       if (pending.results.length) {
         const now = Date.now();
         await batch(env, pending.results.map((command) => env.DB.prepare(
