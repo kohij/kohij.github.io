@@ -5,13 +5,13 @@
   "address": "taekbyeong-709371ef.nip.io",
   "port": 25565,
   "resourcePack": {
-    "file": "taekbyeong-fmm-companions-ui-1.20.1-v10.zip",
+    "file": "taekbyeong-fmm-companions-ui-1.20.1-v11.zip",
     "required": true,
     "models": 12,
     "engine": "FreeMinecraftModels 1.1.4 + Minecraft ItemDisplay 대체",
     "license": "CC0 모델 자산",
-    "sha1": "d725736b02bcf936e8207f8321b13fd2a7a99d19",
-    "sha256": "d5d7fbc146c758dd5e80cf3e8c17a41f06ae0a3260aa9e240d5da5dfd64abfd2"
+    "sha1": "89c66914a22e84418240175f045d21cf9d5cf4b4",
+    "sha256": "66b2e48efd72bb2b43130cc82aff5d8eaefe4d6863cee50e1b60f0965c0f5979"
   },
   "noticePack": {
     "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",
