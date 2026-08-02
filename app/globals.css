@@ -379,31 +379,55 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
 
 .terminal-lower-grid { display: grid; grid-template-columns: minmax(280px, 0.65fr) minmax(620px, 1.35fr); gap: 8px; margin-top: 8px; }
 .command-table .table-row { grid-template-columns: repeat(4, 1fr); }
-.option-search { display: grid; gap: 7px; padding: 12px 13px; border-bottom: 1px solid var(--market-line); }
-.option-search label, .bank-calculator > label { color: var(--market-muted); font-size: 9px; font-weight: 700; }
-.option-search-row { display: grid; grid-template-columns: minmax(100px, 1fr) auto auto; gap: 7px; }
-.option-search input { width: 100%; min-height: 40px; padding: 0 10px; border: 1px solid var(--market-line); border-radius: 7px; outline: 0; background: #101013; color: #fff; font-size: 12px; font-weight: 750; text-transform: uppercase; }
-.option-search input:focus { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.13); }
-.option-search-row > button:not(.secondary-button) { min-height: 40px; padding: 0 12px; border: 1px solid var(--market-line); border-radius: 7px; background: #1d1d22; color: #c5c5ce; font-size: 10px; font-weight: 700; }
-.option-search-row button:disabled { cursor: not-allowed; opacity: 0.42; }
-.option-chain-meta, .option-selection { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 13px; color: var(--market-muted); font-size: 9px; }
-.option-chain-meta span:first-child { display: grid; gap: 3px; color: #fff; font-size: 11px; font-weight: 800; }
-.option-chain-meta span:first-child small { color: var(--market-muted); font-size: 8px; font-weight: 500; }
-.option-chain { max-height: 440px; overflow-y: auto; border-block: 1px solid var(--market-line); }
-.option-chain-row { display: grid; grid-template-columns: 1fr 0.72fr 1fr; min-height: 48px; border-bottom: 1px solid var(--market-line); }
-.option-chain-row > * { display: grid; place-content: center; gap: 3px; min-width: 0; padding: 6px 10px; border: 0; background: transparent; color: #e5e7eb; text-align: center; }
-.option-chain-row > button { transition: background 160ms ease, color 160ms ease; }
-.option-chain-row > button:hover, .option-chain-row > button:focus-visible { background: rgba(49, 130, 246, 0.09); }
-.option-chain-row > button.selected.call { background: rgba(240, 68, 82, 0.14); color: #ff8992; }
-.option-chain-row > button.selected.put { background: rgba(49, 130, 246, 0.16); color: #8ebeff; }
-.option-chain-row b { font-size: 10px; }
-.option-chain-row small { color: var(--market-muted); font-size: 8px; }
-.option-chain-row > span { border-inline: 1px solid var(--market-line); }
-.option-chain-head { position: sticky; top: 0; z-index: 2; min-height: 31px; background: #1b1b20; }
-.option-chain-head span { color: var(--market-muted); font-size: 8px; font-weight: 750; }
-.option-selection { min-height: 58px; }
+.option-search { display: flex; align-items: end; justify-content: space-between; gap: 18px; padding: 14px 16px; border-bottom: 1px solid var(--market-line); }
+.option-search label, .bank-calculator > label { color: var(--market-muted); font-size: 12px; font-weight: 700; }
+.option-symbol-field { display: grid; gap: 7px; }
+.option-symbol-field > div { display: grid; grid-template-columns: minmax(140px, 210px) auto; gap: 8px; }
+.option-symbol-field input { width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid var(--market-line); border-radius: 8px; outline: 0; background: #101013; color: #fff; font-size: 15px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; }
+.option-symbol-field input:focus { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.13); }
+.option-quick-symbols { display: flex; flex-wrap: wrap; gap: 6px; }
+.option-quick-symbols button, .option-range button { min-height: 38px; padding: 0 13px; border: 1px solid var(--market-line); border-radius: 8px; background: transparent; color: #aaaab4; font-size: 12px; font-weight: 750; transition: border-color 160ms ease, background 160ms ease, color 160ms ease; }
+.option-quick-symbols button:hover, .option-quick-symbols button:focus-visible, .option-quick-symbols button.active, .option-range button:hover, .option-range button:focus-visible, .option-range button.active { border-color: rgba(49,130,246,0.5); background: rgba(49,130,246,0.12); color: #fff; }
+.option-search button:disabled { cursor: not-allowed; opacity: 0.42; }
+.option-chain-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px 12px; }
+.option-underlying { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.option-underlying > span { display: grid; gap: 4px; min-width: 0; }
+.option-underlying b { display: flex; align-items: baseline; gap: 8px; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.option-underlying em { color: var(--market-muted); font-size: 12px; font-style: normal; }
+.option-underlying small { color: var(--market-muted); }
+.option-range { display: inline-flex; flex: none; padding: 3px; border-radius: 10px; background: #101013; }
+.option-range button { min-height: 34px; border-color: transparent; }
+.option-range button.active { border-color: var(--market-line); background: #25252b; box-shadow: 0 1px 2px rgba(0,0,0,0.28); }
+.option-expiries { display: flex; gap: 6px; overflow-x: auto; padding: 0 16px 12px; scrollbar-width: thin; }
+.option-expiries button { display: grid; flex: none; gap: 1px; min-width: 90px; min-height: 50px; place-content: center; padding: 6px 12px; border: 1px solid var(--market-line); border-radius: 8px; background: #111114; color: var(--market-muted); text-align: center; transition: border-color 160ms ease, background 160ms ease, color 160ms ease; }
+.option-expiries button b { color: #d9d9df; font-size: 12px; }
+.option-expiries button small { color: inherit; }
+.option-expiries button:hover, .option-expiries button:focus-visible, .option-expiries button.active { border-color: rgba(49,130,246,0.55); background: rgba(49,130,246,0.11); color: var(--market-blue-soft); }
+.option-chain-scroll { max-height: 560px; overflow: auto; border-block: 1px solid var(--market-line); scrollbar-width: thin; }
+.option-chain-table { width: 100%; min-width: 1060px; border-collapse: separate; border-spacing: 0; table-layout: fixed; color: #d8d8df; font-size: 12px; }
+.option-chain-table thead { position: sticky; top: 0; z-index: 3; }
+.option-chain-table th, .option-chain-table td { height: 41px; padding: 5px 7px; border-bottom: 1px solid rgba(255,255,255,0.055); text-align: right; white-space: nowrap; }
+.option-chain-table thead th { height: 33px; border-bottom-color: var(--market-line); background: #1b1b20; color: var(--market-muted); font-weight: 750; text-align: center; }
+.option-chain-table thead tr:first-child th { height: 35px; background: #202025; }
+.option-chain-table .call-group { color: #ff8d97; }
+.option-chain-table .put-group { color: #8ebeff; }
+.option-chain-table tbody tr { background: #121215; transition: background 140ms ease; }
+.option-chain-table tbody tr:nth-child(even) { background: #141417; }
+.option-chain-table tbody tr:hover { background: #1b1b20; }
+.option-chain-table tbody th { position: relative; border-inline: 1px solid var(--market-line); background: rgba(255,255,255,0.025); color: #fff; font-size: 13px; text-align: center; }
+.option-chain-table tbody th small { display: inline-grid; place-items: center; min-width: 30px; height: 19px; margin-left: 7px; border-radius: 5px; background: rgba(255,183,77,0.14); color: #ffc36e; font-size: 11px !important; }
+.option-chain-table tr.at-the-money td, .option-chain-table tr.at-the-money th { border-block-color: rgba(255,183,77,0.25); background-color: rgba(255,183,77,0.04); }
+.option-price-button { width: 100%; min-height: 32px; padding: 0 7px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #f2f4f6; font-weight: 800; text-align: right; transition: border-color 160ms ease, background 160ms ease, color 160ms ease; }
+.option-price-button.call:hover, .option-price-button.call:focus-visible { border-color: rgba(240,68,82,0.4); background: rgba(240,68,82,0.1); color: #ff919b; }
+.option-price-button.put:hover, .option-price-button.put:focus-visible { border-color: rgba(49,130,246,0.45); background: rgba(49,130,246,0.11); color: #9bc5ff; }
+.option-price-button.call.selected { border-color: rgba(240,68,82,0.62); background: rgba(240,68,82,0.17); color: #ff9ba4; box-shadow: inset 3px 0 #f04452; }
+.option-price-button.put.selected { border-color: rgba(49,130,246,0.65); background: rgba(49,130,246,0.18); color: #a5cbff; box-shadow: inset -3px 0 #3182f6; }
+.option-empty { display: grid; min-height: 120px; place-items: center; color: var(--market-muted); font-size: 13px; }
+.option-selection { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 66px; padding: 10px 16px; color: var(--market-muted); }
+.option-selection > span { display: grid; gap: 3px; }
+.option-selection b { color: #fff; font-size: 13px; }
 .option-guide { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 170px; padding: 24px; color: var(--market-muted); }
-.option-guide p { max-width: 420px; margin: 0; font-size: 10px; line-height: 1.6; }
+.option-guide p { max-width: 520px; margin: 0; font-size: 13px; line-height: 1.6; }
 .secondary-button { display: inline-grid; place-items: center; min-height: 40px; padding: 0 16px; border: 1px solid rgba(49, 130, 246, 0.45); border-radius: 7px; background: rgba(49, 130, 246, 0.13); color: var(--market-blue-soft); font-size: 11px; font-weight: 800; }
 .secondary-button:disabled { cursor: not-allowed; opacity: 0.42; }
 .bank-card { grid-column: 1 / -1; }
@@ -504,7 +528,7 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
   .terminal-grid { grid-template-columns: minmax(390px, 1.4fr) minmax(260px, 0.75fr); }
   .order-panel { grid-column: 1 / -1; min-height: auto; }
   .order-panel form { display: block; }
-  .terminal-lower-grid { grid-template-columns: 1fr 1fr; }
+  .terminal-lower-grid { grid-template-columns: 1fr; }
   .bank-card { grid-column: 1 / -1; }
   .banking-workspace .banking-grid { grid-template-columns: 1fr 1fr; }
   .banking-workspace .account-list { grid-column: 1 / -1; border-top: 1px solid var(--market-line); border-left: 0; }
@@ -528,7 +552,7 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
   .chart-ohlc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .chart-canvas { height: 310px; }
   .chart-periods button { min-height: 44px; }
-  .market-filter button, .asset-filter button, .quick-quantity button, .option-search-row button, .account-actions button { min-height: 44px; }
+  .market-filter button, .asset-filter button, .quick-quantity button, .option-search button, .option-range button, .option-expiries button, .account-actions button { min-height: 44px; }
   .quote-list { height: 360px; }
   .order-panel { grid-column: auto; }
   .order-panel form { display: block; }
@@ -555,10 +579,18 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
   .profile-allocation { padding-inline: 20px; }
   .market-shell input, .market-shell select, .market-shell textarea { font-size: 16px !important; }
   .portfolio-table .table-row { grid-template-columns: minmax(150px, 1.4fr) repeat(3, minmax(105px, 1fr)); min-width: 560px; }
-  .option-search-row { grid-template-columns: 1fr 1fr; }
-  .option-search-row input { grid-column: 1 / -1; }
-  .option-chain-row { grid-template-columns: 1fr 0.8fr 1fr; }
-  .option-chain-row > * { padding-inline: 5px; }
+  .option-search { align-items: stretch; flex-direction: column; gap: 12px; padding: 14px 12px; }
+  .option-symbol-field > div { grid-template-columns: 1fr auto; }
+  .option-quick-symbols { flex-wrap: nowrap; overflow-x: auto; }
+  .option-chain-summary { align-items: stretch; flex-direction: column; padding-inline: 12px; }
+  .option-underlying b { white-space: normal; }
+  .option-range { align-self: flex-start; }
+  .option-expiries { padding-inline: 12px; }
+  .option-chain-scroll { max-height: 470px; }
+  .option-chain-table { min-width: 1020px; }
+  .option-price-button { min-height: 38px; }
+  .option-selection { align-items: stretch; flex-direction: column; padding: 12px; }
+  .option-selection button { width: 100%; }
   .bank-card { grid-column: auto; }
   .bank-products { grid-template-columns: 1fr 1fr; }
   .bank-calculator { grid-template-columns: 1fr; }

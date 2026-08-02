@@ -424,10 +424,17 @@ async function marketOptions(request: Request, env: Env): Promise<Response> {
   if (!instrument || instrument.market !== "US" || !["EQUITY", "ETF", "LEVERAGED_ETF"].includes(instrument.type)) {
     return json({ error: "unsupported_underlying" }, 404);
   }
-  const upstream = await fetch(
-    `https://api.nasdaq.com/api/quote/${encodeURIComponent(symbol)}/option-chain?assetclass=${instrument.type === "EQUITY" ? "stocks" : "etf"}&limit=120`,
-    { headers: { "user-agent": "Mozilla/5.0", accept: "application/json, text/plain, */*" } },
-  );
+  const fromDate = new Date();
+  const toDate = new Date(fromDate.getTime() + 370 * 24 * 60 * 60 * 1000);
+  const upstreamUrl = new URL(`https://api.nasdaq.com/api/quote/${encodeURIComponent(symbol)}/option-chain`);
+  upstreamUrl.searchParams.set("assetclass", instrument.type === "EQUITY" ? "stocks" : "etf");
+  upstreamUrl.searchParams.set("limit", "5000");
+  upstreamUrl.searchParams.set("money", "all");
+  upstreamUrl.searchParams.set("fromdate", fromDate.toISOString().slice(0, 10));
+  upstreamUrl.searchParams.set("todate", toDate.toISOString().slice(0, 10));
+  const upstream = await fetch(upstreamUrl, {
+    headers: { "user-agent": "Mozilla/5.0", accept: "application/json, text/plain, */*" },
+  });
   if (!upstream.ok) return json({ error: "option_chain_unavailable" }, 502);
   let data: { table?: { rows?: NasdaqOptionRow[] }; lastTrade?: string } | undefined;
   try {
@@ -454,7 +461,9 @@ async function marketOptions(request: Request, env: Env): Promise<Response> {
         volume: optionNumber(row.p_Volume), openInterest: optionNumber(row.p_Openinterest) },
     });
   }
-  return json({ symbol, name: instrument.name, lastTrade: data?.lastTrade ?? "", contracts });
+  contracts.sort((a, b) => a.expiry.localeCompare(b.expiry) || a.strike - b.strike);
+  const underlyingPrice = optionNumber(data?.lastTrade?.match(/\$[\d,.]+/)?.[0]);
+  return json({ symbol, name: instrument.name, lastTrade: data?.lastTrade ?? "", underlyingPrice, contracts });
 }
 
 async function marketCommunity(request: Request, env: Env): Promise<Response> {

@@ -109,6 +109,9 @@ test("renders the device-code securities login", async () => {
   assert.match(marketPage, /URLSearchParams/);
   assert.match(marketPage, /LEVERAGED_ETF/);
   assert.match(marketPage, /옵션 체인/);
+  assert.match(marketPage, /현재가 주변/);
+  assert.match(marketPage, /option-chain-table/);
+  assert.match(marketPage, /행사가.*전체/);
   assert.match(marketPage, /bank_savings/);
   assert.match(marketPage, /만기 이자/);
   assert.match(marketPage, /중도해지/);
@@ -128,6 +131,9 @@ test("renders the device-code securities login", async () => {
   assert.match(worker, /marketCandles/);
   assert.match(worker, /\/api\/market\/options/);
   assert.match(worker, /api\.nasdaq\.com/);
+  assert.match(worker, /limit", "5000"/);
+  assert.match(worker, /fromdate/);
+  assert.match(worker, /todate/);
   assert.match(worker, /bank_deposit/);
   assert.match(worker, /\/api\/market\/community/);
   assert.match(worker, /\/api\/market\/rankings/);

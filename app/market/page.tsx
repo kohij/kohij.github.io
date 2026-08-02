@@ -27,7 +27,7 @@ type BankProduct = {
 };
 type OptionLeg = { last: number | null; bid: number | null; ask: number | null; volume: number | null; openInterest: number | null };
 type OptionContract = { expiry: string; strike: number; call: OptionLeg; put: OptionLeg };
-type OptionChain = { symbol: string; name: string; lastTrade: string; contracts: OptionContract[] };
+type OptionChain = { symbol: string; name: string; lastTrade: string; underlyingPrice: number | null; contracts: OptionContract[] };
 type CommunityPost = {
   id: string; playerName: string; symbol: string; body: string; stance: string;
   holderVerified: number; createdAt: number; reactionCount: number; reacted: number; mine: number;
@@ -153,6 +153,16 @@ function optionContract(underlying: string, expiry: string, strike: string, side
   return `${underlying.toUpperCase()} ${expiry.slice(2).replaceAll("-", "")} ${side === "call" ? "C" : "P"} ${Number(strike).toLocaleString("en-US")}`;
 }
 
+function optionExpiryLabel(expiry: string) {
+  const [, month, day] = expiry.split("-");
+  return month && day ? `${Number(month)}월 ${Number(day)}일` : expiry;
+}
+
+function optionValue(value: number | null, currency = false) {
+  if (value === null) return "-";
+  return currency ? optionPrice.format(value) : integer.format(value);
+}
+
 export default function MarketPage() {
   const [snapshot, setSnapshot] = useState<Snapshot>({ authenticated: false });
   const [loading, setLoading] = useState(true);
@@ -172,6 +182,7 @@ export default function MarketPage() {
   const [optionChain, setOptionChain] = useState<OptionChain | null>(null);
   const [optionExpiry, setOptionExpiry] = useState("");
   const [optionLoading, setOptionLoading] = useState(false);
+  const [optionRange, setOptionRange] = useState<"near" | "all">("all");
   const [bankProductId, setBankProductId] = useState(bankProducts[0].id);
   const [bankAmount, setBankAmount] = useState("10000");
   const [cancelAccountId, setCancelAccountId] = useState("");
@@ -317,8 +328,14 @@ export default function MarketPage() {
   const expectedPrincipal = bankAmountNumber * selectedBank.payments;
   const expectedInterest = Math.floor(expectedPrincipal * selectedBank.rate);
   const bankAmountValid = bankAmountNumber >= 1000 && bankAmountNumber <= 10_000_000 && Number.isInteger(bankAmountNumber);
-  const optionExpiries = [...new Set((optionChain?.contracts ?? []).map((contract) => contract.expiry))];
-  const visibleOptions = (optionChain?.contracts ?? []).filter((contract) => contract.expiry === optionExpiry).slice(0, 40);
+  const optionExpiries = [...new Set((optionChain?.contracts ?? []).map((contract) => contract.expiry))].sort();
+  const expiryOptions = (optionChain?.contracts ?? []).filter((contract) => contract.expiry === optionExpiry).sort((a, b) => a.strike - b.strike);
+  const atmIndex = optionChain?.underlyingPrice === null || !expiryOptions.length
+    ? -1
+    : expiryOptions.reduce((closest, contract, index) => Math.abs(contract.strike - (optionChain?.underlyingPrice ?? 0)) < Math.abs(expiryOptions[closest].strike - (optionChain?.underlyingPrice ?? 0)) ? index : closest, 0);
+  const visibleOptions = optionRange === "near" && atmIndex >= 0
+    ? expiryOptions.slice(Math.max(0, atmIndex - 15), atmIndex + 16)
+    : expiryOptions;
 
   const chooseInstrument = (item: Instrument | null) => { setSelected(item); setRiskAccepted(false); setQuantity("1"); };
 
@@ -366,6 +383,7 @@ export default function MarketPage() {
       const result = await response.json() as OptionChain;
       setOption({ ...option, underlying: symbol }); setOptionChain(result);
       setOptionExpiry(result.contracts[0]?.expiry ?? "");
+      setOptionRange("all");
       if (!result.contracts.length) setNotice("현재 조회 가능한 옵션 계약이 없습니다.");
     } catch (error) { setNotice(error instanceof Error ? error.message : "옵션 체인을 불러오지 못했습니다."); }
     finally { setOptionLoading(false); }
@@ -543,12 +561,26 @@ export default function MarketPage() {
         </section>
 
         <section className="terminal-panel option-card" id="options" aria-labelledby="option-title">
-          <div className="terminal-panel-head"><div><Icon name="chart" /><h2 id="option-title">미국 주식 옵션 체인</h2></div><span>실시간 계약 조회</span></div>
-          <form className="option-search" onSubmit={(event) => { event.preventDefault(); void loadOptionChain(); }}><label htmlFor="option-underlying">기초자산</label><div className="option-search-row"><input id="option-underlying" value={option.underlying} onChange={(event) => setOption({ ...option, underlying: event.target.value.toUpperCase().replace(/[^A-Z-]/g, "") })} aria-label="옵션 기초자산 심볼" /><button className="secondary-button" disabled={optionLoading}>{optionLoading ? "조회 중" : "옵션 조회"}</button>{["AAPL", "TSLA", "NVDA"].map((symbol) => <button key={symbol} type="button" onClick={() => { setOption({ ...option, underlying: symbol }); void loadOptionChain(symbol); }}>{symbol}</button>)}</div></form>
+          <div className="terminal-panel-head"><div><Icon name="chart" /><h2 id="option-title">미국 주식 옵션 체인</h2></div><span>Nasdaq 기준 · 최대 1년</span></div>
+          <form className="option-search" onSubmit={(event) => { event.preventDefault(); void loadOptionChain(); }}>
+            <label className="option-symbol-field" htmlFor="option-underlying"><span>기초자산</span><div><input id="option-underlying" value={option.underlying} onChange={(event) => setOption({ ...option, underlying: event.target.value.toUpperCase().replace(/[^A-Z-]/g, "") })} aria-label="옵션 기초자산 심볼" placeholder="AAPL" /><button className="secondary-button" disabled={optionLoading}>{optionLoading ? "불러오는 중" : "조회"}</button></div></label>
+            <div className="option-quick-symbols" role="group" aria-label="빠른 기초자산 선택">{["AAPL", "TSLA", "NVDA"].map((symbol) => <button key={symbol} type="button" className={option.underlying === symbol ? "active" : ""} onClick={() => { setOption({ ...option, underlying: symbol }); void loadOptionChain(symbol); }}>{symbol}</button>)}</div>
+          </form>
           {optionChain ? <>
-            <div className="option-chain-meta"><span>{optionChain.name} · {optionChain.symbol}<small>{optionChain.lastTrade}</small></span><label>만기 <select value={optionExpiry} onChange={(event) => setOptionExpiry(event.target.value)}>{optionExpiries.map((expiry) => <option key={expiry} value={expiry}>{expiry}</option>)}</select></label></div>
-            <div className="option-chain" role="table" aria-label={`${optionChain.name} 옵션 체인`}><div className="option-chain-row option-chain-head" role="row"><span>콜 · 상승</span><span>행사가</span><span>풋 · 하락</span></div>{visibleOptions.map((contract) => <div className="option-chain-row" role="row" key={`${contract.expiry}-${contract.strike}`}><button type="button" className={option.expiry === contract.expiry && Number(option.strike) === contract.strike && option.side === "call" ? "selected call" : ""} onClick={() => setOption({ underlying: optionChain.symbol, expiry: contract.expiry, strike: String(contract.strike), side: "call" })}><b>{contract.call.last === null ? "-" : optionPrice.format(contract.call.last)}</b><small>매수 {contract.call.bid ?? "-"} · 매도 {contract.call.ask ?? "-"}</small><small>거래 {contract.call.volume ?? "-"} · 미결제 {contract.call.openInterest ?? "-"}</small></button><span><b>{contract.strike.toLocaleString("en-US")}</b><small>{contract.expiry}</small></span><button type="button" className={option.expiry === contract.expiry && Number(option.strike) === contract.strike && option.side === "put" ? "selected put" : ""} onClick={() => setOption({ underlying: optionChain.symbol, expiry: contract.expiry, strike: String(contract.strike), side: "put" })}><b>{contract.put.last === null ? "-" : optionPrice.format(contract.put.last)}</b><small>매수 {contract.put.bid ?? "-"} · 매도 {contract.put.ask ?? "-"}</small><small>거래 {contract.put.volume ?? "-"} · 미결제 {contract.put.openInterest ?? "-"}</small></button></div>)}</div>
-            <div className="option-selection"><span>{optionContract(option.underlying, option.expiry, option.strike, option.side)}</span><button className="secondary-button" type="button" disabled={!option.expiry || ordering} onClick={registerOption}>선택 계약 등록</button></div>
+            <div className="option-chain-summary">
+              <div className="option-underlying"><InstrumentIcon symbol={optionChain.symbol} name={optionChain.name} type="EQUITY" market="US" size="small" eager /><span><b>{optionChain.name}<em>{optionChain.symbol}</em></b><small>{optionChain.underlyingPrice === null ? "기초자산 시세 확인 중" : `기초자산 ${optionPrice.format(optionChain.underlyingPrice)}`} · 만기 {optionExpiries.length}개 · 행사가 {optionChain.contracts.length}개</small></span></div>
+              <div className="option-range" role="group" aria-label="행사가 표시 범위"><button type="button" aria-pressed={optionRange === "near"} className={optionRange === "near" ? "active" : ""} onClick={() => setOptionRange("near")}>현재가 주변</button><button type="button" aria-pressed={optionRange === "all"} className={optionRange === "all" ? "active" : ""} onClick={() => setOptionRange("all")}>행사가 전체</button></div>
+            </div>
+            <div className="option-expiries" role="tablist" aria-label="옵션 만기 선택">{optionExpiries.map((expiry) => { const count = optionChain.contracts.filter((contract) => contract.expiry === expiry).length; return <button key={expiry} type="button" role="tab" aria-selected={optionExpiry === expiry} className={optionExpiry === expiry ? "active" : ""} onClick={() => setOptionExpiry(expiry)}><b>{optionExpiryLabel(expiry)}</b><small>{count}개</small></button>; })}</div>
+            <div className="option-chain-scroll">
+              <table className="option-chain-table">
+                <caption className="sr-only">{optionChain.name} {optionExpiry} 콜·풋 옵션 체인</caption>
+                <thead><tr><th className="call-group" colSpan={5}>콜 · 상승</th><th rowSpan={2}>행사가</th><th className="put-group" colSpan={5}>풋 · 하락</th></tr><tr><th>거래량</th><th>미결제</th><th>매수</th><th>매도</th><th>최근가</th><th>최근가</th><th>매수</th><th>매도</th><th>미결제</th><th>거래량</th></tr></thead>
+                <tbody>{visibleOptions.map((contract) => { const isAtm = expiryOptions[atmIndex]?.strike === contract.strike; const callSelected = option.expiry === contract.expiry && Number(option.strike) === contract.strike && option.side === "call"; const putSelected = option.expiry === contract.expiry && Number(option.strike) === contract.strike && option.side === "put"; return <tr key={`${contract.expiry}-${contract.strike}`} className={isAtm ? "at-the-money" : ""}><td>{optionValue(contract.call.volume)}</td><td>{optionValue(contract.call.openInterest)}</td><td>{optionValue(contract.call.bid, true)}</td><td>{optionValue(contract.call.ask, true)}</td><td><button type="button" className={`option-price-button call ${callSelected ? "selected" : ""}`} aria-pressed={callSelected} onClick={() => setOption({ underlying: optionChain.symbol, expiry: contract.expiry, strike: String(contract.strike), side: "call" })}>{optionValue(contract.call.last, true)}</button></td><th scope="row"><b>{contract.strike.toLocaleString("en-US")}</b>{isAtm && <small>ATM</small>}</th><td><button type="button" className={`option-price-button put ${putSelected ? "selected" : ""}`} aria-pressed={putSelected} onClick={() => setOption({ underlying: optionChain.symbol, expiry: contract.expiry, strike: String(contract.strike), side: "put" })}>{optionValue(contract.put.last, true)}</button></td><td>{optionValue(contract.put.bid, true)}</td><td>{optionValue(contract.put.ask, true)}</td><td>{optionValue(contract.put.openInterest)}</td><td>{optionValue(contract.put.volume)}</td></tr>; })}</tbody>
+              </table>
+              {!visibleOptions.length && <div className="option-empty">선택한 만기의 옵션 계약이 없습니다.</div>}
+            </div>
+            <div className="option-selection"><span><small>선택 계약</small><b>{optionContract(option.underlying, option.expiry, option.strike, option.side)}</b></span><button className="secondary-button" type="button" disabled={!option.expiry || ordering} onClick={registerOption}>이 계약 등록</button></div>
           </> : <div className="option-guide"><Icon name="shield" /><p><b>1계약은 기초자산 100주 기준입니다.</b><br />미국 주식·ETF 심볼을 조회하면 만기별 콜·풋, 행사가, 최근가와 호가를 비교할 수 있습니다. 매수 옵션은 프리미엄 전액을 잃을 수 있습니다.</p></div>}
         </section>
       </div>
