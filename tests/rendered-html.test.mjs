@@ -126,6 +126,8 @@ test("renders the device-code securities login", async () => {
   assert.match(marketPage, /자산 랭킹/);
   assert.match(marketPage, /포트폴리오/);
   assert.match(marketPage, /InstrumentIcon/);
+  assert.match(marketPage, /PlayerHead/);
+  assert.match(marketPage, /\/api\/market\/player-head\?name=/);
   assert.match(marketPage, /instrument-product-badge/);
   assert.match(marketPage, /보유자 표시/);
   assert.doesNotMatch(marketPage, /게임머니 투자|SECURE GAME LINK|현재 IP/);
@@ -148,6 +150,8 @@ test("renders the device-code securities login", async () => {
   assert.match(worker, /\/api\/market\/rankings/);
   assert.match(worker, /\/api\/market\/logo/);
   assert.match(worker, /assets\.parqet\.com\/logos\/symbol/);
+  assert.match(worker, /\/api\/market\/player-head/);
+  assert.match(worker, /mc-heads\.net\/avatar/);
   assert.match(worker, /publicProfile/);
   assert.match(worker, /holder_verified/);
   assert.match(schema, /candles: text\("candles"\)/);

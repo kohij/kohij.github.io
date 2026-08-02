@@ -249,7 +249,7 @@ a {
 .community-feed { max-height: 430px; overflow-y: auto; }
 .community-feed article { display: grid; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--market-line); }
 .community-feed article header { display: flex; align-items: center; gap: 8px; }
-.community-avatar { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #27272e; color: #d9dbe2; font-size: 11px; font-weight: 800; }
+.community-avatar { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border-radius: 8px; background: transparent; }
 .community-feed header div { display: grid; gap: 2px; margin-right: auto; }
 .community-feed header b { font-size: 10px; }
 .community-feed header small { color: var(--market-muted); font-size: 8px; }
@@ -295,8 +295,10 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
 .ranking-number.rank-1 { background: rgba(49,130,246,0.2); color: #9dc6ff; }
 .ranking-number.rank-2 { background: rgba(255,255,255,0.09); color: #e2e3e7; }
 .ranking-number.rank-3 { background: rgba(206,140,91,0.13); color: #dfaa84; }
-.ranking-avatar, .profile-avatar { display: grid; place-items: center; border-radius: 50%; background: linear-gradient(145deg, #2d63c8, #19386f); color: #fff; font-weight: 850; }
-.ranking-avatar { width: 42px; height: 42px; font-size: 15px; }
+.player-head { display: grid; place-items: center; flex: none; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(145deg, #2d63c8, #19386f); color: #fff; font-weight: 850; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
+.player-head img { display: block; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.community-player-head { width: 30px; height: 30px; border-radius: 7px; font-size: 11px; }
+.ranking-avatar { width: 42px; height: 42px; border-radius: 10px; font-size: 15px; }
 .ranking-player, .ranking-value { display: grid; gap: 5px; min-width: 0; }
 .ranking-player b { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .ranking-player em, .profile-hero h2 em { margin-left: 7px; padding: 3px 6px; border-radius: 999px; background: rgba(49,130,246,0.15); color: #92bdff; font-size: 12px; font-style: normal; vertical-align: middle; }
@@ -318,7 +320,7 @@ button.table-row:hover, button.table-row:focus-visible { background: rgba(255, 2
 .public-profile > header { position: sticky; top: 0; z-index: 2; display: flex; justify-content: flex-end; min-height: 54px; padding: 6px 10px; background: rgba(23,23,27,0.92); backdrop-filter: blur(12px); }
 .profile-loading { display: grid; place-items: center; min-height: 320px; color: var(--market-muted); font-size: 14px; }
 .profile-hero { display: flex; align-items: center; gap: 15px; padding: 2px 28px 22px; }
-.profile-avatar { width: 58px; height: 58px; font-size: 21px; }
+.profile-avatar { width: 58px; height: 58px; border-radius: 13px; font-size: 21px; }
 .profile-hero > div { display: grid; gap: 4px; }
 .profile-hero h2 { margin: 0; font-size: 23px; letter-spacing: -0.04em; }
 .profile-hero p { margin: 0; color: var(--market-muted); font-size: 13px; }

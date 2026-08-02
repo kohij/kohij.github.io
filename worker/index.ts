@@ -89,6 +89,30 @@ async function marketLogo(request: Request): Promise<Response> {
   }
 }
 
+async function marketPlayerHead(request: Request): Promise<Response> {
+  if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, { allow: "GET" });
+  const playerName = new URL(request.url).searchParams.get("name")?.trim() ?? "";
+  if (!/^[A-Za-z0-9_]{1,16}$/.test(playerName)) return json({ error: "invalid_player" }, 400);
+
+  try {
+    const upstream = await fetch(`https://mc-heads.net/avatar/${encodeURIComponent(playerName)}/64`, {
+      headers: { accept: "image/png" }, redirect: "follow",
+    });
+    const contentType = upstream.headers.get("content-type") ?? "";
+    if (!upstream.ok || !contentType.startsWith("image/png")) return json({ error: "head_not_found" }, 404);
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        "cache-control": "public, max-age=21600, s-maxage=86400, stale-while-revalidate=604800",
+        "content-type": "image/png",
+        "x-content-type-options": "nosniff",
+      },
+    });
+  } catch {
+    return json({ error: "head_unavailable" }, 502);
+  }
+}
+
 function base64Bytes(value: string): Uint8Array {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
@@ -799,6 +823,7 @@ const worker = {
     const url = new URL(request.url);
     if (url.pathname === "/api/patch-notes") return patchNotesApi(request, env);
     if (url.pathname === "/api/market/logo") return marketLogo(request);
+    if (url.pathname === "/api/market/player-head") return marketPlayerHead(request);
     if (url.pathname === "/api/market/login") return marketLogin(request, env);
     if (url.pathname === "/api/market/snapshot") return marketSnapshot(request, env);
     if (url.pathname === "/api/market/rankings") return marketRankings(request, env);

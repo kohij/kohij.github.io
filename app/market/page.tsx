@@ -73,6 +73,16 @@ function instrumentBadge(symbol: string, type: string) {
   return "";
 }
 
+function PlayerHead({ playerName, className }: { playerName: string; className: string }) {
+  const [failedName, setFailedName] = useState("");
+  const failed = failedName === playerName;
+  return <span className={`player-head ${className}`} aria-hidden="true">
+    {!failed
+      ? <img src={`/api/market/player-head?name=${encodeURIComponent(playerName)}`} alt="" width="64" height="64" loading="lazy" decoding="async" onError={() => setFailedName(playerName)} />
+      : <span>{playerName.slice(0, 1).toUpperCase()}</span>}
+  </span>;
+}
+
 function InstrumentIcon({ symbol, name, type, market, size = "medium", eager = false }: {
   symbol: string; name: string; type: string; market?: string; size?: "small" | "medium" | "large"; eager?: boolean;
 }) {
@@ -534,7 +544,7 @@ export default function MarketPage() {
           </form>
           <div className="community-feed" aria-live="polite">
             {communityLoading && !communityPosts.length ? <div className="empty-state">의견을 불러오는 중입니다.</div> : communityPosts.length ? communityPosts.map((post) => <article key={post.id}>
-              <header><button className="community-avatar" type="button" onClick={() => void openPublicProfile(post.playerName)} aria-label={`${post.playerName} 포트폴리오 보기`}>{post.playerName.slice(0, 1).toUpperCase()}</button><div><button className="community-profile-link" type="button" onClick={() => void openPublicProfile(post.playerName)}>{post.playerName}</button><small>{new Date(post.createdAt).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</small></div><span className={`stance ${post.stance}`}>{stanceLabel(post.stance)}</span>{Boolean(post.holderVerified) && <span className="holder-badge">보유자</span>}</header>
+              <header><button className="community-avatar" type="button" onClick={() => void openPublicProfile(post.playerName)} aria-label={`${post.playerName} 포트폴리오 보기`}><PlayerHead playerName={post.playerName} className="community-player-head" /></button><div><button className="community-profile-link" type="button" onClick={() => void openPublicProfile(post.playerName)}>{post.playerName}</button><small>{new Date(post.createdAt).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</small></div><span className={`stance ${post.stance}`}>{stanceLabel(post.stance)}</span>{Boolean(post.holderVerified) && <span className="holder-badge">보유자</span>}</header>
               <p>{post.body}</p>
               <footer><button type="button" className="community-symbol" onClick={() => setSelected(snapshot.instruments?.find((item) => item.symbol === post.symbol) ?? selected)} aria-label={`${post.symbol} 종목 선택`}>{post.symbol}</button><button type="button" className={post.reacted ? "reacted" : ""} onClick={() => void reactCommunityPost(post.id)} aria-pressed={Boolean(post.reacted)}>공감 {post.reactionCount}</button>{Boolean(post.mine) && <button type="button" className="delete-post" onClick={() => void deleteCommunityPost(post.id)}>삭제</button>}</footer>
             </article>) : <div className="empty-state">아직 의견이 없습니다. 첫 의견을 남겨보세요.</div>}
@@ -547,7 +557,7 @@ export default function MarketPage() {
         <div className="ranking-intro"><div><span>플레이어 랭킹</span><strong>{rankings[0] ? `${rankings[0].playerName} · ${won.format(rankings[0].totalAssetWon)}` : "집계 중"}</strong><p>현금과 투자 평가액, 예금 · 적금 원금을 합산합니다.</p></div><button type="button" onClick={() => void loadRankings()} disabled={rankingsLoading}>{rankingsLoading ? "새로고침 중" : "새로고침"}</button></div>
         <div className="ranking-list" role="list" aria-live="polite">
           {rankings.map((player) => <button className={`ranking-row ${player.mine ? "mine" : ""}`} type="button" role="listitem" key={player.playerName} onClick={() => void openPublicProfile(player.playerName)} aria-label={`${player.rank}위 ${player.playerName} 포트폴리오 보기`}>
-            <span className={`ranking-number rank-${Math.min(player.rank, 4)}`}>{player.rank}</span><span className="ranking-avatar">{player.playerName.slice(0, 1).toUpperCase()}</span><span className="ranking-player"><b>{player.playerName}{player.mine && <em>나</em>}</b><small><i className={player.online ? "online" : ""} />{player.online ? "접속 중" : `최근 갱신 ${dateLabel(player.updatedAt)}`} · 보유 {player.positionCount}종목</small></span><span className="ranking-value"><b>{won.format(player.totalAssetWon)}</b><small className={player.profitWon >= 0 ? "rise" : "fall"}>{player.profitWon >= 0 ? "+" : ""}{won.format(player.profitWon)}</small></span><Icon name="chevron" />
+            <span className={`ranking-number rank-${Math.min(player.rank, 4)}`}>{player.rank}</span><PlayerHead playerName={player.playerName} className="ranking-avatar" /><span className="ranking-player"><b>{player.playerName}{player.mine && <em>나</em>}</b><small><i className={player.online ? "online" : ""} />{player.online ? "접속 중" : `최근 갱신 ${dateLabel(player.updatedAt)}`} · 보유 {player.positionCount}종목</small></span><span className="ranking-value"><b>{won.format(player.totalAssetWon)}</b><small className={player.profitWon >= 0 ? "rise" : "fall"}>{player.profitWon >= 0 ? "+" : ""}{won.format(player.profitWon)}</small></span><Icon name="chevron" />
           </button>)}
           {!rankingsLoading && !rankings.length && <div className="empty-state">아직 집계된 플레이어가 없습니다.</div>}
           {rankingsLoading && !rankings.length && <div className="empty-state">랭킹을 불러오는 중입니다.</div>}
@@ -619,7 +629,7 @@ export default function MarketPage() {
         <section className="public-profile" role="dialog" aria-modal="true" aria-labelledby="public-profile-title">
           {profileLoading && !publicProfile ? <div className="profile-loading" role="status">포트폴리오를 불러오는 중입니다.</div> : publicProfile && <>
             <header><button className="icon-button" type="button" onClick={closePublicProfile} aria-label="프로필 닫기"><Icon name="close" /></button></header>
-            <div className="profile-hero"><span className="profile-avatar">{publicProfile.playerName.slice(0, 1).toUpperCase()}</span><div><span className={publicProfile.online ? "profile-online" : "profile-offline"}>{publicProfile.online ? "접속 중" : "오프라인"}</span><h2 id="public-profile-title">{publicProfile.playerName}{publicProfile.mine && <em>나</em>}</h2><p>자산 랭킹 {publicProfile.rank}위</p></div></div>
+            <div className="profile-hero"><PlayerHead playerName={publicProfile.playerName} className="profile-avatar" /><div><span className={publicProfile.online ? "profile-online" : "profile-offline"}>{publicProfile.online ? "접속 중" : "오프라인"}</span><h2 id="public-profile-title">{publicProfile.playerName}{publicProfile.mine && <em>나</em>}</h2><p>자산 랭킹 {publicProfile.rank}위</p></div></div>
             <div className="profile-total"><span>총자산</span><strong>{won.format(publicProfile.totalAssetWon)}</strong><small className={publicProfile.profitWon >= 0 ? "rise" : "fall"}>투자 손익 {publicProfile.profitWon >= 0 ? "+" : ""}{won.format(publicProfile.profitWon)}</small></div>
             <div className="allocation-bar" aria-label="자산 구성"><i className="cash" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.cashWon / publicProfile.totalAssetWon * 100 : 0}%` }} /><i className="stocks" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.portfolioWon / publicProfile.totalAssetWon * 100 : 0}%` }} /><i className="bank" style={{ width: `${publicProfile.totalAssetWon ? publicProfile.bankWon / publicProfile.totalAssetWon * 100 : 0}%` }} /></div>
             <dl className="profile-allocation"><div><dt><i className="cash" />현금</dt><dd>{won.format(publicProfile.cashWon)}</dd></div><div><dt><i className="stocks" />투자</dt><dd>{won.format(publicProfile.portfolioWon)}</dd></div><div><dt><i className="bank" />예금 · 적금</dt><dd>{won.format(publicProfile.bankWon)}</dd></div></dl>
