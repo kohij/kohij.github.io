@@ -10,7 +10,7 @@
 
 ## 택병서버 UI·FMM 동료 통합팩
 
-- 파일: `../downloads/taekbyeong-fmm-companions-ui-1.20.1-v9.zip` (현재 필수 통합)
+- 파일: `../downloads/taekbyeong-fmm-companions-ui-1.20.1-v12.zip` (현재 필수 통합)
 - 기반: McTsts/mc-core-shaders `hide sidebar numbers`
 - 고정 커밋: `628674d87277616d91e420ca0cb38884ecd22a2f`
 - 라이선스: Unlicense / Public Domain
@@ -18,7 +18,7 @@
 
 ## CC0 고품질 동료 12종
 
-- 파일: `../downloads/taekbyeong-fmm-companions-ui-1.20.1-v9.zip`
+- 파일: `../downloads/taekbyeong-fmm-companions-ui-1.20.1-v12.zip`
 - 렌더러: FreeMinecraftModels 1.1.4, 장애 시 Minecraft 1.20.1 기본 `ItemDisplay`
 - FMM 원본: Kenney Cube Pets 2.0
 - 기본 ItemDisplay 대체 원본: Quaternius CC0·Kenney CC0
