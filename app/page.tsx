@@ -10,6 +10,7 @@ import {
   type BrewTier,
   type Rarity,
 } from "./content";
+import patchNotes from "./patch-notes.json";
 
 const address = "taekbyeong-709371ef.nip.io";
 const fishFilters: Array<"전체" | Rarity> = [
@@ -116,6 +117,7 @@ export default function Home() {
           <a href="#brewery">양조</a>
           <a href="#fishing">낚시</a>
           <a href="#pets">동료</a>
+          <a href="#patch-notes">패치노트</a>
         </nav>
         <button className="nav-connect" onClick={copyAddress}>
           {copied ? "복사 완료" : "주소 복사"}
@@ -575,6 +577,65 @@ export default function Home() {
                   <dd>{pet.limit}</dd>
                 </div>
               </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section patch-section" id="patch-notes">
+        <div className="patch-release">
+          <div>
+            <span>LIVE PATCH · 2026.08.02</span>
+            <h2>8월 2일 업데이트</h2>
+            <p>
+              플레이하면서 바로 느끼는 변화부터 정리했습니다. 내부 이름이나 개인 기록은
+              빼고, 무엇이 달라졌는지와 그렇게 바꾼 이유를 함께 공개합니다.
+            </p>
+          </div>
+          <a href="#top">맨 위로</a>
+        </div>
+        <div className="patch-toc" aria-label="패치노트 바로가기">
+          {patchNotes.map((note, index) => (
+            <a key={note.title} href={`#patch-${index + 1}`}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {note.type}
+            </a>
+          ))}
+        </div>
+        <div className="patch-list">
+          {patchNotes.map((note, index) => (
+            <article key={note.title} id={`patch-${index + 1}`}>
+              <header>
+                <div className="patch-number">{String(index + 1).padStart(2, "0")}</div>
+                <div>
+                  <div className="patch-meta">
+                    <span>{note.type}</span>
+                    <time>{note.date.replaceAll("-", ".")}</time>
+                  </div>
+                  <h3>{note.title}</h3>
+                  <p>{note.summary}</p>
+                </div>
+              </header>
+              <div className="patch-details">
+                <div>
+                  <h4>변경 내용</h4>
+                  <ul>
+                    {note.changes.map((change) => <li key={change}>{change}</li>)}
+                  </ul>
+                </div>
+                <aside className="developer-note">
+                  <span>개발자 노트</span>
+                  <h4>왜 바꿨나요?</h4>
+                  <p>{note.reason}</p>
+                </aside>
+                <div className="patch-evidence">
+                  <h4>확인 근거</h4>
+                  <ul>
+                    {note.evidence.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                  <small>모든 근거는 개인을 알아볼 수 없도록 이름·계정·주소·보유 내역을 제외했습니다.</small>
+                </div>
+              </div>
             </article>
           ))}
         </div>
