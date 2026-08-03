@@ -1,19 +1,19 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "notes": "택병서버 런처 안정성·자동 업데이트·다운로드 경로 개선",
-  "pub_date": "2026-08-03T12:37:43.438Z",
+  "pub_date": "2026-08-03T13:21:05.134Z",
   "platforms": {
     "darwin-aarch64": {
-      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.0-macOS-Universal.app.tar.gz",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU2dLeHFIMXp3NXBkdnJUT0lWYlZUQWY0V2VheVE2MDhjRVQ2eG1KU2ZZOFJRS0Q2TjFMTzhrZlFMUDNCTGhSNjlCTnRIYU9JYjJHVWtTV3c1ZDhGUFFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NzYwNjU0CWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKTGprcmxIb3FkQU5PTStlOUxzOVIvR2VqOTJ1UGxnQWQ0MXNSa1hlcXdodkt3U0FNdUJpK0ErRG9DdHVMZngxM2hoZUwvQjMzMTkvZ2tBUDA1Z3c4QkE9PQo="
+      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.1-macOS-Universal.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU21JZzRHRW5pcHNqM05hVDlvN3dYV20wY3plNEVnaXUwSEVVT0hrdEpRZUxwVHVBZGhLYlRud0NjRm13WlAwSjhXQXpNRm1teFVxNUdPczFsVmJoZWdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NzYzMjA3CWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKU1cvOEw4bzZwZTgxODFlT0tlK09ZRFE3Y2hkNG5sSmtHOERlTm8wZjFLdTRrSGpsVGxBZVJXNzliZDg4UzJyS3F5YUhrR2tNNVlMRE1RSkZSbVd3QkE9PQo="
     },
     "darwin-x86_64": {
-      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.0-macOS-Universal.app.tar.gz",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU2dLeHFIMXp3NXBkdnJUT0lWYlZUQWY0V2VheVE2MDhjRVQ2eG1KU2ZZOFJRS0Q2TjFMTzhrZlFMUDNCTGhSNjlCTnRIYU9JYjJHVWtTV3c1ZDhGUFFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NzYwNjU0CWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKTGprcmxIb3FkQU5PTStlOUxzOVIvR2VqOTJ1UGxnQWQ0MXNSa1hlcXdodkt3U0FNdUJpK0ErRG9DdHVMZngxM2hoZUwvQjMzMTkvZ2tBUDA1Z3c4QkE9PQo="
+      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.1-macOS-Universal.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU21JZzRHRW5pcHNqM05hVDlvN3dYV20wY3plNEVnaXUwSEVVT0hrdEpRZUxwVHVBZGhLYlRud0NjRm13WlAwSjhXQXpNRm1teFVxNUdPczFsVmJoZWdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NzYzMjA3CWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKU1cvOEw4bzZwZTgxODFlT0tlK09ZRFE3Y2hkNG5sSmtHOERlTm8wZjFLdTRrSGpsVGxBZVJXNzliZDg4UzJyS3F5YUhrR2tNNVlMRE1RSkZSbVd3QkE9PQo="
     },
     "windows-x86_64": {
-      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.0-Windows-x64-Setup.exe",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU24xT25GY1pjeG1HNHNsS2JvQ0VjU1pKT1d3QWFONEhYSGdidkc0NUZvMUpNSDk0R2JoRGZsbGdDajJLR2ZmUmpQMGdEeVI3Uk9hTm94MWRIUzFwalFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NzYwNTg5CWZpbGU67YOd67OR7ISc67KEXzAuMy4wX3g2NC1zZXR1cC5leGUKRXRpa3RmSk5ZcHNyNEpiMW5JZWJPTFpKTTJZaWxmSkFwa0NKeThmUnU2ZWxPL2kzTE9SczgxWXBVNUlmYm9KYkc3YkJWQ1lGMkNWN2t5NmpUS1NEQ2c9PQo="
+      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.1-Windows-x64-Setup.exe",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU2tDV0lwQmZ3anBDREpiTyt4bFNIWGtiMGMvWmJLY2d0MzhYRzBoVEIzTG53SDdlMkNWalB0Mno2MU9uSElwc2ZOSzl4end0N1dIMEM2NmZ2VFRTc0FNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1NzYzMDg0CWZpbGU67YOd67OR7ISc67KEXzAuMy4xX3g2NC1zZXR1cC5leGUKODVlVmRDbEVaN2JDd3BqTGRLeWM4aDNUanpXSVQwUFRPeC9FRGIyVk9HSVFNY3F6OXJXemlWb1hVd2JXaHB4aTVKczMwNnRkVW9WdnBJZjhzNWV2QVE9PQo="
     }
   }
 }
