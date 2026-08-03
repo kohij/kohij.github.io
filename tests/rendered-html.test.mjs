@@ -43,6 +43,9 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /72종/);
   assert.match(html, /한국·미국 증권/);
   assert.match(html, /웹 증권 열기/);
+  assert.match(html, /macOS Universal 다운로드/);
+  assert.match(html, /Windows x64 다운로드/);
+  assert.match(html, /런처 자동 업데이트/);
   assert.doesNotMatch(html, /카나리|MSPT|SERVER OPERATIONS|DESIGN REFERENCES|게임머니 투자/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
 });
@@ -67,6 +70,20 @@ test("ships required social and server assets", async () => {
   assert.match(layout, /lang="ko"/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   await assert.rejects(access(new URL("app/_sites-preview/SkeletonPreview.tsx", root)));
+});
+
+test("ships launcher installers and a signed updater feed", async () => {
+  const downloadRoot = new URL("public/downloads/launcher/", root);
+  await Promise.all([
+    access(new URL("TaekbyeongLauncher-0.3.0-macOS-Universal.dmg", downloadRoot)),
+    access(new URL("TaekbyeongLauncher-0.3.0-Windows-x64-Setup.exe", downloadRoot)),
+  ]);
+
+  const feed = JSON.parse(await readFile(new URL("latest.json", downloadRoot), "utf8"));
+  assert.equal(feed.version, "0.3.0");
+  assert.ok(feed.platforms["darwin-aarch64"].signature);
+  assert.ok(feed.platforms["darwin-x86_64"].signature);
+  assert.ok(feed.platforms["windows-x86_64"].signature);
 });
 
 test("ships a dedicated Taekbyeong Securities brand and install metadata", async () => {

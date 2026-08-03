@@ -123,6 +123,7 @@ export default function Home() {
           </span>
         </a>
         <nav aria-label="주요 메뉴">
+          <a href="#launcher">런처</a>
           <a href="#start">시작</a>
           <a href="#systems">시스템</a>
           <a href="#economy">경제</a>
@@ -195,9 +196,38 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="section launcher-section" id="launcher">
+        <SectionTitle
+          kicker="01 · SERVER LAUNCHER"
+          title="설치하고, 바로 택병서버로."
+          body="Java·Forge·모드·셰이더·서버 주소를 직접 맞출 필요가 없습니다. 처음 한 번 Microsoft 로그인만 하면 이후 업데이트와 접속은 런처가 처리합니다."
+        />
+        <div className="launcher-downloads">
+          <article>
+            <span>macOS 12+</span>
+            <h3>Mac용 런처</h3>
+            <p>Apple Silicon과 Intel Mac을 한 설치파일로 지원합니다.</p>
+            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.0-macOS-Universal.dmg" download>
+              macOS 다운로드 <small>DMG · Universal</small>
+            </a>
+          </article>
+          <article>
+            <span>Windows 10·11</span>
+            <h3>Windows용 런처</h3>
+            <p>64비트 Windows 전용. 사용자 계정에 자동 설치합니다.</p>
+            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.0-Windows-x64-Setup.exe" download>
+              Windows 다운로드 <small>EXE · x64</small>
+            </a>
+          </article>
+        </div>
+        <p className="launcher-assurance">
+          SHA-256 검증 · 변경 파일만 동기화 · 런처 자동 업데이트 · 택병서버 고정 접속
+        </p>
+      </section>
+
       <section className="section start-section" id="start">
         <SectionTitle
-          kicker="01 · FIRST DAY"
+          kicker="02 · FIRST DAY"
           title="처음 60분은 이렇게"
           body="서버의 모든 시스템을 한꺼번에 외울 필요는 없습니다. 첫 산업 의뢰까지 따라가면 나머지 길이 자연스럽게 열립니다."
         />
@@ -225,7 +255,7 @@ export default function Home() {
             서버 안내에 있는 모드팩을 그대로 적용한 뒤 다시 접속하세요.
           </p>
           <p>
-            <a href="/downloads/TaekbyeongNotices-1.20.1-1.0.2.jar">
+            <a href="/downloads/TaekbyeongNotices-1.20.1-1.0.4.jar">
               택병 알림함 다운로드
             </a>
             를 <code>mods</code> 폴더에 넣으면 공지를 HUD나 기존 채팅으로 골라 받을 수 있습니다. 비디오 설정에서 크기·위치·등장 방식과 자유 배치를 조절할 수 있습니다.
