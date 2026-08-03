@@ -43,8 +43,10 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /72종/);
   assert.match(html, /한국·미국 증권/);
   assert.match(html, /웹 증권 열기/);
-  assert.match(html, /macOS Universal 다운로드/);
-  assert.match(html, /Windows x64 다운로드/);
+  assert.match(html, /macOS 다운로드/);
+  assert.match(html, /DMG · Universal/);
+  assert.match(html, /Windows 다운로드/);
+  assert.match(html, /EXE · x64/);
   assert.match(html, /런처 자동 업데이트/);
   assert.doesNotMatch(html, /카나리|MSPT|SERVER OPERATIONS|DESIGN REFERENCES|게임머니 투자/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
