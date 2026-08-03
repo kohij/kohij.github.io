@@ -5,17 +5,27 @@
   "address": "taekbyeong-709371ef.nip.io",
   "port": 25565,
   "resourcePack": {
-    "file": "taekbyeong-fmm-companions-ui-1.20.1-v15.zip",
+    "file": "taekbyeong-fmm-companions-ui-1.20.1-v16.zip",
     "required": true,
     "models": 12,
     "engine": "FreeMinecraftModels 1.1.4 + Minecraft ItemDisplay 대체",
     "license": "CC0 모델 자산",
-    "sha1": "3a272eca3bb778a7df91741891510597e325de31",
-    "sha256": "7cdd3960009be2b51078130f289f3a29e700a0900f5db7ce12edb26571531caf"
+    "sha1": "c89a76ea8c72f923b7232a6aa347ef93f3687d1c",
+    "sha256": "2e4d6004c035f63335b85cfaa7fe7e1f13baedb15796349923cc2839d252362e"
+  },
+  "noticeClient": {
+    "file": "TaekbyeongNotices-1.20.1-1.0.0.jar",
+    "requiredForSeparateHud": true,
+    "fallbackWithoutMod": "클릭 가능한 한 줄 공지",
+    "openKey": "N",
+    "defaultScale": 0.72,
+    "sha1": "281f8e01108dffc5bfbdb6f19de96a05e4caa0ec",
+    "sha256": "9cef1151479c8c5c6c74a660d766870d62d6e1c28b76eabe6a8cabc8637c87ab"
   },
   "noticePack": {
     "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",
     "optional": true,
+    "deprecatedForAutomaticNotices": true,
     "fontNamespace": "taekbyeong:scroll",
     "sha1": "80ec9dcce9cbbfff96d5e53dc00da69c2901c477",
     "sha256": "4a3ec09b841afb40eb71ab1ca4b9897ccd7ce38eeef48789d0af395b6a8d5151"
