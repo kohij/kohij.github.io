@@ -228,7 +228,7 @@ export default function Home() {
             <a href="/downloads/TaekbyeongNotices-1.20.1-1.0.2.jar">
               택병 알림함 다운로드
             </a>
-            를 <code>mods</code> 폴더에 넣으면 공지가 채팅 밖의 작은 HUD로 분리됩니다. 비디오 설정에서 크기·위치·등장 방식과 자유 배치를 조절할 수 있습니다.
+            를 <code>mods</code> 폴더에 넣으면 공지를 HUD나 기존 채팅으로 골라 받을 수 있습니다. 비디오 설정에서 크기·위치·등장 방식과 자유 배치를 조절할 수 있습니다.
           </p>
         </aside>
       </section>
