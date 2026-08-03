@@ -9,7 +9,7 @@ d5d7fbc146c758dd5e80cf3e8c17a41f06ae0a3260aa9e240d5da5dfd64abfd2  taekbyeong-fmm
 6ba9d7f7a42d4372fee40fc069e23f6308334f481a82245e97fb7d1fbff65bed  taekbyeong-fmm-companions-ui-1.20.1-v13.zip
 7cdd3960009be2b51078130f289f3a29e700a0900f5db7ce12edb26571531caf  taekbyeong-fmm-companions-ui-1.20.1-v15.zip
 2e4d6004c035f63335b85cfaa7fe7e1f13baedb15796349923cc2839d252362e  taekbyeong-fmm-companions-ui-1.20.1-v16.zip
-9cef1151479c8c5c6c74a660d766870d62d6e1c28b76eabe6a8cabc8637c87ab  TaekbyeongNotices-1.20.1-1.0.0.jar
+65473ed1d0e8811228bdee70139e881e05279df54026f4fc1c7b266311f1339a  TaekbyeongNotices-1.20.1-1.0.0.jar
 fe9612be70c95adb548f9802ee3fb9c2937a6f2b2f854daf75c33367033dfa7f  taekbyeong-modelengine-ui-1.20.1-v2.zip
 9eb3fcb1a9bce6de42f1c75e64309f6eb396b1653228fb81e63701c69ea1d7e1  taekbyeong-modelengine-ui-1.20.1-v3.zip
 4a3ec09b841afb40eb71ab1ca4b9897ccd7ce38eeef48789d0af395b6a8d5151  taekbyeong-modelengine-ui-1.20.1-v4.zip

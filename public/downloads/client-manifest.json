@@ -19,8 +19,8 @@
     "fallbackWithoutMod": "클릭 가능한 한 줄 공지",
     "openKey": "N",
     "defaultScale": 0.72,
-    "sha1": "281f8e01108dffc5bfbdb6f19de96a05e4caa0ec",
-    "sha256": "9cef1151479c8c5c6c74a660d766870d62d6e1c28b76eabe6a8cabc8637c87ab"
+    "sha1": "1064aa1bfe09611f2248cd84379ac4215212cd96",
+    "sha256": "65473ed1d0e8811228bdee70139e881e05279df54026f4fc1c7b266311f1339a"
   },
   "noticePack": {
     "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",
