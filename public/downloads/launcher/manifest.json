@@ -1,0 +1,249 @@
+{
+  "formatVersion": 1,
+  "release": "44747969548f4e64",
+  "publishedAt": "2026-08-03T11:41:05.408Z",
+  "patchNotesUrl": "/api/patch-notes",
+  "guideUrl": "/#patch-notes",
+  "server": {
+    "name": "택병서버",
+    "address": "taekbyeong-709371ef.nip.io",
+    "port": 25565
+  },
+  "minecraft": {
+    "version": "1.20.1",
+    "forge": "47.3.22",
+    "javaRuntime": "java-runtime-gamma"
+  },
+  "files": [
+    {
+      "path": "config/oculus.properties",
+      "url": "files/config/oculus.properties",
+      "size": 127,
+      "sha256": "dce7428afb017fdbdf9505be10406f37cfea328eebd5563e6417504eeb395a0e",
+      "policy": "seed"
+    },
+    {
+      "path": "mods/ae2utility-20.1.0.jar",
+      "url": "files/mods/ae2utility-20.1.0.jar",
+      "size": 129175,
+      "sha256": "2fd3b19862f07382c787a8954d824c91d17c57a88b341b878877ad04c42f4ffc"
+    },
+    {
+      "path": "mods/appliedenergistics2-forge-15.4.10.jar",
+      "url": "files/mods/appliedenergistics2-forge-15.4.10.jar",
+      "size": 8495956,
+      "sha256": "fbfee05c6674cb6b00fe425e945ca4818d41eb34069b60dcb4a36221a0390fcc"
+    },
+    {
+      "path": "mods/architectury-9.2.14-forge.jar",
+      "url": "files/mods/architectury-9.2.14-forge.jar",
+      "size": 580602,
+      "sha256": "218b471d0b8a1f6cda14cfc1beb9eeb0df54304500acc6c5613d9b88ec65d9af"
+    },
+    {
+      "path": "mods/better_create-1.0.0-forge-1.20.1.jar",
+      "url": "files/mods/better_create-1.0.0-forge-1.20.1.jar",
+      "size": 2252091,
+      "sha256": "35ff9022f1ab368ba1a68891d68a826bfc21ba03526dc6e6ac80c95c8d54ff7c"
+    },
+    {
+      "path": "mods/BiomesOPlenty-1.20.1-18.0.0.592.jar",
+      "url": "files/mods/BiomesOPlenty-1.20.1-18.0.0.592.jar",
+      "size": 21800460,
+      "sha256": "c587b49931e62f89c2673936a5e7269c6daabb713dbcc30813cb0f76da37e01d"
+    },
+    {
+      "path": "mods/Connector-1.0.0-beta.49+1.20.1.jar",
+      "url": "files/mods/Connector-1.0.0-beta.49+1.20.1.jar",
+      "size": 5046108,
+      "sha256": "caf19c97c0fce9158e03e354d4ebf556e8f1745c868da5dc4f6b7498727ab29f"
+    },
+    {
+      "path": "mods/COP-Create+6.0.7-3.1.jar",
+      "url": "files/mods/COP-Create+6.0.7-3.1.jar",
+      "size": 46813,
+      "sha256": "4661c4d4518249c6f96e667e0ab80cad7fe2bb426066cc9a13d5fa277877b3b8"
+    },
+    {
+      "path": "mods/create_sophback_compat-1.0.jar",
+      "url": "files/mods/create_sophback_compat-1.0.jar",
+      "size": 679850,
+      "sha256": "5eee67aff06d3355cbd06b6190551e109884a43465da3671f9d2735a07eba3c3"
+    },
+    {
+      "path": "mods/create-1.20.1-6.0.8.jar",
+      "url": "files/mods/create-1.20.1-6.0.8.jar",
+      "size": 19170905,
+      "sha256": "6fbb910c367dbce8e4fc7e5bf64b6edd4de980906ed00af8e47e4af843c0d9b0"
+    },
+    {
+      "path": "mods/creategoggles-1.20.1-6.1.1-[FORGE].jar",
+      "url": "files/mods/creategoggles-1.20.1-6.1.1-[FORGE].jar",
+      "size": 384668,
+      "sha256": "bb8ca1a5d27f658307d261846fdc1464a5798c11cbd238c60358fc134b37b1e7"
+    },
+    {
+      "path": "mods/curios-forge-5.14.1+1.20.1.jar",
+      "url": "files/mods/curios-forge-5.14.1+1.20.1.jar",
+      "size": 398066,
+      "sha256": "1e817919a35b37cf30524aaec73f0ca5130452f23f168f844854df282eb8e51f"
+    },
+    {
+      "path": "mods/embeddium-0.3.31+mc1.20.1.jar",
+      "url": "https://cdn.modrinth.com/data/sk9rgfiA/versions/UTbfe5d1/embeddium-0.3.31%2Bmc1.20.1.jar",
+      "size": 1320675,
+      "sha256": "eed3d1325f2acc2fd4e69bb495e5ccb91d962126ac5330f0582ebc2a3daf47fb"
+    },
+    {
+      "path": "mods/entityculling-forge-1.10.5-mc1.20.1.jar",
+      "url": "https://cdn.modrinth.com/data/NNAgCjsB/versions/MloBcsQQ/entityculling-forge-1.10.5-mc1.20.1.jar",
+      "size": 1590221,
+      "sha256": "db0ee6aaf7e78d758885969e1d237e6efef07109195d4bb81fa06b304ddc12aa"
+    },
+    {
+      "path": "mods/fabric-api-0.92.6+1.11.14+1.20.1.jar",
+      "url": "files/mods/fabric-api-0.92.6+1.11.14+1.20.1.jar",
+      "size": 3065813,
+      "sha256": "9b140af437581d32e5ee17d20f8fe882000e6a34cba85c152ae5bccc9570cc03"
+    },
+    {
+      "path": "mods/fabric-language-kotlin-1.13.13+kotlin.2.4.10.jar",
+      "url": "files/mods/fabric-language-kotlin-1.13.13+kotlin.2.4.10.jar",
+      "size": 8076363,
+      "sha256": "34ccdacf13bb9351fe43ce61912c2e09b72364e43e787d36ba3d2d04dec75a52"
+    },
+    {
+      "path": "mods/ferritecore-6.0.1-forge.jar",
+      "url": "files/mods/ferritecore-6.0.1-forge.jar",
+      "size": 123034,
+      "sha256": "9c2c9396a49e796d88497758caa4637d2bcbb433c318e2dd9cebcffbaf0f6c54"
+    },
+    {
+      "path": "mods/guideme-20.1.15.jar",
+      "url": "files/mods/guideme-20.1.15.jar",
+      "size": 9414827,
+      "sha256": "cf8052ab3da121012efc59a20e731c24bfe7488dfa556c9b88809f42dea3b24a"
+    },
+    {
+      "path": "mods/ImmediatelyFast-Forge-1.5.5+1.20.4.jar",
+      "url": "https://cdn.modrinth.com/data/5ZwdcRci/versions/rvsLEEZU/ImmediatelyFast-Forge-1.5.5%2B1.20.4.jar",
+      "size": 532063,
+      "sha256": "82db19cc65b5c11a444498fb4b8cbcb0393c043e794cb5bf368631a0af765035"
+    },
+    {
+      "path": "mods/industrialcraft2-refabricated-1.20.1-fabric.0.3a.jar",
+      "url": "files/mods/industrialcraft2-refabricated-1.20.1-fabric.0.3a.jar",
+      "size": 16706659,
+      "sha256": "7db803e21a176699b84b049763a01521dcc60ead77352d0bd74f2f8517d9ff8f"
+    },
+    {
+      "path": "mods/Jade-1.20.1-Forge-11.13.3.jar",
+      "url": "files/mods/Jade-1.20.1-Forge-11.13.3.jar",
+      "size": 553487,
+      "sha256": "a632c77975e5aedff6322b0072f8b0db3f5d4bf914df6bdcc87d1aea4d5f55f4"
+    },
+    {
+      "path": "mods/jei-1.20.1-forge-15.20.0.112.jar",
+      "url": "files/mods/jei-1.20.1-forge-15.20.0.112.jar",
+      "size": 1385600,
+      "sha256": "2d3a86f503dbde51afa5142951525c37e227016ce8d9e7dfd10bbdd9233f0204"
+    },
+    {
+      "path": "mods/mekajadeupgrade-1.3-20.1.jar",
+      "url": "files/mods/mekajadeupgrade-1.3-20.1.jar",
+      "size": 9480,
+      "sha256": "77d861b306e540c23c8b83ddc77f1587e9ecfe90abe226185cf300a229e023ef"
+    },
+    {
+      "path": "mods/Mekanism-1.20.1-10.4.16.80.jar",
+      "url": "files/mods/Mekanism-1.20.1-10.4.16.80.jar",
+      "size": 12558456,
+      "sha256": "3b0d191fa4a45e662f9725991d76a30192f30186abb2ba694b873b5f7b9358d2"
+    },
+    {
+      "path": "mods/MekanismAdditions-1.20.1-10.4.16.80.jar",
+      "url": "files/mods/MekanismAdditions-1.20.1-10.4.16.80.jar",
+      "size": 1136805,
+      "sha256": "980a86196b872ca7a66a76d37fe2119097beb8e9cc7f0fad44aa0bb47f7d83a4"
+    },
+    {
+      "path": "mods/MekanismGenerators-1.20.1-10.4.16.80.jar",
+      "url": "files/mods/MekanismGenerators-1.20.1-10.4.16.80.jar",
+      "size": 1054586,
+      "sha256": "be2d5b8553f8638cfabf491002f95cef6acef210f627addb391f5af713502512"
+    },
+    {
+      "path": "mods/MekanismTools-1.20.1-10.4.16.80.jar",
+      "url": "files/mods/MekanismTools-1.20.1-10.4.16.80.jar",
+      "size": 517999,
+      "sha256": "29089222fd52d272d767d7d2f62b9e6b401b3280a212be096eaedb0fc48aacfb"
+    },
+    {
+      "path": "mods/MekanismWeapons-1.20.1-4.2.1.jar",
+      "url": "files/mods/MekanismWeapons-1.20.1-4.2.1.jar",
+      "size": 150905,
+      "sha256": "dc6f3e6311eeefdf665a4dd8fc6767f2c4723960681be97293deb8ad9fb1e6b9"
+    },
+    {
+      "path": "mods/modernfix-forge-5.19.4+mc1.20.1.jar",
+      "url": "files/mods/modernfix-forge-5.19.4+mc1.20.1.jar",
+      "size": 778504,
+      "sha256": "5771fadc81b1e30bbbf11f083715c6938ec852d48eeab3c41467e755bbd45d47"
+    },
+    {
+      "path": "mods/oculus-mc1.20.1-1.8.0.jar",
+      "url": "https://cdn.modrinth.com/data/GchcoXML/versions/iQ1SwGc3/oculus-mc1.20.1-1.8.0.jar",
+      "size": 2851119,
+      "sha256": "0945df0cba0f62b3901dd80c3268e5311b770ece78c78037a45db12ac0425fef"
+    },
+    {
+      "path": "mods/sophisticatedbackpacks-1.20.1-3.24.62.2017.jar",
+      "url": "files/mods/sophisticatedbackpacks-1.20.1-3.24.62.2017.jar",
+      "size": 1130880,
+      "sha256": "ffa11da88bde6ed6158bfba25e2e33005260b080a4558cc4f85be7baea9f9220"
+    },
+    {
+      "path": "mods/sophisticatedcore-1.20.1-1.3.73.2192.jar",
+      "url": "files/mods/sophisticatedcore-1.20.1-1.3.73.2192.jar",
+      "size": 1622705,
+      "sha256": "96c0fa99f790df039116278518fbc78d858ea43cf2d317031e7d81fb2706a7a3"
+    },
+    {
+      "path": "mods/TaekbyeongNotices-1.20.1-1.0.4.jar",
+      "url": "files/mods/TaekbyeongNotices-1.20.1-1.0.4.jar",
+      "size": 54296,
+      "sha256": "cfb6dc2868596d2e80d07e01333d25a1ac6a43b01e80af08a48b2929c75933fb"
+    },
+    {
+      "path": "mods/TerraBlender-forge-1.20.1-3.0.1.10.jar",
+      "url": "files/mods/TerraBlender-forge-1.20.1-3.0.1.10.jar",
+      "size": 107532,
+      "sha256": "c109016f46ca9bdae69976bf080bbf2e8e5968cb66c0a78845f8ca6af5dbbeb1"
+    },
+    {
+      "path": "mods/ycurrenci-2.1.0-forge-1.20.1.jar",
+      "url": "files/mods/ycurrenci-2.1.0-forge-1.20.1.jar",
+      "size": 2033851,
+      "sha256": "349901961f64906759412378a89acfbc995e13990ecf6c866350b9fefe5b5a18"
+    },
+    {
+      "path": "mods/zihlaunchpads-1.2.0.jar",
+      "url": "files/mods/zihlaunchpads-1.2.0.jar",
+      "size": 146519,
+      "sha256": "aaaad644a304849afbee33901d28fb33a589e0d9d9bef5a3cac744d93f5c5a5c"
+    },
+    {
+      "path": "options.txt",
+      "url": "files/options.txt",
+      "size": 265,
+      "sha256": "c3f18b6fa2b99d86dac307cc8c8c30b270be72a36c1b4601a3f0580832589f8a",
+      "policy": "seed"
+    },
+    {
+      "path": "shaderpacks/MakeUp-UltraFast-9.5c.zip",
+      "url": "https://cdn.modrinth.com/data/izsIPI7a/versions/zt4eHisU/MakeUp-UltraFast-9.5c.zip",
+      "size": 398840,
+      "sha256": "8b62b38e6572f230b89035a14c13f596e85c29a7a7422d6a654204aac9ee8a05"
+    }
+  ]
+}

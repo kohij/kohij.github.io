@@ -1,0 +1,17 @@
+version:3465
+autoJump:false
+enableVsync:true
+entityShadows:false
+forceUnicodeFont:false
+fov:0.0
+fullscreen:false
+graphicsMode:1
+guiScale:0
+lang:ko_kr
+maxFps:120
+mipmapLevels:4
+particles:1
+renderClouds:"fast"
+renderDistance:12
+simulationDistance:8
+tutorialStep:none
