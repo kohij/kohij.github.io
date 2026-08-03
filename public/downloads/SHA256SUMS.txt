@@ -15,4 +15,4 @@ fe9612be70c95adb548f9802ee3fb9c2937a6f2b2f854daf75c33367033dfa7f  taekbyeong-mod
 4a3ec09b841afb40eb71ab1ca4b9897ccd7ce38eeef48789d0af395b6a8d5151  taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip
 f2c7b6030afd5bc5ab7799a684e3867cca4e9662f75a079e14f69e1c3b85aa15  taekbyeong-modelengine-free-pets-v1.zip
 304e8ce9cf15a9162e9b7fe3977bb197f5a84897066342d76644697ff2b8e4dd  ../assets/taekbyeong-pet-concepts-v1.png
-2ba7d7353f9a85fdb8fb7fe05bf71ac0e46b2e92ebb908b7e309188ff46a2eaf  TaekbyeongNotices-1.20.1-1.0.1.jar
+2acf224cda8782822c630b111d0a67a5a143d12151366ba4306dab3cad63ce3d  TaekbyeongNotices-1.20.1-1.0.2.jar
