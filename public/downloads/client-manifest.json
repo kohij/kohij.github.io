@@ -14,13 +14,13 @@
     "sha256": "2e4d6004c035f63335b85cfaa7fe7e1f13baedb15796349923cc2839d252362e"
   },
   "noticeClient": {
-    "file": "TaekbyeongNotices-1.20.1-1.0.4.jar",
+    "file": "TaekbyeongNotices-1.20.1-1.0.5.jar",
     "requiredForSeparateHud": true,
     "fallbackWithoutMod": "클릭 가능한 한 줄 공지",
     "openKey": "N",
     "defaultScale": 0.72,
-    "sha1": "25cbba5adb154a247ce5250471ade2cb02d5381f",
-    "sha256": "cfb6dc2868596d2e80d07e01333d25a1ac6a43b01e80af08a48b2929c75933fb",
+    "sha1": "cdfefbc3a51d505f56b9e0cc906af4d084be7a94",
+    "sha256": "de5403e8c588cf255096213fc9df598a1e19620d28a9ca8752f7294a7d4aa8ba",
     "maxScale": 1.5,
     "historyLimit": 50,
     "supportsKeepLastVisible": true

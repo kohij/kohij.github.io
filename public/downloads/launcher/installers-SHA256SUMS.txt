@@ -1,3 +1,3 @@
-c6aa60ebf5b6c6c27d62a622a8363453543b30b049d22ea2bc2cf35d051668a5  TaekbyeongLauncher-0.3.2-macOS-Universal.dmg
-52f3ebc4857a67698fb81d808ab5af4bf15d032fc8c8d8443ac19f6bb5ef4cc4  TaekbyeongLauncher-0.3.2-macOS-Universal.app.tar.gz
-6b4bd506a4c681366fb6f9a7be7ba2bd5cd0a75acc551c9448dd8a3a4ded5436  TaekbyeongLauncher-0.3.2-Windows-x64-Setup.exe
+6101131bc9eb780d3ff618736ca5881bb4724ac181351b72fa71f56ae8d92af3  TaekbyeongLauncher-0.3.3-macOS-Universal.dmg
+065d7c97c6dde4360dbf1dd19e247e4104d4119140636a2423375ba31575a30c  TaekbyeongLauncher-0.3.3-macOS-Universal.app.tar.gz
+d49ba6657c648fd2eea8088de8585535addf5da311f44e38e40665cfc32f96ad  TaekbyeongLauncher-0.3.3-Windows-x64-Setup.exe
