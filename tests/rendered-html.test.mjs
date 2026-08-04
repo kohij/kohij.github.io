@@ -138,11 +138,14 @@ test("ships launcher installers and a signed updater feed", async () => {
   assert.ok(feed.platforms["darwin-x86_64"].signature);
   assert.ok(feed.platforms["windows-x86_64"].signature);
 
-  const clientManifest = JSON.parse(await readFile(
-    new URL("public/downloads/client-manifest.json", root), "utf8",
-  ));
+  const [clientManifest, patchNotes] = await Promise.all([
+    readFile(new URL("public/downloads/client-manifest.json", root), "utf8").then(JSON.parse),
+    readFile(new URL("app/patch-notes.json", root), "utf8").then(JSON.parse),
+  ]);
   assert.equal(clientManifest.noticeClient.version, "1.0.9");
   assert.equal(clientManifest.noticeClient.file, "TaekbyeongNotices-1.20.1-1.0.9.jar");
+  assert.ok(patchNotes.some((note) => note.changes?.some((change) =>
+    change.includes("시야 10·시뮬레이션 6·최대 120 FPS"))));
   await access(new URL(`public/downloads/${clientManifest.noticeClient.file}`, root));
 
   const packManifest = JSON.parse(await readFile(new URL("manifest.json", downloadRoot), "utf8"));
