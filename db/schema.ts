@@ -84,9 +84,33 @@ export const hostTelemetry = sqliteTable("host_telemetry", {
   tps5: real("tps_5").notNull(),
   tps1m: real("tps_1m").notNull(),
   tpsAgeSeconds: integer("tps_age_seconds").notNull(),
+  msptP95Ms: real("mspt_p95_ms").notNull().default(0),
+  msptMaxMs: real("mspt_max_ms").notNull().default(0),
 }, (table) => [
   index("host_telemetry_received_idx").on(table.receivedAt),
   index("host_telemetry_bucket_idx").on(table.sampleBucket),
+]);
+
+export const clientCrashReports = sqliteTable("client_crash_reports", {
+  id: text("id").primaryKey(),
+  receivedAt: integer("received_at").notNull(),
+  source: text("source").notNull(),
+  event: text("event").notNull(),
+  fingerprint: text("fingerprint").notNull(),
+  appVersion: text("app_version").notNull(),
+  packRelease: text("pack_release").notNull(),
+  minecraftVersion: text("minecraft_version").notNull(),
+  javaRuntime: text("java_runtime").notNull(),
+  os: text("os").notNull(),
+  arch: text("arch").notNull(),
+  phase: text("phase").notNull(),
+  exitCode: integer("exit_code"),
+  artifactSize: integer("artifact_size").notNull(),
+  networkHash: text("network_hash").notNull(),
+}, (table) => [
+  index("client_crash_reports_received_idx").on(table.receivedAt),
+  index("client_crash_reports_fingerprint_idx").on(table.fingerprint, table.receivedAt),
+  index("client_crash_reports_network_idx").on(table.networkHash, table.receivedAt),
 ]);
 
 export const marketLoginNonces = sqliteTable("market_login_nonces", {

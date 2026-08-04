@@ -58,6 +58,22 @@ test("serves independent telemetry health and validates schema 2 probes", async 
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
   });
   assert.equal(response.status, 204);
+
+  const crash = {
+    schema: 1, kind: "crash", source: "minecraft", event: "crash_report",
+    fingerprint: "0".repeat(64), appVersion: "probe", packRelease: "test",
+    minecraftVersion: "1.20.1", javaRuntime: "java-runtime-gamma", os: "macos",
+    arch: "aarch64", phase: "next_start_scan", exitCode: null, artifactSize: 1024,
+  };
+  const crashResponse = await workerRequest("/api/client-telemetry", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(crash),
+  });
+  assert.equal(crashResponse.status, 204);
+  const rawLogAttempt = await workerRequest("/api/client-telemetry", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ ...crash, rawLog: "private local path and log" }),
+  });
+  assert.equal(rawLogAttempt.status, 400);
 });
 
 test("server-renders the Korean player guide", async () => {

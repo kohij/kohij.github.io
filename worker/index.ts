@@ -78,6 +78,24 @@ type HostTelemetry = {
   tps5: number;
   tps1m: number;
   tpsAgeSeconds: number;
+  msptP95Ms: number;
+  msptMaxMs: number;
+};
+type CrashTelemetry = {
+  schema: 1;
+  kind: "crash";
+  source: "launcher" | "minecraft";
+  event: "panic" | "operation_error" | "crash_report" | "jvm_fatal";
+  fingerprint: string;
+  appVersion: string;
+  packRelease: string;
+  minecraftVersion: string;
+  javaRuntime: string;
+  os: "macos" | "windows" | "other";
+  arch: "aarch64" | "x86_64" | "other";
+  phase: string;
+  exitCode?: number | null;
+  artifactSize: number;
 };
 type MarketSession = { id: string; player_uuid: string; player_name: string; ip: string; expires_at: number };
 type YahooChartResult = {
@@ -311,7 +329,26 @@ function validHostTelemetry(value: unknown): value is HostTelemetry {
     finiteBetween(item.hostCpuRatio, 0, 16) && finiteBetween(item.serverRssMb, 0, 1_048_576) &&
     finiteBetween(item.loadPerCore, 0, 100) && finiteBetween(item.freeDiskGb, 0, 1_048_576) &&
     finiteBetween(item.tps5, 0, 20.5) && finiteBetween(item.tps1m, 0, 20.5) &&
-    integerBetween(item.tpsAgeSeconds, 0, 86_400);
+    integerBetween(item.tpsAgeSeconds, 0, 86_400) && finiteBetween(item.msptP95Ms, 0, 60_000) &&
+    finiteBetween(item.msptMaxMs, 0, 60_000);
+}
+
+function validCrashTelemetry(value: unknown): value is CrashTelemetry {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<CrashTelemetry>;
+  const allowed = new Set(["schema", "kind", "source", "event", "fingerprint", "appVersion",
+    "packRelease", "minecraftVersion", "javaRuntime", "os", "arch", "phase", "exitCode", "artifactSize"]);
+  if (Object.keys(item).some((key) => !allowed.has(key))) return false;
+  const token = (candidate: unknown, maximum = 64) => typeof candidate === "string" &&
+    candidate.length >= 1 && candidate.length <= maximum && /^[A-Za-z0-9._-]+$/.test(candidate);
+  return item.schema === 1 && item.kind === "crash" && ["launcher", "minecraft"].includes(item.source ?? "") &&
+    ["panic", "operation_error", "crash_report", "jvm_fatal"].includes(item.event ?? "") &&
+    typeof item.fingerprint === "string" && /^[0-9a-f]{64}$/.test(item.fingerprint) &&
+    token(item.appVersion) && token(item.packRelease) && token(item.minecraftVersion) && token(item.javaRuntime) &&
+    ["macos", "windows", "other"].includes(item.os ?? "") &&
+    ["aarch64", "x86_64", "other"].includes(item.arch ?? "") && token(item.phase, 48) &&
+    (item.exitCode === undefined || item.exitCode === null || integerBetween(item.exitCode, -2_147_483_648, 2_147_483_647)) &&
+    integerBetween(item.artifactSize, 0, 8_388_608);
 }
 
 function preliminaryCause(item: ClientTelemetry): string {
@@ -329,6 +366,7 @@ function hostBad(item: Record<string, unknown>): boolean {
   return Number(item.proxy_ok) === 0 || Number(item.backend_ok) === 0 || Number(item.public_status_ok) === 0 ||
     Number(item.server_cpu_ratio) >= 0.9 || Number(item.host_cpu_ratio) >= 0.95 ||
     Number(item.load_per_core) >= 1.5 || Number(item.free_disk_gb) < 5 ||
+    Number(item.mspt_p95_ms) >= 50 || Number(item.mspt_max_ms) >= 200 ||
     (Number(item.tps_age_seconds) <= 300 && (Number(item.tps_5) < 18 || Number(item.tps_1m) < 18));
 }
 
@@ -363,14 +401,40 @@ async function clientTelemetryApi(request: Request, env: Env): Promise<Response>
           `INSERT INTO host_telemetry
             (id, received_at, sample_bucket, proxy_ok, backend_ok, public_status_ok, external_ok,
              proxy_tcp_ms, backend_tcp_ms, public_status_ms, external_rtt_ms, server_cpu_ratio,
-             host_cpu_ratio, server_rss_mb, load_per_core, free_disk_gb, tps_5, tps_1m, tps_age_seconds)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             host_cpu_ratio, server_rss_mb, load_per_core, free_disk_gb, tps_5, tps_1m, tps_age_seconds,
+             mspt_p95_ms, mspt_max_ms)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         ).bind(crypto.randomUUID(), now, Math.floor(now / 300_000), body.proxyOk ? 1 : 0,
           body.backendOk ? 1 : 0, body.publicStatusOk ? 1 : 0, body.externalOk ? 1 : 0,
           body.proxyTcpMs, body.backendTcpMs, body.publicStatusMs, body.externalRttMs,
           body.serverCpuRatio, body.hostCpuRatio, body.serverRssMb, body.loadPerCore,
-          body.freeDiskGb, body.tps5, body.tps1m, body.tpsAgeSeconds),
+          body.freeDiskGb, body.tps5, body.tps1m, body.tpsAgeSeconds, body.msptP95Ms, body.msptMaxMs),
         env.DB.prepare("DELETE FROM host_telemetry WHERE received_at < ?").bind(now - 14 * 86_400_000),
+      ]);
+      return json({ ok: true, accepted: true }, 201);
+    }
+    if (validCrashTelemetry(body)) {
+      if (body.appVersion === "probe") return new Response(null, { status: 204 });
+      const now = Date.now();
+      const networkHash = await telemetryNetworkHash(request, env);
+      const networkRate = await env.DB.prepare(
+        "SELECT COUNT(*) AS samples FROM client_crash_reports WHERE network_hash = ? AND received_at >= ?",
+      ).bind(networkHash, now - 60_000).first<{ samples: number }>();
+      if ((networkRate?.samples ?? 0) >= 12) return json({ error: "rate_limited" }, 429);
+      const duplicate = await env.DB.prepare(
+        "SELECT received_at FROM client_crash_reports WHERE fingerprint = ? AND received_at >= ? LIMIT 1",
+      ).bind(body.fingerprint, now - 86_400_000).first<{ received_at: number }>();
+      if (duplicate) return json({ ok: true, accepted: false }, 202);
+      await env.DB.batch([
+        env.DB.prepare(
+          `INSERT INTO client_crash_reports
+            (id, received_at, source, event, fingerprint, app_version, pack_release,
+             minecraft_version, java_runtime, os, arch, phase, exit_code, artifact_size, network_hash)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ).bind(crypto.randomUUID(), now, body.source, body.event, body.fingerprint,
+          body.appVersion, body.packRelease, body.minecraftVersion, body.javaRuntime,
+          body.os, body.arch, body.phase, body.exitCode ?? null, body.artifactSize, networkHash),
+        env.DB.prepare("DELETE FROM client_crash_reports WHERE received_at < ?").bind(now - 14 * 86_400_000),
       ]);
       return json({ ok: true, accepted: true }, 201);
     }
@@ -452,6 +516,13 @@ async function clientTelemetryApi(request: Request, env: Env): Promise<Response>
   const hostRows = await env.DB.prepare(
     `SELECT * FROM host_telemetry WHERE received_at >= ? ORDER BY received_at DESC`,
   ).bind(since).all<Record<string, unknown>>();
+  const crashRows = await env.DB.prepare(
+    `SELECT source, event, app_version, pack_release, os, arch, COUNT(*) AS reports,
+            COUNT(DISTINCT fingerprint) AS fingerprints, MAX(received_at) AS last_received_at
+       FROM client_crash_reports WHERE received_at >= ?
+      GROUP BY source, event, app_version, pack_release, os, arch
+      ORDER BY reports DESC LIMIT 50`,
+  ).bind(since).all<Record<string, unknown>>();
   const badHostBuckets = new Set(hostRows.results.filter(hostBad).map((row) => Number(row.sample_bucket)));
   const bucketSessions = new Map<number, Set<string>>();
   for (const row of causeRows.results) {
@@ -471,7 +542,8 @@ async function clientTelemetryApi(request: Request, env: Env): Promise<Response>
   }
   return json({ generatedAt: Date.now(), hours, summary: summary ?? {}, platforms: platforms.results,
     causeCounts, hostSamples: hostRows.results.length, latestHost: hostRows.results[0] ?? null,
-    privacy: "No account, player name, chat, coordinates, raw IP, or persistent hardware identifier is stored." });
+    crashes: crashRows.results,
+    privacy: "No account, player name, chat, coordinates, raw logs, file paths, raw IP, or persistent hardware identifier is stored." });
 }
 
 async function marketLogin(request: Request, env: Env): Promise<Response> {
