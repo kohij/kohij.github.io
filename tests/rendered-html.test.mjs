@@ -141,13 +141,13 @@ test("ships launcher installers and a signed updater feed", async () => {
   const clientManifest = JSON.parse(await readFile(
     new URL("public/downloads/client-manifest.json", root), "utf8",
   ));
-  assert.equal(clientManifest.noticeClient.version, "1.0.7");
-  assert.equal(clientManifest.noticeClient.file, "TaekbyeongNotices-1.20.1-1.0.7.jar");
+  assert.equal(clientManifest.noticeClient.version, "1.0.8");
+  assert.equal(clientManifest.noticeClient.file, "TaekbyeongNotices-1.20.1-1.0.8.jar");
   await access(new URL(`public/downloads/${clientManifest.noticeClient.file}`, root));
 
   const packManifest = JSON.parse(await readFile(new URL("manifest.json", downloadRoot), "utf8"));
   assert.ok(packManifest.files.some((file) =>
-    file.path === "mods/TaekbyeongNotices-1.20.1-1.0.7.jar" &&
+    file.path === "mods/TaekbyeongNotices-1.20.1-1.0.8.jar" &&
     file.sha256 === clientManifest.noticeClient.sha256));
 });
 
