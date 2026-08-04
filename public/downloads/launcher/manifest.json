@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
-  "release": "930dad89eb93786c",
-  "publishedAt": "2026-08-04T07:35:43.821Z",
+  "release": "558f88a86a09ddd5",
+  "publishedAt": "2026-08-04T09:48:51.007Z",
   "patchNotesUrl": "/api/patch-notes",
   "guideUrl": "/#patch-notes",
   "server": {
@@ -15,13 +15,6 @@
     "javaRuntime": "java-runtime-gamma"
   },
   "files": [
-    {
-      "path": "config/oculus.properties",
-      "url": "files/config/oculus.properties",
-      "size": 134,
-      "sha256": "6fd4bb726acc029b593d063dd2e8ee3e18332a042525575b0e50ae7ddf7fc9ce",
-      "policy": "seed"
-    },
     {
       "path": "mods/ae2utility-20.1.0.jar",
       "url": "files/mods/ae2utility-20.1.0.jar",
@@ -185,12 +178,6 @@
       "sha256": "5771fadc81b1e30bbbf11f083715c6938ec852d48eeab3c41467e755bbd45d47"
     },
     {
-      "path": "mods/oculus-mc1.20.1-1.8.0.jar",
-      "url": "https://cdn.modrinth.com/data/GchcoXML/versions/iQ1SwGc3/oculus-mc1.20.1-1.8.0.jar",
-      "size": 2851119,
-      "sha256": "0945df0cba0f62b3901dd80c3268e5311b770ece78c78037a45db12ac0425fef"
-    },
-    {
       "path": "mods/sophisticatedbackpacks-1.20.1-3.24.62.2017.jar",
       "url": "files/mods/sophisticatedbackpacks-1.20.1-3.24.62.2017.jar",
       "size": 1130880,
@@ -229,15 +216,9 @@
     {
       "path": "options.txt",
       "url": "files/options.txt",
-      "size": 265,
-      "sha256": "c3f18b6fa2b99d86dac307cc8c8c30b270be72a36c1b4601a3f0580832589f8a",
+      "size": 266,
+      "sha256": "83d77d352444a3ee632c50b11f2b66a06cb7463727ae83f28451d85836833935",
       "policy": "seed"
-    },
-    {
-      "path": "shaderpacks/MakeUp-UltraFast-9.5c.zip",
-      "url": "https://cdn.modrinth.com/data/izsIPI7a/versions/zt4eHisU/MakeUp-UltraFast-9.5c.zip",
-      "size": 398840,
-      "sha256": "8b62b38e6572f230b89035a14c13f596e85c29a7a7422d6a654204aac9ee8a05"
     }
   ]
 }

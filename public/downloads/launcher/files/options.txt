@@ -1,6 +1,6 @@
 version:3465
 autoJump:false
-enableVsync:true
+enableVsync:false
 entityShadows:false
 forceUnicodeFont:false
 fov:0.0
