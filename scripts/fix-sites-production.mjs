@@ -12,12 +12,14 @@ for (const dependency of forbiddenRuntimeImports) {
   }
 }
 
-config.compatibility_date = "2026-08-04";
+// Sites currently injects nodejs_compat. Keep the date before the flag became
+// implicit so Cloudflare accepts the generated deployment configuration.
+config.compatibility_date = "2026-08-03";
 delete config.compatibility_flags;
 await writeFile(configUrl, `${JSON.stringify(config)}\n`);
 
 const verified = JSON.parse(await readFile(configUrl, "utf8"));
-if (verified.compatibility_date !== "2026-08-04" || "compatibility_flags" in verified) {
+if (verified.compatibility_date !== "2026-08-03" || "compatibility_flags" in verified) {
   throw new Error("Sites production compatibility metadata was not normalized");
 }
 
