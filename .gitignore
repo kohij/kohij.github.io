@@ -45,3 +45,4 @@ next-env.d.ts
 # generated static entry pages
 /public/index.html
 /public/market/
+/public/render-assets/
