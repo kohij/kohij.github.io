@@ -506,7 +506,16 @@ async function clientTelemetryApi(request: Request, env: Env): Promise<Response>
   const platforms = await env.DB.prepare(
     `SELECT os, arch, client_mod_version, ic2_version, COUNT(*) AS samples,
             COUNT(DISTINCT session_id) AS sessions, AVG(fps_average) AS fps_average,
-            AVG(frame_p95_ms) AS frame_p95_ms, AVG(ping_p95_ms) AS ping_p95_ms
+            AVG(frame_p95_ms) AS frame_p95_ms, AVG(frame_p99_ms) AS frame_p99_ms,
+            MAX(frame_max_ms) AS frame_max_ms, SUM(stutter_frames) AS stutter_frames,
+            SUM(freeze_frames) AS freeze_frames, SUM(frame_count) AS frame_count,
+            AVG(ping_p95_ms) AS ping_p95_ms, AVG(client_tick_p95_ms) AS client_tick_p95_ms,
+            AVG(internet_p95_ms) AS internet_p95_ms, AVG(heap_used_ratio) AS heap_used_ratio,
+            SUM(gc_pause_ms) AS gc_pause_ms, AVG(process_cpu_ratio) AS process_cpu_ratio,
+            AVG(system_cpu_ratio) AS system_cpu_ratio, AVG(screen_width) AS screen_width,
+            AVG(screen_height) AS screen_height, AVG(render_distance) AS render_distance,
+            AVG(simulation_distance) AS simulation_distance, AVG(max_fps) AS max_fps,
+            AVG(allocated_memory_mb) AS allocated_memory_mb
        FROM client_telemetry WHERE received_at >= ?
       GROUP BY os, arch, client_mod_version, ic2_version ORDER BY samples DESC LIMIT 20`,
   ).bind(since).all();

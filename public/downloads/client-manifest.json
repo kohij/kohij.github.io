@@ -14,17 +14,17 @@
     "sha256": "2e4d6004c035f63335b85cfaa7fe7e1f13baedb15796349923cc2839d252362e"
   },
   "noticeClient": {
-    "file": "TaekbyeongNotices-1.20.1-1.0.8.jar",
+    "file": "TaekbyeongNotices-1.20.1-1.0.9.jar",
     "requiredForSeparateHud": true,
     "fallbackWithoutMod": "클릭 가능한 한 줄 공지",
     "openKey": "N",
     "defaultScale": 0.72,
-    "sha1": "389f214c29a0d3256ecc79c2497ee54b01fc1bdb",
-    "sha256": "30cff1c9f8e4a4ccd35decea12424ce31dcfbee69d2de96df52bab2930c324f7",
+    "sha1": "37e8f9b37b5902797fb3e758843c64087b3f9642",
+    "sha256": "8b2f2d1c7b40a3669f34b8d498f87c8057d4896155ad5d7434254eb8b6ee1e2d",
     "maxScale": 1.5,
     "historyLimit": 50,
     "supportsKeepLastVisible": true,
-    "version": "1.0.8"
+    "version": "1.0.9"
   },
   "noticePack": {
     "file": "taekbyeong-modelengine-ui-1.20.1-v4-atlas-safe.zip",
