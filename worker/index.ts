@@ -1,4 +1,4 @@
-/** Cloudflare Worker: guide, patch notes, secure web market relay. */
+/** Cloudflare Worker: guide, patch notes, market relay, and independent telemetry. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 
