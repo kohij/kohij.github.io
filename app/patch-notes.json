@@ -69,7 +69,7 @@
     "summary": "서버 모드·Forge·Java·그래픽 최적화를 자동으로 맞추고, 다른 주소 선택 없이 택병서버로 접속하는 전용 런처를 추가했습니다.",
     "changes": [
       "변경된 모드만 다운로드하고 SHA-256을 확인한 뒤 원자적으로 교체합니다.",
-      "Minecraft 전용 Microsoft OpenJDK 17과 Forge 47.3.22를 자동 설치하고 기기 RAM에 맞게 할당합니다.",
+      "Forge 1.20.1 호환성과 Windows 실측 결과가 더 나은 Minecraft 전용 Microsoft OpenJDK 17을 자동 설치하고, 기기 RAM에 맞게 G1GC 인수를 조정합니다.",
       "Embeddium·Entity Culling을 함께 구성합니다. Windows 실측에서 Embeddium 렌더 경로를 중복 변경하던 Oculus·ImmediatelyFast와 셰이더팩은 호환 버전이 확정될 때까지 배포에서 제외합니다.",
       "런처 첫 화면에서 서버 접속 상태·인원·지연시간과 최신 패치노트를 보여 줍니다.",
       "Windows에서 런처·보조 코어·Minecraft를 콘솔 창 없이 실행하고, 런처 오류는 업데이트·로그인·동기화·Java 준비·게임 실행 단계로만 익명 구분합니다.",
@@ -87,7 +87,9 @@
       "게임 시작 후 Tauri와 네이티브 코어가 모두 종료되어 게임에 RAM과 CPU를 반환하도록 구성했습니다.",
       "macOS Universal·Windows x64 설치본의 내장 코어·Java 17·Forge 기동·GUI 실행·자동 업데이트 서명·SHA-256을 배포 전에 일괄 검증했습니다.",
       "실제 Ryzen 9 7950X3D·RTX 4090 Windows PC에서 자체 모드와 Embeddium을 고정한 채 모드를 반씩 격리했습니다. 같은 위치·해상도·이동·시점 회전에서 Oculus 포함 조합은 약 70 FPS, Oculus를 빼고 Entity Culling을 유지한 조합은 119 FPS를 확인했습니다.",
-      "전용 클라이언트 모드 1.0.5를 실제 Forge 47.3.22 환경에서 빌드하고 메뉴 버튼 구성을 검사했습니다."
+      "같은 Windows PC에서 Microsoft OpenJDK 17.0.15와 최신 Temurin 17.0.20을 같은 인수로 비교해 Microsoft 쪽의 월드 진입이 47.9초 대 51.0초로 빨랐고, F3 순간 프레임도 89 대 81로 높아 기존 Java를 유지했습니다.",
+      "Cull Leaves 추가는 같은 검증에서 62 FPS로 낮아져 제외했고, FerriteCore 제거 경고와 ModernFix 동반 지연, JEI·Jade 제거 시 성능 이득 없음도 확인해 운영 팩에는 검증된 조합만 남겼습니다.",
+      "전용 클라이언트 모드 1.0.10을 실제 Forge 47.3.22 환경에서 유지한 채 서버 접속·이동·점프·시점 회전·리소스팩 강제 적용을 검사했습니다."
     ]
   },
   {
