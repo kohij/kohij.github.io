@@ -77,7 +77,11 @@ test("serves independent telemetry health and validates schema 2 probes", async 
 });
 
 test("server-renders the Korean player guide", async () => {
-  const response = await render();
+  const [response, clientManifest, launcherFeed] = await Promise.all([
+    render(),
+    readFile(new URL("public/downloads/client-manifest.json", root), "utf8").then(JSON.parse),
+    readFile(new URL("public/downloads/launcher/latest.json", root), "utf8").then(JSON.parse),
+  ]);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
@@ -99,9 +103,9 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /Windows 다운로드/);
   assert.match(html, /EXE · x64/);
   assert.match(html, /런처 자동 업데이트/);
-  assert.match(html, /TaekbyeongLauncher-0\.3\.5-macOS-Universal\.dmg/);
-  assert.match(html, /TaekbyeongLauncher-0\.3\.5-Windows-x64-Setup\.exe/);
-  assert.match(html, /TaekbyeongNotices-1\.20\.1-1\.0\.10\.jar/);
+  assert.ok(html.includes(`TaekbyeongLauncher-${launcherFeed.version}-macOS-Universal.dmg`));
+  assert.ok(html.includes(`TaekbyeongLauncher-${launcherFeed.version}-Windows-x64-Setup.exe`));
+  assert.ok(html.includes(clientManifest.noticeClient.file));
   assert.doesNotMatch(html, /카나리|MSPT|SERVER OPERATIONS|DESIGN REFERENCES|게임머니 투자/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
 });
@@ -132,13 +136,13 @@ test("ships required social and server assets", async () => {
 
 test("ships launcher installers and a signed updater feed", async () => {
   const downloadRoot = new URL("public/downloads/launcher/", root);
+  const feed = JSON.parse(await readFile(new URL("latest.json", downloadRoot), "utf8"));
   await Promise.all([
-    access(new URL("TaekbyeongLauncher-0.3.6-macOS-Universal.dmg", downloadRoot)),
-    access(new URL("TaekbyeongLauncher-0.3.6-Windows-x64-Setup.exe", downloadRoot)),
+    access(new URL(`TaekbyeongLauncher-${feed.version}-macOS-Universal.dmg`, downloadRoot)),
+    access(new URL(`TaekbyeongLauncher-${feed.version}-Windows-x64-Setup.exe`, downloadRoot)),
   ]);
 
-  const feed = JSON.parse(await readFile(new URL("latest.json", downloadRoot), "utf8"));
-  assert.equal(feed.version, "0.3.6");
+  assert.match(feed.version, /^\d+\.\d+\.\d+$/);
   assert.ok(feed.platforms["darwin-aarch64"].signature);
   assert.ok(feed.platforms["darwin-x86_64"].signature);
   assert.ok(feed.platforms["windows-x86_64"].signature);
@@ -147,15 +151,18 @@ test("ships launcher installers and a signed updater feed", async () => {
     readFile(new URL("public/downloads/client-manifest.json", root), "utf8").then(JSON.parse),
     readFile(new URL("app/patch-notes.json", root), "utf8").then(JSON.parse),
   ]);
-  assert.equal(clientManifest.noticeClient.version, "1.0.10");
-  assert.equal(clientManifest.noticeClient.file, "TaekbyeongNotices-1.20.1-1.0.10.jar");
+  assert.match(clientManifest.noticeClient.version, /^\d+\.\d+\.\d+$/);
+  assert.equal(
+    clientManifest.noticeClient.file,
+    `TaekbyeongNotices-1.20.1-${clientManifest.noticeClient.version}.jar`,
+  );
   assert.ok(patchNotes.some((note) => note.changes?.some((change) =>
-    change.includes("ImmediatelyFast를 클라이언트 팩에서 제거"))));
+    change.includes("Oculus·ImmediatelyFast") && change.includes("배포에서 제외"))));
   await access(new URL(`public/downloads/${clientManifest.noticeClient.file}`, root));
 
   const packManifest = JSON.parse(await readFile(new URL("manifest.json", downloadRoot), "utf8"));
   assert.ok(packManifest.files.some((file) =>
-    file.path === "mods/TaekbyeongNotices-1.20.1-1.0.10.jar" &&
+    file.path === `mods/${clientManifest.noticeClient.file}` &&
     file.sha256 === clientManifest.noticeClient.sha256));
   assert.ok(packManifest.files.every((file) => !file.path.includes("ImmediatelyFast")));
 });
