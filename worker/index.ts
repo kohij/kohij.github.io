@@ -504,7 +504,7 @@ async function clientTelemetryApi(request: Request, env: Env): Promise<Response>
        FROM client_telemetry WHERE received_at >= ?`,
   ).bind(since).first<Record<string, number | null>>();
   const platforms = await env.DB.prepare(
-    `SELECT os, arch, client_mod_version, ic2_version, COUNT(*) AS samples,
+    `SELECT os, arch, pack_release, client_mod_version, ic2_version, COUNT(*) AS samples,
             COUNT(DISTINCT session_id) AS sessions, AVG(fps_average) AS fps_average,
             AVG(frame_p95_ms) AS frame_p95_ms, AVG(frame_p99_ms) AS frame_p99_ms,
             MAX(frame_max_ms) AS frame_max_ms, SUM(stutter_frames) AS stutter_frames,
@@ -517,7 +517,7 @@ async function clientTelemetryApi(request: Request, env: Env): Promise<Response>
             AVG(simulation_distance) AS simulation_distance, AVG(max_fps) AS max_fps,
             AVG(allocated_memory_mb) AS allocated_memory_mb
        FROM client_telemetry WHERE received_at >= ?
-      GROUP BY os, arch, client_mod_version, ic2_version ORDER BY samples DESC LIMIT 20`,
+      GROUP BY os, arch, pack_release, client_mod_version, ic2_version ORDER BY samples DESC LIMIT 50`,
   ).bind(since).all();
   const causeRows = await env.DB.prepare(
     `SELECT sample_bucket, cause_hint, session_id FROM client_telemetry WHERE received_at >= ?`,
@@ -526,10 +526,10 @@ async function clientTelemetryApi(request: Request, env: Env): Promise<Response>
     `SELECT * FROM host_telemetry WHERE received_at >= ? ORDER BY received_at DESC`,
   ).bind(since).all<Record<string, unknown>>();
   const crashRows = await env.DB.prepare(
-    `SELECT source, event, app_version, pack_release, os, arch, COUNT(*) AS reports,
+    `SELECT source, event, phase, app_version, pack_release, os, arch, COUNT(*) AS reports,
             COUNT(DISTINCT fingerprint) AS fingerprints, MAX(received_at) AS last_received_at
        FROM client_crash_reports WHERE received_at >= ?
-      GROUP BY source, event, app_version, pack_release, os, arch
+      GROUP BY source, event, phase, app_version, pack_release, os, arch
       ORDER BY reports DESC LIMIT 50`,
   ).bind(since).all<Record<string, unknown>>();
   const badHostBuckets = new Set(hostRows.results.filter(hostBad).map((row) => Number(row.sample_bucket)));

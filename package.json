@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
     "build": "npm run export:static && WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build && node scripts/fix-sites-production.mjs",
-    "export:static": "STATIC_RENDER_BUILD=1 WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build && node scripts/export-static.mjs",
+    "export:static": "node scripts/clean-static.mjs && STATIC_RENDER_BUILD=1 WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build && node scripts/export-static.mjs",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",

@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
-  "release": "14b4f008fb26c5e8",
-  "publishedAt": "2026-08-04T04:44:30.274Z",
+  "release": "930dad89eb93786c",
+  "publishedAt": "2026-08-04T07:35:43.821Z",
   "patchNotesUrl": "/api/patch-notes",
   "guideUrl": "/#patch-notes",
   "server": {
@@ -18,8 +18,8 @@
     {
       "path": "config/oculus.properties",
       "url": "files/config/oculus.properties",
-      "size": 127,
-      "sha256": "dce7428afb017fdbdf9505be10406f37cfea328eebd5563e6417504eeb395a0e",
+      "size": 134,
+      "sha256": "6fd4bb726acc029b593d063dd2e8ee3e18332a042525575b0e50ae7ddf7fc9ce",
       "policy": "seed"
     },
     {
@@ -125,12 +125,6 @@
       "sha256": "cf8052ab3da121012efc59a20e731c24bfe7488dfa556c9b88809f42dea3b24a"
     },
     {
-      "path": "mods/ImmediatelyFast-Forge-1.5.5+1.20.4.jar",
-      "url": "https://cdn.modrinth.com/data/5ZwdcRci/versions/rvsLEEZU/ImmediatelyFast-Forge-1.5.5%2B1.20.4.jar",
-      "size": 532063,
-      "sha256": "82db19cc65b5c11a444498fb4b8cbcb0393c043e794cb5bf368631a0af765035"
-    },
-    {
       "path": "mods/industrialcraft2-refabricated-1.20.1-fabric.0.4-KO-final.jar",
       "url": "files/mods/industrialcraft2-refabricated-1.20.1-fabric.0.4-KO-final.jar",
       "size": 16901678,
@@ -209,10 +203,10 @@
       "sha256": "96c0fa99f790df039116278518fbc78d858ea43cf2d317031e7d81fb2706a7a3"
     },
     {
-      "path": "mods/TaekbyeongNotices-1.20.1-1.0.9.jar",
-      "url": "files/mods/TaekbyeongNotices-1.20.1-1.0.9.jar",
-      "size": 80416,
-      "sha256": "1d78ff427b40b82048ed20089559690be5349b7cd07dc45fe378595c39302bd3"
+      "path": "mods/TaekbyeongNotices-1.20.1-1.0.10.jar",
+      "url": "files/mods/TaekbyeongNotices-1.20.1-1.0.10.jar",
+      "size": 77628,
+      "sha256": "74e319f96af10f6451d08fb4726004058dfb08138ec391b3fb2ab74d86a11423"
     },
     {
       "path": "mods/TerraBlender-forge-1.20.1-3.0.1.10.jar",

@@ -11,10 +11,13 @@ import {
   type Rarity,
 } from "./content";
 import patchNotes from "./patch-notes.json";
+import clientManifest from "../public/downloads/client-manifest.json";
+import launcherRelease from "../public/downloads/launcher/latest.json";
 
 type PatchNote = (typeof patchNotes)[number];
 
 const address = "taekbyeong-709371ef.nip.io";
+const launcherVersion = launcherRelease.version;
 const fishFilters: Array<"전체" | Rarity> = [
   "전체",
   "일반",
@@ -209,7 +212,7 @@ export default function Home() {
             <span>macOS 12+</span>
             <h3>Mac용 런처</h3>
             <p>Apple Silicon과 Intel Mac을 한 설치파일로 지원합니다.</p>
-            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.4-macOS-Universal.dmg" download>
+            <a href={`/downloads/launcher/TaekbyeongLauncher-${launcherVersion}-macOS-Universal.dmg`} download>
               macOS 다운로드 <small>DMG · Universal</small>
             </a>
           </article>
@@ -217,7 +220,7 @@ export default function Home() {
             <span>Windows 10·11</span>
             <h3>Windows용 런처</h3>
             <p>64비트 Windows 전용. 사용자 계정에 자동 설치합니다.</p>
-            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.4-Windows-x64-Setup.exe" download>
+            <a href={`/downloads/launcher/TaekbyeongLauncher-${launcherVersion}-Windows-x64-Setup.exe`} download>
               Windows 다운로드 <small>EXE · x64</small>
             </a>
           </article>
@@ -257,7 +260,7 @@ export default function Home() {
             서버 안내에 있는 모드팩을 그대로 적용한 뒤 다시 접속하세요.
           </p>
           <p>
-            <a href="/downloads/TaekbyeongNotices-1.20.1-1.0.7.jar">
+            <a href={`/downloads/${clientManifest.noticeClient.file}`}>
               택병 알림함 다운로드
             </a>
             를 <code>mods</code> 폴더에 넣으면 공지를 HUD나 기존 채팅으로 골라 받을 수 있습니다. 비디오 설정에서 크기·위치·등장 방식과 자유 배치를 조절할 수 있습니다.

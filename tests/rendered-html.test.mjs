@@ -99,6 +99,9 @@ test("server-renders the Korean player guide", async () => {
   assert.match(html, /Windows 다운로드/);
   assert.match(html, /EXE · x64/);
   assert.match(html, /런처 자동 업데이트/);
+  assert.match(html, /TaekbyeongLauncher-0\.3\.5-macOS-Universal\.dmg/);
+  assert.match(html, /TaekbyeongLauncher-0\.3\.5-Windows-x64-Setup\.exe/);
+  assert.match(html, /TaekbyeongNotices-1\.20\.1-1\.0\.10\.jar/);
   assert.doesNotMatch(html, /카나리|MSPT|SERVER OPERATIONS|DESIGN REFERENCES|게임머니 투자/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
 });
@@ -118,6 +121,8 @@ test("ships required social and server assets", async () => {
   ]);
 
   assert.doesNotMatch(page, /HYPIXEL SKYBLOCK|STONEWORKS|SHA256|SERVER OPERATIONS/);
+  assert.doesNotMatch(page, /TaekbyeongNotices-1\.20\.1-1\.0\.[0-9]+\.jar/);
+  assert.doesNotMatch(page, /TaekbyeongLauncher-0\.3\.[0-9]+/);
   assert.match(content, /404 피시 낫 파운드/);
   assert.match(content, /정밀기계식 브랜디/);
   assert.match(layout, /lang="ko"/);
@@ -128,12 +133,12 @@ test("ships required social and server assets", async () => {
 test("ships launcher installers and a signed updater feed", async () => {
   const downloadRoot = new URL("public/downloads/launcher/", root);
   await Promise.all([
-    access(new URL("TaekbyeongLauncher-0.3.4-macOS-Universal.dmg", downloadRoot)),
-    access(new URL("TaekbyeongLauncher-0.3.4-Windows-x64-Setup.exe", downloadRoot)),
+    access(new URL("TaekbyeongLauncher-0.3.5-macOS-Universal.dmg", downloadRoot)),
+    access(new URL("TaekbyeongLauncher-0.3.5-Windows-x64-Setup.exe", downloadRoot)),
   ]);
 
   const feed = JSON.parse(await readFile(new URL("latest.json", downloadRoot), "utf8"));
-  assert.equal(feed.version, "0.3.4");
+  assert.equal(feed.version, "0.3.5");
   assert.ok(feed.platforms["darwin-aarch64"].signature);
   assert.ok(feed.platforms["darwin-x86_64"].signature);
   assert.ok(feed.platforms["windows-x86_64"].signature);
@@ -142,16 +147,17 @@ test("ships launcher installers and a signed updater feed", async () => {
     readFile(new URL("public/downloads/client-manifest.json", root), "utf8").then(JSON.parse),
     readFile(new URL("app/patch-notes.json", root), "utf8").then(JSON.parse),
   ]);
-  assert.equal(clientManifest.noticeClient.version, "1.0.9");
-  assert.equal(clientManifest.noticeClient.file, "TaekbyeongNotices-1.20.1-1.0.9.jar");
+  assert.equal(clientManifest.noticeClient.version, "1.0.10");
+  assert.equal(clientManifest.noticeClient.file, "TaekbyeongNotices-1.20.1-1.0.10.jar");
   assert.ok(patchNotes.some((note) => note.changes?.some((change) =>
-    change.includes("시야 10·시뮬레이션 6·최대 120 FPS"))));
+    change.includes("ImmediatelyFast를 클라이언트 팩에서 제거"))));
   await access(new URL(`public/downloads/${clientManifest.noticeClient.file}`, root));
 
   const packManifest = JSON.parse(await readFile(new URL("manifest.json", downloadRoot), "utf8"));
   assert.ok(packManifest.files.some((file) =>
-    file.path === "mods/TaekbyeongNotices-1.20.1-1.0.9.jar" &&
+    file.path === "mods/TaekbyeongNotices-1.20.1-1.0.10.jar" &&
     file.sha256 === clientManifest.noticeClient.sha256));
+  assert.ok(packManifest.files.every((file) => !file.path.includes("ImmediatelyFast")));
 });
 
 test("ships a dedicated Taekbyeong Securities brand and install metadata", async () => {
@@ -257,6 +263,10 @@ test("renders the device-code securities login", async () => {
   assert.match(worker, /user_internet/);
   assert.match(worker, /network_path/);
   assert.match(worker, /host_telemetry/);
+  assert.match(worker, /SELECT source, event, phase, app_version/);
+  assert.match(worker, /GROUP BY source, event, phase, app_version/);
+  assert.match(worker, /SELECT os, arch, pack_release, client_mod_version/);
+  assert.match(worker, /GROUP BY os, arch, pack_release, client_mod_version/);
   assert.match(worker, /\/api\/client-telemetry\/health/);
   assert.match(schema, /clientTelemetry = sqliteTable\("client_telemetry"/);
   assert.match(schema, /hostTelemetry = sqliteTable\("host_telemetry"/);

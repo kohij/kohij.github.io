@@ -1,19 +1,19 @@
 {
-  "version": "0.3.4",
-  "notes": "런처·Minecraft·JVM 크래시 익명 진단과 오프라인 재전송 추가",
-  "pub_date": "2026-08-04T02:03:51.445Z",
+  "version": "0.3.5",
+  "notes": "Windows 콘솔 창 제거와 런처 오류 단계별 익명 진단 추가",
+  "pub_date": "2026-08-04T07:43:00.161Z",
   "platforms": {
     "darwin-aarch64": {
-      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.4-macOS-Universal.app.tar.gz",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU2lBcFNYN25hNVY0MVBBVXpkc08ybjNNT3UzTUYxNk9nK2psb0JiMG43OHVucDhzK1Y1cDZtby85ZndxUm9JZU93Qk5YdkdIM0pISXI3ekwwTVBOMVFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODA4NjIwCWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKZndpMDNOY1RKMlV5dkJWcUlaQUJneWd6bnhRQVZtbjd2TVVtV1Izc01IbEdJTVhxUTZwZXBkL2ErNGM5eGluZ2NmRklwY1JtWW4yUEtUckNyMFEvRFE9PQo="
+      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.5-macOS-Universal.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU21rdHVhbzVMWVlGQjE4b2lCbVp2VDNRNnFqUDFXTGxVZDhwb0MzcHBLZ0szZDMvQXB1ZGF0RnZaOElmSEtsV1p6V2RsS2lmWUREelk2cUtpSEFsT2djPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODI4Mzc4CWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKSEZiR0NpYzZUNnhhV2xFbm1IUEdaSkN6YitBRjh3Wk9IREduSTdDUHlnNUNiaGYwT3ZNMThKVWxNTjRSZUZicnBwYXVzZjUwUytlZ3cxNU8rN0xiQVE9PQo="
     },
     "darwin-x86_64": {
-      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.4-macOS-Universal.app.tar.gz",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU2lBcFNYN25hNVY0MVBBVXpkc08ybjNNT3UzTUYxNk9nK2psb0JiMG43OHVucDhzK1Y1cDZtby85ZndxUm9JZU93Qk5YdkdIM0pISXI3ekwwTVBOMVFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODA4NjIwCWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKZndpMDNOY1RKMlV5dkJWcUlaQUJneWd6bnhRQVZtbjd2TVVtV1Izc01IbEdJTVhxUTZwZXBkL2ErNGM5eGluZ2NmRklwY1JtWW4yUEtUckNyMFEvRFE9PQo="
+      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.5-macOS-Universal.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU21rdHVhbzVMWVlGQjE4b2lCbVp2VDNRNnFqUDFXTGxVZDhwb0MzcHBLZ0szZDMvQXB1ZGF0RnZaOElmSEtsV1p6V2RsS2lmWUREelk2cUtpSEFsT2djPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODI4Mzc4CWZpbGU67YOd67OR7ISc67KELmFwcC50YXIuZ3oKSEZiR0NpYzZUNnhhV2xFbm1IUEdaSkN6YitBRjh3Wk9IREduSTdDUHlnNUNiaGYwT3ZNMThKVWxNTjRSZUZicnBwYXVzZjUwUytlZ3cxNU8rN0xiQVE9PQo="
     },
     "windows-x86_64": {
-      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.4-Windows-x64-Setup.exe",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU2dCU2Z3NTVvc2VVNFF5SVgyUnd2WmNZTzhka2pnZHBLdnZhUzRBTGIxZWJOclJxQld2UWdkVnM4VmZGaEZHenJXS3ZhK2NGQkRhOHRRTFZUdkdLZHdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODA4OTMwCWZpbGU67YOd67OR7ISc67KEXzAuMy40X3g2NC1zZXR1cC5leGUKN1RaaC82Q2lSWURYb1lHT0dVK3B3MzAzWXRFd3BXM09JaXZUbmJxT0FNMFFXNmxsbHluRWxFS1BZelBPOUU1NjF4QWFxZit1R1czTVVWQmNLQ05KRHc9PQo="
+      "url": "https://taekbyeong-guide.fasho-7.chatgpt.site/downloads/launcher/TaekbyeongLauncher-0.3.5-Windows-x64-Setup.exe",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSVlZ2Y3dpaDllU2lkVEVTNDBrYmp5dzJDYnFnSUpyckZBajZTa3pCMU54SVF1VGdsdWEzcFRRK2Q2NWNYQmR2TmpnTGRvOW53YTNsM2dGY0F2MjM0ZUZyTEpLRVFhYVFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODI5MzMwCWZpbGU67YOd67OR7ISc67KEXzAuMy41X3g2NC1zZXR1cC5leGUKd205cjIrdStVQW41U1dYZFRNNHZHQlV3ZHVIZHVJdXJaWnhBdnVoZ3VLVTd6Y0pNa1Z3Rktmb3UzYWFtYlJmRCtVUllrYU1GM2cwcVNqUGdtQ1JQRFE9PQo="
     }
   }
 }
