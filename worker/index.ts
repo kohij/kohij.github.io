@@ -32,6 +32,67 @@ type PatchNote = {
   reason: string;
   evidence: string[];
 };
+type ClientTelemetry = {
+  schema: 2;
+  sessionId: string;
+  sampleSeconds: number;
+  frameCount: number;
+  fpsAverage: number;
+  frameP50Ms: number;
+  frameP95Ms: number;
+  frameP99Ms: number;
+  frameMaxMs: number;
+  stutterFrames: number;
+  freezeFrames: number;
+  pingSamples: number;
+  pingAverageMs: number;
+  pingP95Ms: number;
+  pingMaxMs: number;
+  pingMissingSamples: number;
+  clientTickP95Ms: number;
+  clientTickMaxMs: number;
+  internetSamples: number;
+  internetAverageMs: number;
+  internetP95Ms: number;
+  internetMaxMs: number;
+  internetFailures: number;
+  heapUsedRatio: number;
+  gcPauseMs: number;
+  processCpuRatio: number;
+  systemCpuRatio: number;
+  screenWidth: number;
+  screenHeight: number;
+  renderDistance: number;
+  simulationDistance: number;
+  maxFps: number;
+  allocatedMemoryMb: number;
+  os: string;
+  arch: string;
+  packRelease: string;
+  clientModVersion: string;
+  ic2Version: string;
+};
+type HostTelemetry = {
+  schema: 1;
+  kind: "host";
+  sessionId: string;
+  proxyOk: boolean;
+  backendOk: boolean;
+  publicStatusOk: boolean;
+  externalOk: boolean;
+  proxyTcpMs: number;
+  backendTcpMs: number;
+  publicStatusMs: number;
+  externalRttMs: number;
+  serverCpuRatio: number;
+  hostCpuRatio: number;
+  serverRssMb: number;
+  loadPerCore: number;
+  freeDiskGb: number;
+  tps5: number;
+  tps1m: number;
+  tpsAgeSeconds: number;
+};
 type MarketSession = { id: string; player_uuid: string; player_name: string; ip: string; expires_at: number };
 type YahooChartResult = {
   meta?: { regularMarketPrice?: number };
@@ -217,6 +278,214 @@ async function patchNotesApi(request: Request, env: Env): Promise<Response> {
     note.summary, JSON.stringify(note.changes), note.reason, JSON.stringify(note.evidence), position, now)));
   await env.DB.batch(statements);
   return json({ ok: true, count: notes.length });
+}
+
+function finiteBetween(value: unknown, minimum: number, maximum: number): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= minimum && value <= maximum;
+}
+
+function integerBetween(value: unknown, minimum: number, maximum: number): value is number {
+  return Number.isInteger(value) && finiteBetween(value, minimum, maximum);
+}
+
+function validTelemetry(value: unknown): value is ClientTelemetry {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<ClientTelemetry>;
+  const token = (candidate: unknown) => typeof candidate === "string" && /^[A-Za-z0-9._-]{1,64}$/.test(candidate);
+  return item.schema === 2 && typeof item.sessionId === "string" && /^[0-9a-f]{32}$/.test(item.sessionId) &&
+    finiteBetween(item.sampleSeconds, 10, 300) && integerBetween(item.frameCount, 30, 100_000) &&
+    finiteBetween(item.fpsAverage, 0, 2_000) && finiteBetween(item.frameP50Ms, 0, 30_000) &&
+    finiteBetween(item.frameP95Ms, 0, 30_000) && finiteBetween(item.frameP99Ms, 0, 30_000) &&
+    finiteBetween(item.frameMaxMs, 0, 30_000) && integerBetween(item.stutterFrames, 0, item.frameCount) &&
+    integerBetween(item.freezeFrames, 0, item.frameCount) && integerBetween(item.pingSamples, 0, 300) &&
+    finiteBetween(item.pingAverageMs, 0, 60_000) && finiteBetween(item.pingP95Ms, 0, 60_000) &&
+    finiteBetween(item.pingMaxMs, 0, 60_000) && integerBetween(item.pingMissingSamples, 0, 300) &&
+    finiteBetween(item.clientTickP95Ms, 0, 30_000) && finiteBetween(item.clientTickMaxMs, 0, 30_000) &&
+    integerBetween(item.internetSamples, 0, 60) && finiteBetween(item.internetAverageMs, 0, 60_000) &&
+    finiteBetween(item.internetP95Ms, 0, 60_000) && finiteBetween(item.internetMaxMs, 0, 60_000) &&
+    integerBetween(item.internetFailures, 0, 60) && finiteBetween(item.heapUsedRatio, 0, 1) &&
+    integerBetween(item.gcPauseMs, 0, 300_000) && finiteBetween(item.processCpuRatio, 0, 1) &&
+    finiteBetween(item.systemCpuRatio, 0, 1) && integerBetween(item.screenWidth, 0, 16_384) &&
+    integerBetween(item.screenHeight, 0, 16_384) && integerBetween(item.renderDistance, 2, 64) &&
+    integerBetween(item.simulationDistance, 2, 64) && integerBetween(item.maxFps, 10, 1_000) &&
+    integerBetween(item.allocatedMemoryMb, 256, 262_144) && ["macos", "windows", "other"].includes(item.os ?? "") &&
+    ["aarch64", "x86_64", "other"].includes(item.arch ?? "") && token(item.packRelease) &&
+    token(item.clientModVersion) && token(item.ic2Version);
+}
+
+function validHostTelemetry(value: unknown): value is HostTelemetry {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<HostTelemetry>;
+  return item.schema === 1 && item.kind === "host" && typeof item.sessionId === "string" &&
+    /^[0-9a-f]{32}$/.test(item.sessionId) && typeof item.proxyOk === "boolean" &&
+    typeof item.backendOk === "boolean" && typeof item.publicStatusOk === "boolean" &&
+    typeof item.externalOk === "boolean" && finiteBetween(item.proxyTcpMs, 0, 60_000) &&
+    finiteBetween(item.backendTcpMs, 0, 60_000) && finiteBetween(item.publicStatusMs, 0, 60_000) &&
+    finiteBetween(item.externalRttMs, 0, 60_000) && finiteBetween(item.serverCpuRatio, 0, 16) &&
+    finiteBetween(item.hostCpuRatio, 0, 16) && finiteBetween(item.serverRssMb, 0, 1_048_576) &&
+    finiteBetween(item.loadPerCore, 0, 100) && finiteBetween(item.freeDiskGb, 0, 1_048_576) &&
+    finiteBetween(item.tps5, 0, 20.5) && finiteBetween(item.tps1m, 0, 20.5) &&
+    integerBetween(item.tpsAgeSeconds, 0, 86_400);
+}
+
+function preliminaryCause(item: ClientTelemetry): string {
+  const clientPressure = item.frameP95Ms >= 50 || item.clientTickP95Ms >= 50 ||
+    item.heapUsedRatio >= 0.9 || item.gcPauseMs >= 1_500 || item.processCpuRatio >= 0.9 || item.systemCpuRatio >= 0.95;
+  const gameNetworkBad = item.pingP95Ms >= 180 || item.pingMissingSamples >= 5;
+  const internetBad = item.internetP95Ms >= 250 || item.internetFailures >= 2;
+  if (clientPressure) return "client_pc";
+  if (gameNetworkBad && internetBad) return "user_internet";
+  if (gameNetworkBad) return "server_or_path";
+  return "healthy";
+}
+
+function hostBad(item: Record<string, unknown>): boolean {
+  return Number(item.proxy_ok) === 0 || Number(item.backend_ok) === 0 || Number(item.public_status_ok) === 0 ||
+    Number(item.server_cpu_ratio) >= 0.9 || Number(item.host_cpu_ratio) >= 0.95 ||
+    Number(item.load_per_core) >= 1.5 || Number(item.free_disk_gb) < 5 ||
+    (Number(item.tps_age_seconds) <= 300 && (Number(item.tps_5) < 18 || Number(item.tps_1m) < 18));
+}
+
+async function telemetryNetworkHash(request: Request, env: Env): Promise<string> {
+  const source = `${new Date().toISOString().slice(0, 10)}|${env.PATCH_NOTES_TOKEN ?? "telemetry"}|${clientIp(request)}`;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(source));
+  return Array.from(new Uint8Array(digest)).slice(0, 12).map((value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+function telemetryHealth(request: Request): Response {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return json({ error: "method_not_allowed" }, 405, { allow: "GET, HEAD" });
+  }
+  return new Response(request.method === "HEAD" ? null : "ok", {
+    status: 200, headers: { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8" },
+  });
+}
+
+async function clientTelemetryApi(request: Request, env: Env): Promise<Response> {
+  if (request.method === "POST") {
+    const contentLength = Number(request.headers.get("content-length") ?? "0");
+    if (Number.isFinite(contentLength) && contentLength > 12_288) return json({ error: "payload_too_large" }, 413);
+    let body: unknown;
+    try { body = await request.json(); } catch { return json({ error: "invalid_json" }, 400); }
+    if (validHostTelemetry(body)) {
+      if (!env.PATCH_NOTES_TOKEN || request.headers.get("authorization") !== `Bearer ${env.PATCH_NOTES_TOKEN}`) {
+        return json({ error: "unauthorized" }, 401);
+      }
+      const now = Date.now();
+      await env.DB.batch([
+        env.DB.prepare(
+          `INSERT INTO host_telemetry
+            (id, received_at, sample_bucket, proxy_ok, backend_ok, public_status_ok, external_ok,
+             proxy_tcp_ms, backend_tcp_ms, public_status_ms, external_rtt_ms, server_cpu_ratio,
+             host_cpu_ratio, server_rss_mb, load_per_core, free_disk_gb, tps_5, tps_1m, tps_age_seconds)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ).bind(crypto.randomUUID(), now, Math.floor(now / 300_000), body.proxyOk ? 1 : 0,
+          body.backendOk ? 1 : 0, body.publicStatusOk ? 1 : 0, body.externalOk ? 1 : 0,
+          body.proxyTcpMs, body.backendTcpMs, body.publicStatusMs, body.externalRttMs,
+          body.serverCpuRatio, body.hostCpuRatio, body.serverRssMb, body.loadPerCore,
+          body.freeDiskGb, body.tps5, body.tps1m, body.tpsAgeSeconds),
+        env.DB.prepare("DELETE FROM host_telemetry WHERE received_at < ?").bind(now - 14 * 86_400_000),
+      ]);
+      return json({ ok: true, accepted: true }, 201);
+    }
+    if (!validTelemetry(body)) return json({ error: "invalid_telemetry" }, 400);
+    if (body.clientModVersion === "probe") return new Response(null, { status: 204 });
+    const now = Date.now();
+    const networkHash = await telemetryNetworkHash(request, env);
+    const latest = await env.DB.prepare(
+      "SELECT received_at FROM client_telemetry WHERE session_id = ? ORDER BY received_at DESC LIMIT 1",
+    ).bind(body.sessionId).first<{ received_at: number }>();
+    if (latest && now - latest.received_at < 30_000) return json({ ok: true, accepted: false }, 202);
+    const networkRate = await env.DB.prepare(
+      "SELECT COUNT(*) AS samples FROM client_telemetry WHERE network_hash = ? AND received_at >= ?",
+    ).bind(networkHash, now - 60_000).first<{ samples: number }>();
+    if ((networkRate?.samples ?? 0) >= 30) return json({ error: "rate_limited" }, 429);
+    const cause = preliminaryCause(body);
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO client_telemetry
+          (id, received_at, session_id, sample_seconds, frame_count, fps_average,
+           frame_p50_ms, frame_p95_ms, frame_p99_ms, frame_max_ms, stutter_frames,
+           freeze_frames, ping_samples, ping_average_ms, ping_p95_ms, ping_max_ms,
+           ping_missing_samples, client_tick_p95_ms, client_tick_max_ms, internet_samples,
+           internet_average_ms, internet_p95_ms, internet_max_ms, internet_failures,
+           heap_used_ratio, gc_pause_ms, process_cpu_ratio, system_cpu_ratio, screen_width,
+           screen_height, render_distance, simulation_distance, max_fps, allocated_memory_mb,
+           os, arch, pack_release, client_mod_version, ic2_version, cause_hint, network_hash, sample_bucket)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).bind(crypto.randomUUID(), now, body.sessionId, body.sampleSeconds, body.frameCount,
+        body.fpsAverage, body.frameP50Ms, body.frameP95Ms, body.frameP99Ms, body.frameMaxMs,
+        body.stutterFrames, body.freezeFrames, body.pingSamples, body.pingAverageMs,
+        body.pingP95Ms, body.pingMaxMs, body.pingMissingSamples, body.clientTickP95Ms,
+        body.clientTickMaxMs, body.internetSamples, body.internetAverageMs, body.internetP95Ms,
+        body.internetMaxMs, body.internetFailures, body.heapUsedRatio, body.gcPauseMs,
+        body.processCpuRatio, body.systemCpuRatio, body.screenWidth, body.screenHeight,
+        body.renderDistance, body.simulationDistance, body.maxFps, body.allocatedMemoryMb,
+        body.os, body.arch, body.packRelease, body.clientModVersion, body.ic2Version,
+        cause, networkHash, Math.floor(now / 300_000)),
+      env.DB.prepare("DELETE FROM client_telemetry WHERE received_at < ?").bind(now - 14 * 86_400_000),
+    ]);
+    return json({ ok: true, accepted: true }, 201);
+  }
+  if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, { allow: "GET, POST" });
+  if (!env.PATCH_NOTES_TOKEN || request.headers.get("authorization") !== `Bearer ${env.PATCH_NOTES_TOKEN}`) {
+    return json({ error: "unauthorized" }, 401);
+  }
+  const requestedHours = Number(new URL(request.url).searchParams.get("hours") ?? "24");
+  const hours = Number.isInteger(requestedHours) && requestedHours >= 1 && requestedHours <= 336
+    ? requestedHours : 24;
+  const since = Date.now() - hours * 3_600_000;
+  await env.DB.prepare("DELETE FROM client_telemetry WHERE received_at < ?")
+    .bind(Date.now() - 14 * 86_400_000).run();
+  const summary = await env.DB.prepare(
+    `SELECT COUNT(*) AS samples, COUNT(DISTINCT session_id) AS sessions,
+            AVG(fps_average) AS fps_average, AVG(frame_p95_ms) AS frame_p95_ms,
+            AVG(frame_p99_ms) AS frame_p99_ms, MAX(frame_max_ms) AS frame_max_ms,
+            SUM(stutter_frames) AS stutter_frames, SUM(freeze_frames) AS freeze_frames,
+            SUM(frame_count) AS frame_count, AVG(ping_average_ms) AS ping_average_ms,
+            AVG(ping_p95_ms) AS ping_p95_ms, MAX(ping_max_ms) AS ping_max_ms,
+            SUM(ping_missing_samples) AS ping_missing_samples,
+            AVG(client_tick_p95_ms) AS client_tick_p95_ms, MAX(client_tick_max_ms) AS client_tick_max_ms,
+            AVG(internet_average_ms) AS internet_average_ms, AVG(internet_p95_ms) AS internet_p95_ms,
+            MAX(internet_max_ms) AS internet_max_ms, SUM(internet_failures) AS internet_failures,
+            AVG(heap_used_ratio) AS heap_used_ratio, SUM(gc_pause_ms) AS gc_pause_ms,
+            AVG(process_cpu_ratio) AS process_cpu_ratio, AVG(system_cpu_ratio) AS system_cpu_ratio,
+            MIN(received_at) AS first_received_at, MAX(received_at) AS last_received_at
+       FROM client_telemetry WHERE received_at >= ?`,
+  ).bind(since).first<Record<string, number | null>>();
+  const platforms = await env.DB.prepare(
+    `SELECT os, arch, client_mod_version, ic2_version, COUNT(*) AS samples,
+            COUNT(DISTINCT session_id) AS sessions, AVG(fps_average) AS fps_average,
+            AVG(frame_p95_ms) AS frame_p95_ms, AVG(ping_p95_ms) AS ping_p95_ms
+       FROM client_telemetry WHERE received_at >= ?
+      GROUP BY os, arch, client_mod_version, ic2_version ORDER BY samples DESC LIMIT 20`,
+  ).bind(since).all();
+  const causeRows = await env.DB.prepare(
+    `SELECT sample_bucket, cause_hint, session_id FROM client_telemetry WHERE received_at >= ?`,
+  ).bind(since).all<Record<string, unknown>>();
+  const hostRows = await env.DB.prepare(
+    `SELECT * FROM host_telemetry WHERE received_at >= ? ORDER BY received_at DESC`,
+  ).bind(since).all<Record<string, unknown>>();
+  const badHostBuckets = new Set(hostRows.results.filter(hostBad).map((row) => Number(row.sample_bucket)));
+  const bucketSessions = new Map<number, Set<string>>();
+  for (const row of causeRows.results) {
+    const bucket = Number(row.sample_bucket);
+    const sessions = bucketSessions.get(bucket) ?? new Set<string>();
+    sessions.add(String(row.session_id));
+    bucketSessions.set(bucket, sessions);
+  }
+  const causeCounts: Record<string, number> = { healthy: 0, client_pc: 0, user_internet: 0, network_path: 0, server: 0 };
+  for (const row of causeRows.results) {
+    let cause = String(row.cause_hint);
+    if (cause === "server_or_path") {
+      const bucket = Number(row.sample_bucket);
+      cause = badHostBuckets.has(bucket) || (bucketSessions.get(bucket)?.size ?? 0) >= 2 ? "server" : "network_path";
+    }
+    causeCounts[cause] = (causeCounts[cause] ?? 0) + 1;
+  }
+  return json({ generatedAt: Date.now(), hours, summary: summary ?? {}, platforms: platforms.results,
+    causeCounts, hostSamples: hostRows.results.length, latestHost: hostRows.results[0] ?? null,
+    privacy: "No account, player name, chat, coordinates, raw IP, or persistent hardware identifier is stored." });
 }
 
 async function marketLogin(request: Request, env: Env): Promise<Response> {
@@ -852,6 +1121,8 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname === "/api/patch-notes") return patchNotesApi(request, env);
+    if (url.pathname === "/api/client-telemetry/health") return telemetryHealth(request);
+    if (url.pathname === "/api/client-telemetry") return clientTelemetryApi(request, env);
     if (url.pathname === "/api/market/logo") return marketLogo(request);
     if (url.pathname === "/api/market/player-head") return marketPlayerHead(request);
     if (url.pathname === "/api/market/login") return marketLogin(request, env);

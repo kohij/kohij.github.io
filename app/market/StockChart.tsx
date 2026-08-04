@@ -51,8 +51,8 @@ export default function StockChart({ item }: { item: ChartInstrument }) {
   const mountRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const candleSeriesRef = useRef<ISeriesApi<"Candlestick", UTCTimestamp> | null>(null);
-  const volumeSeriesRef = useRef<ISeriesApi<"Histogram", UTCTimestamp> | null>(null);
+  const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
 
   const candles = remote?.symbol === item.symbol && remote.candles.length ? remote.candles : item.candles;
   const loading = remote?.symbol !== item.symbol;
@@ -136,7 +136,7 @@ export default function StockChart({ item }: { item: ChartInstrument }) {
     });
     volumeSeries.priceScale().applyOptions({ scaleMargins: { top: 0.76, bottom: 0 } });
 
-    const onCrosshair = (param: MouseEventParams<UTCTimestamp>) => {
+    const onCrosshair = (param: MouseEventParams) => {
       const tooltip = tooltipRef.current;
       if (!tooltip || !param.point || param.time === undefined) {
         if (tooltip) tooltip.hidden = true;

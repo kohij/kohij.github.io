@@ -72,8 +72,10 @@ export default function Home() {
     const controller = new AbortController();
     fetch("/api/patch-notes", { cache: "no-store", signal: controller.signal })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("patch notes unavailable")))
-      .then((payload: { notes?: PatchNote[] }) => {
-        if (Array.isArray(payload.notes) && payload.notes.length > 0) setLivePatchNotes(payload.notes);
+      .then((payload: unknown) => {
+        if (!payload || typeof payload !== "object") return;
+        const notes = (payload as { notes?: unknown }).notes;
+        if (Array.isArray(notes) && notes.length > 0) setLivePatchNotes(notes as PatchNote[]);
       })
       .catch(() => undefined);
     return () => controller.abort();
@@ -255,7 +257,7 @@ export default function Home() {
             서버 안내에 있는 모드팩을 그대로 적용한 뒤 다시 접속하세요.
           </p>
           <p>
-            <a href="/downloads/TaekbyeongNotices-1.20.1-1.0.4.jar">
+            <a href="/downloads/TaekbyeongNotices-1.20.1-1.0.6.jar">
               택병 알림함 다운로드
             </a>
             를 <code>mods</code> 폴더에 넣으면 공지를 HUD나 기존 채팅으로 골라 받을 수 있습니다. 비디오 설정에서 크기·위치·등장 방식과 자유 배치를 조절할 수 있습니다.

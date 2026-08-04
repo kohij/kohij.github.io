@@ -25,6 +25,36 @@ async function render(path = "/") {
   );
 }
 
+async function workerRequest(path, init = {}) {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("api-test", `${process.pid}-${Date.now()}-${Math.random()}`);
+  const { default: worker } = await import(workerUrl.href);
+  return worker.fetch(new Request(`http://localhost${path}`, init), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, {
+    waitUntil() {}, passThroughOnException() {},
+  });
+}
+
+test("serves independent telemetry health and validates schema 2 probes", async () => {
+  const health = await workerRequest("/api/client-telemetry/health");
+  assert.equal(health.status, 200);
+  assert.equal(await health.text(), "ok");
+  const payload = {
+    schema: 2, sessionId: "0".repeat(32), sampleSeconds: 60, frameCount: 3600,
+    fpsAverage: 60, frameP50Ms: 16, frameP95Ms: 18, frameP99Ms: 22, frameMaxMs: 40,
+    stutterFrames: 0, freezeFrames: 0, pingSamples: 60, pingAverageMs: 25,
+    pingP95Ms: 32, pingMaxMs: 40, pingMissingSamples: 0, clientTickP95Ms: 8,
+    clientTickMaxMs: 15, internetSamples: 4, internetAverageMs: 30, internetP95Ms: 40,
+    internetMaxMs: 45, internetFailures: 0, heapUsedRatio: 0.5, gcPauseMs: 10,
+    processCpuRatio: 0.3, systemCpuRatio: 0.4, screenWidth: 1920, screenHeight: 1080,
+    renderDistance: 12, simulationDistance: 8, maxFps: 120, allocatedMemoryMb: 6144,
+    os: "macos", arch: "aarch64", packRelease: "test", clientModVersion: "probe", ic2Version: "0.4",
+  };
+  const response = await workerRequest("/api/client-telemetry", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload),
+  });
+  assert.equal(response.status, 204);
+});
+
 test("server-renders the Korean player guide", async () => {
   const response = await render();
   assert.equal(response.status, 200);
@@ -113,7 +143,7 @@ test("ships a dedicated Taekbyeong Securities brand and install metadata", async
 });
 
 test("renders the device-code securities login", async () => {
-  const [marketPage, stockChart, worker, schema, migration, communityMigration, communityGlobalMigration, packageJson] = await Promise.all([
+  const [marketPage, stockChart, worker, schema, migration, communityMigration, communityGlobalMigration, telemetryMigration, telemetryAttributionMigration, packageJson] = await Promise.all([
     readFile(new URL("app/market/page.tsx", root), "utf8"),
     readFile(new URL("app/market/StockChart.tsx", root), "utf8"),
     readFile(new URL("worker/index.ts", root), "utf8"),
@@ -121,6 +151,8 @@ test("renders the device-code securities login", async () => {
     readFile(new URL("drizzle/0002_market_candles.sql", root), "utf8"),
     readFile(new URL("drizzle/0003_market_community.sql", root), "utf8"),
     readFile(new URL("drizzle/0004_market_community_global.sql", root), "utf8"),
+    readFile(new URL("drizzle/0006_client_telemetry.sql", root), "utf8"),
+    readFile(new URL("drizzle/0007_client_telemetry_attribution.sql", root), "utf8"),
     readFile(new URL("package.json", root), "utf8"),
   ]);
   assert.match(marketPage, /택병증권/);
@@ -182,5 +214,18 @@ test("renders the device-code securities login", async () => {
   assert.match(communityMigration, /CREATE TABLE `market_community_posts`/);
   assert.match(communityMigration, /market_community_reactions/);
   assert.match(communityGlobalMigration, /market_community_created_idx/);
+  assert.match(worker, /\/api\/client-telemetry/);
+  assert.match(worker, /clientTelemetryApi/);
+  assert.match(worker, /COUNT\(DISTINCT session_id\)/);
+  assert.match(worker, /client_pc/);
+  assert.match(worker, /user_internet/);
+  assert.match(worker, /network_path/);
+  assert.match(worker, /host_telemetry/);
+  assert.match(worker, /\/api\/client-telemetry\/health/);
+  assert.match(schema, /clientTelemetry = sqliteTable\("client_telemetry"/);
+  assert.match(schema, /hostTelemetry = sqliteTable\("host_telemetry"/);
+  assert.match(telemetryMigration, /CREATE TABLE `client_telemetry`/);
+  assert.match(telemetryMigration, /client_telemetry_session_received_idx/);
+  assert.match(telemetryAttributionMigration, /CREATE TABLE `host_telemetry`/);
   assert.match(packageJson, /lightweight-charts/);
 });
