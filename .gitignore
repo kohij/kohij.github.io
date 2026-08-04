@@ -41,3 +41,7 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# generated static entry pages
+/public/index.html
+/public/market/

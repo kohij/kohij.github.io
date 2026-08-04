@@ -15,7 +15,12 @@ async function render(path = "/") {
     }),
     {
       ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
+        fetch: async () => {
+          const asset = path === "/market" ? "dist/client/market/index.html" : "dist/client/index.html";
+          return new Response(await readFile(new URL(asset, root)), {
+            status: 200, headers: { "content-type": "text/html; charset=utf-8" },
+          });
+        },
       },
     },
     {

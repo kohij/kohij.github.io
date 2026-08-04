@@ -12,8 +12,8 @@ const { d1, r2 } = hostingConfig;
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 
 const localBindingConfig = {
-  main: "./worker/index.ts",
-  compatibility_date: "2026-08-03",
+  main: process.env.STATIC_RENDER_BUILD === "1" ? "./worker/render.ts" : "./worker/index.ts",
+  compatibility_date: "2026-08-04",
   d1_databases: d1
     ? [
         {
