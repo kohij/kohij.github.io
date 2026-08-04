@@ -1,0 +1,24 @@
+import { readFile, writeFile } from "node:fs/promises";
+
+const configUrl = new URL("../dist/server/wrangler.json", import.meta.url);
+const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+const config = JSON.parse(await readFile(configUrl, "utf8"));
+const worker = await readFile(workerUrl, "utf8");
+
+const forbiddenRuntimeImports = ["node:", "vinext/server", "react-dom", "react-server"];
+for (const dependency of forbiddenRuntimeImports) {
+  if (worker.includes(dependency)) {
+    throw new Error(`Production Worker contains a Node runtime dependency: ${dependency}`);
+  }
+}
+
+config.compatibility_date = "2026-08-04";
+delete config.compatibility_flags;
+await writeFile(configUrl, `${JSON.stringify(config)}\n`);
+
+const verified = JSON.parse(await readFile(configUrl, "utf8"));
+if (verified.compatibility_date !== "2026-08-04" || "compatibility_flags" in verified) {
+  throw new Error("Sites production compatibility metadata was not normalized");
+}
+
+console.log("Sites 경량 Worker·호환성 메타데이터 검증 완료");
