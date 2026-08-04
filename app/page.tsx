@@ -209,7 +209,7 @@ export default function Home() {
             <span>macOS 12+</span>
             <h3>Mac용 런처</h3>
             <p>Apple Silicon과 Intel Mac을 한 설치파일로 지원합니다.</p>
-            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.3-macOS-Universal.dmg" download>
+            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.4-macOS-Universal.dmg" download>
               macOS 다운로드 <small>DMG · Universal</small>
             </a>
           </article>
@@ -217,7 +217,7 @@ export default function Home() {
             <span>Windows 10·11</span>
             <h3>Windows용 런처</h3>
             <p>64비트 Windows 전용. 사용자 계정에 자동 설치합니다.</p>
-            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.3-Windows-x64-Setup.exe" download>
+            <a href="/downloads/launcher/TaekbyeongLauncher-0.3.4-Windows-x64-Setup.exe" download>
               Windows 다운로드 <small>EXE · x64</small>
             </a>
           </article>

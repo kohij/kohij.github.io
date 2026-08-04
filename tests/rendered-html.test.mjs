@@ -128,12 +128,12 @@ test("ships required social and server assets", async () => {
 test("ships launcher installers and a signed updater feed", async () => {
   const downloadRoot = new URL("public/downloads/launcher/", root);
   await Promise.all([
-    access(new URL("TaekbyeongLauncher-0.3.3-macOS-Universal.dmg", downloadRoot)),
-    access(new URL("TaekbyeongLauncher-0.3.3-Windows-x64-Setup.exe", downloadRoot)),
+    access(new URL("TaekbyeongLauncher-0.3.4-macOS-Universal.dmg", downloadRoot)),
+    access(new URL("TaekbyeongLauncher-0.3.4-Windows-x64-Setup.exe", downloadRoot)),
   ]);
 
   const feed = JSON.parse(await readFile(new URL("latest.json", downloadRoot), "utf8"));
-  assert.equal(feed.version, "0.3.3");
+  assert.equal(feed.version, "0.3.4");
   assert.ok(feed.platforms["darwin-aarch64"].signature);
   assert.ok(feed.platforms["darwin-x86_64"].signature);
   assert.ok(feed.platforms["windows-x86_64"].signature);

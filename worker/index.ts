@@ -366,7 +366,7 @@ function hostBad(item: Record<string, unknown>): boolean {
   return Number(item.proxy_ok) === 0 || Number(item.backend_ok) === 0 || Number(item.public_status_ok) === 0 ||
     Number(item.server_cpu_ratio) >= 0.9 || Number(item.host_cpu_ratio) >= 0.95 ||
     Number(item.load_per_core) >= 1.5 || Number(item.free_disk_gb) < 5 ||
-    Number(item.mspt_p95_ms) >= 50 || Number(item.mspt_max_ms) >= 200 ||
+    Number(item.mspt_p95_ms) >= 50 || Number(item.mspt_max_ms) >= 500 ||
     (Number(item.tps_age_seconds) <= 300 && (Number(item.tps_5) < 18 || Number(item.tps_1m) < 18));
 }
 
