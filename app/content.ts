@@ -616,7 +616,7 @@ export const currentSystems = [
     body: "Create, Mekanism, AE2, IC2를 한 경제권으로 묶었습니다. 자동화 단계가 올라갈수록 계약과 연구가 열립니다.",
   },
   {
-    title: "mcMMO·커스텀 강화",
+    title: "숙련도·커스텀 강화",
     eyebrow: "현재 운영",
     body: "스킬 성장과 장비 강화, 호퍼 업그레이드에 따라 보상과 새 목표가 열립니다.",
   },
