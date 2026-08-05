@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
-  "release": "5a3443a59787aac5",
-  "publishedAt": "2026-08-05T01:55:49.995Z",
+  "release": "bbecdeade17d7adf",
+  "publishedAt": "2026-08-05T02:37:08.077Z",
   "patchNotesUrl": "/api/patch-notes",
   "guideUrl": "/#patch-notes",
   "server": {
@@ -209,10 +209,10 @@
       "sha256": "96c0fa99f790df039116278518fbc78d858ea43cf2d317031e7d81fb2706a7a3"
     },
     {
-      "path": "mods/TaekbyeongNotices-1.20.1-1.0.12.jar",
-      "url": "files/mods/TaekbyeongNotices-1.20.1-1.0.12.jar",
-      "size": 88338,
-      "sha256": "6dc1af6ef96a441dafd05f6655333db1e090c04220429977a2a9dd0995a76a29"
+      "path": "mods/TaekbyeongNotices-1.20.1-1.0.13.jar",
+      "url": "files/mods/TaekbyeongNotices-1.20.1-1.0.13.jar",
+      "size": 89362,
+      "sha256": "8dedbb831b4c06f5667ade0d044843fe0329ee66ad203185af1fa0fa0e23c66e"
     },
     {
       "path": "mods/TerraBlender-forge-1.20.1-3.0.1.10.jar",

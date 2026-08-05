@@ -157,7 +157,7 @@ test("ships launcher installers and a signed updater feed", async () => {
     `TaekbyeongNotices-1.20.1-${clientManifest.noticeClient.version}.jar`,
   );
   assert.ok(patchNotes.some((note) => note.changes?.some((change) =>
-    change.includes("Oculus·ImmediatelyFast") && change.includes("배포에서 제외"))));
+    change.includes("Oculus 1.8.0") && change.includes("기본 꺼짐"))));
   await access(new URL(`public/downloads/${clientManifest.noticeClient.file}`, root));
 
   const packManifest = JSON.parse(await readFile(new URL("manifest.json", downloadRoot), "utf8"));
