@@ -1,0 +1,17 @@
+{
+  "formatVersion": 1,
+  "release": "0.1.0",
+  "publishedAt": "2026-08-08T00:00:00Z",
+  "patchNotesUrl": "/api/patch-notes",
+  "guideUrl": "/",
+  "server": {"name": "택병 하드코어", "address": "taekbyeong-709371ef.nip.io", "port": 25565},
+  "minecraft": {"version": "26.2", "forge": "", "loader": "fabric", "loaderVersion": "0.19.3", "javaMajor": 25, "javaRuntime": "java-runtime-gamma"},
+  "files": [
+    {"path": "mods/fabric-api-0.156.0+26.2.jar", "url": "/downloads/hardcore-launcher/files/fabric-api-0.156.0+26.2.jar", "size": 2531175, "sha256": "8de18d9f6a8a2a5b2120ef9e8bffb79cc9b75989c0c022c39c9dfc1bc3a29a99"},
+    {"path": "mods/sodium-fabric-0.9.2-alpha.4+mc26.2.jar", "url": "/downloads/hardcore-launcher/files/sodium-fabric-0.9.2-alpha.4+mc26.2.jar", "size": 1880490, "sha256": "a6d1ced177a1c57147e8c1c8043650d5f93e1f2824c9952f3fb67ae05633a0a7"},
+    {"path": "mods/ImmediatelyFast-Fabric-1.16.2+26.2.jar", "url": "/downloads/hardcore-launcher/files/ImmediatelyFast-Fabric-1.16.2+26.2.jar", "size": 91422, "sha256": "40da44194cd1dabdc5399c8e3c46253b6a568c2f4f9e2363a3b3a0069531d770"},
+    {"path": "mods/entityculling-fabric-1.10.5-mc26.2.jar", "url": "/downloads/hardcore-launcher/files/entityculling-fabric-1.10.5-mc26.2.jar", "size": 1583775, "sha256": "05a36decbb1bbb0f785d974068c0d9c191975e0d8d637e1eb1f2f6bb84eab05a"},
+    {"path": "mods/lithium-fabric-0.25.3+mc26.2.jar", "url": "/downloads/hardcore-launcher/files/lithium-fabric-0.25.3+mc26.2.jar", "size": 912850, "sha256": "fdde92e238e8075f89ad7f701f2a3d5854af88ba9a67657184a4407b104ac563"},
+    {"path": "mods/ferritecore-9.0.0-fabric.jar", "url": "/downloads/hardcore-launcher/files/ferritecore-9.0.0-fabric.jar", "size": 72677, "sha256": "213966c72ed967acc7392beb28a866fba301ff56b9976c2e7801c2db7de6bf22"}
+  ]
+}

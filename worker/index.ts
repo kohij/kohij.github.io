@@ -7,6 +7,7 @@ interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
   PATCH_NOTES_TOKEN?: string;
+  HARDCORE_SYNC_PUBLIC_KEY?: string;
 }
 
 type PatchNote = {
@@ -136,6 +137,82 @@ type PublicAccount = {
 
 function json(data: unknown, status = 200, headers: HeadersInit = {}) {
   return Response.json(data, { status, headers: { "cache-control": "no-store", ...headers } });
+}
+
+type HardcorePayload = {
+  schema: 1;
+  summary: Record<string, unknown>;
+  runs: Array<{ id: string; finishedAt: number; outcome: string; [key: string]: unknown }>;
+  totals: Array<Record<string, unknown>>;
+};
+
+function validHardcorePayload(value: unknown): value is HardcorePayload {
+  if (!value || typeof value !== "object") return false;
+  const payload = value as Partial<HardcorePayload>;
+  return payload.schema === 1 && !!payload.summary && typeof payload.summary === "object" &&
+    Array.isArray(payload.runs) && payload.runs.length <= 50 &&
+    payload.runs.every((run) => typeof run?.id === "string" && /^[a-zA-Z0-9_-]{1,96}$/.test(run.id) &&
+      Number.isSafeInteger(run.finishedAt) && typeof run.outcome === "string" && run.outcome.length <= 32) &&
+    Array.isArray(payload.totals) && payload.totals.length <= 100;
+}
+
+async function verifyHardcoreSignature(env: Env, message: string, signature: string): Promise<boolean> {
+  if (!env.HARDCORE_SYNC_PUBLIC_KEY || !/^[A-Za-z0-9_-]{80,200}$/.test(signature)) return false;
+  try {
+    const key = await crypto.subtle.importKey("spki", exactBuffer(base64Bytes(env.HARDCORE_SYNC_PUBLIC_KEY)),
+      { name: "Ed25519" }, false, ["verify"]);
+    return crypto.subtle.verify("Ed25519", key, exactBuffer(base64Bytes(signature)),
+      exactBuffer(new TextEncoder().encode(message)));
+  } catch { return false; }
+}
+
+async function hardcoreApi(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  if (url.pathname === "/api/hardcore/summary") {
+    if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, { allow: "GET" });
+    const row = await env.DB.prepare("SELECT payload, updated_at FROM hardcore_state WHERE id = 1").first<{ payload: string; updated_at: number }>();
+    if (!row) return json({ mode: "off", challengeState: "RESETTING", stale: true });
+    return json({ ...JSON.parse(row.payload), updatedAt: row.updated_at });
+  }
+  if (url.pathname === "/api/hardcore/runs") {
+    if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, { allow: "GET" });
+    const limit = Math.min(50, Math.max(1, Number(url.searchParams.get("limit") ?? 20) || 20));
+    const cursor = Number(url.searchParams.get("cursor") ?? Number.MAX_SAFE_INTEGER);
+    const outcome = url.searchParams.get("outcome") ?? "";
+    if (!Number.isSafeInteger(cursor) || outcome.length > 32) return json({ error: "invalid_query" }, 400);
+    const query = outcome
+      ? env.DB.prepare("SELECT id, payload, finished_at FROM hardcore_runs WHERE finished_at < ? AND outcome = ? ORDER BY finished_at DESC LIMIT ?").bind(cursor, outcome, limit)
+      : env.DB.prepare("SELECT id, payload, finished_at FROM hardcore_runs WHERE finished_at < ? ORDER BY finished_at DESC LIMIT ?").bind(cursor, limit);
+    const result = await query.all<{ id: string; payload: string; finished_at: number }>();
+    const runs = result.results.map((row) => JSON.parse(row.payload));
+    const nextCursor = result.results.length === limit ? result.results.at(-1)?.finished_at : null;
+    return json({ runs, nextCursor });
+  }
+  if (request.method !== "PUT") return json({ error: "method_not_allowed" }, 405, { allow: "PUT" });
+  let body: { timestamp?: unknown; nonce?: unknown; payload?: unknown; signature?: unknown };
+  try { body = await request.json(); } catch { return json({ error: "invalid_json" }, 400); }
+  const timestamp = body.timestamp;
+  const nonce = body.nonce;
+  if (!Number.isSafeInteger(timestamp) || Math.abs(Date.now() / 1000 - Number(timestamp)) > 300 ||
+    typeof nonce !== "string" || !/^[a-f0-9-]{36}$/.test(nonce) || !validHardcorePayload(body.payload) ||
+    typeof body.signature !== "string") return json({ error: "invalid_sync" }, 400);
+  const serialized = JSON.stringify(body.payload);
+  if (!(await verifyHardcoreSignature(env, `${timestamp}\n${nonce}\n${serialized}`, body.signature))) return json({ error: "invalid_signature" }, 401);
+  const exists = await env.DB.prepare("SELECT nonce FROM hardcore_sync_nonces WHERE nonce = ?").bind(nonce).first();
+  if (exists) return json({ error: "replayed_nonce" }, 409);
+  const now = Date.now();
+  const statements: D1PreparedStatement[] = [
+    env.DB.prepare("INSERT INTO hardcore_sync_nonces (nonce, expires_at) VALUES (?, ?)").bind(nonce, now + 600_000),
+    env.DB.prepare("DELETE FROM hardcore_sync_nonces WHERE expires_at < ?").bind(now),
+    env.DB.prepare("INSERT INTO hardcore_state (id, payload, updated_at) VALUES (1, ?, ?) ON CONFLICT(id) DO UPDATE SET payload = excluded.payload, updated_at = excluded.updated_at").bind(JSON.stringify(body.payload.summary), now),
+  ];
+  for (const run of body.payload.runs) {
+    statements.push(env.DB.prepare(
+      "INSERT INTO hardcore_runs (id, outcome, finished_at, payload, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET outcome = excluded.outcome, finished_at = excluded.finished_at, payload = excluded.payload, updated_at = excluded.updated_at",
+    ).bind(run.id, run.outcome, run.finishedAt, JSON.stringify(run), now));
+  }
+  await env.DB.batch(statements);
+  return json({ ok: true, acceptedRuns: body.payload.runs.length });
 }
 
 async function marketLogo(request: Request): Promise<Response> {
@@ -1190,6 +1267,7 @@ const worker = {
     if (url.pathname === "/api/patch-notes") return patchNotesApi(request, env);
     if (url.pathname === "/api/client-telemetry/health") return telemetryHealth(request);
     if (url.pathname === "/api/client-telemetry") return clientTelemetryApi(request, env);
+    if (url.pathname === "/api/hardcore/summary" || url.pathname === "/api/hardcore/runs" || url.pathname === "/api/hardcore/sync") return hardcoreApi(request, env);
     if (url.pathname === "/api/market/logo") return marketLogo(request);
     if (url.pathname === "/api/market/player-head") return marketPlayerHead(request);
     if (url.pathname === "/api/market/login") return marketLogin(request, env);

@@ -120,6 +120,28 @@ export const marketLoginNonces = sqliteTable("market_login_nonces", {
   usedAt: integer("used_at").notNull(),
 });
 
+export const hardcoreState = sqliteTable("hardcore_state", {
+  id: integer("id").primaryKey(),
+  payload: text("payload").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});
+
+export const hardcoreRuns = sqliteTable("hardcore_runs", {
+  id: text("id").primaryKey(),
+  outcome: text("outcome").notNull(),
+  finishedAt: integer("finished_at").notNull(),
+  payload: text("payload").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+}, (table) => [
+  index("hardcore_runs_finished_idx").on(table.finishedAt),
+  index("hardcore_runs_outcome_finished_idx").on(table.outcome, table.finishedAt),
+]);
+
+export const hardcoreSyncNonces = sqliteTable("hardcore_sync_nonces", {
+  nonce: text("nonce").primaryKey(),
+  expiresAt: integer("expires_at").notNull(),
+});
+
 export const marketSessions = sqliteTable("market_sessions", {
   id: text("id").primaryKey(),
   playerUuid: text("player_uuid").notNull(),
